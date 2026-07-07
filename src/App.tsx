@@ -2,7 +2,13 @@ import { useEffect } from "react";
 import { auth, db } from "./utils/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { ref, onValue } from "firebase/database";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import { useAppDispatch } from "./store/store";
 import { useAppSelector } from "./store/store";
 import { setProfile, clearProfile } from "./store/authSlice";
@@ -13,12 +19,17 @@ import Register from "./components/Register";
 import Home from "./components/Home";
 import Footer from "./components/Footer";
 import Profile from "./components/Profile";
+import DashboardLayout from "./components/DashboardLayout";
+import Overview from "./components/DashboardOverview";
+import Tasks from "./components/DashboardTasks";
+import Contact from "./components/Contact";
 
 export default function App() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const location = useLocation();
   const hideFooter = ["/login", "/register"].includes(location.pathname);
+  const hideLayout = location.pathname.startsWith("/dashboard");
   const { userProfile, loading } = useAppSelector((state) => state.auth);
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -59,14 +70,22 @@ export default function App() {
 
   return (
     <div className="min-h-screen  flex flex-col bg-slate-50">
-      <Navbar userProfile={userProfile} onLogout={handleLogout} />
+      {!hideLayout && (
+        <Navbar userProfile={userProfile} onLogout={handleLogout} />
+      )}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<Navigate to="overview" replace />} />
+          <Route path="overview" element={<Overview />} />
+          <Route path="tasks" element={<Tasks />} />
+        </Route>
+        <Route path="/contact" element={<Contact />} />
       </Routes>
-      {!hideFooter && <Footer />}
+      {!hideLayout && !hideFooter && <Footer />}
     </div>
   );
 }

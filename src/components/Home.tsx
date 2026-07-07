@@ -6,7 +6,7 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
-
+import { Helmet } from "react-helmet-async";
 function Hero() {
   return (
     <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 grid lg:grid-cols-2 gap-16 items-center">
@@ -256,6 +256,14 @@ function CTABanner() {
 export default function Home() {
   return (
     <div className="bg-white font-sans">
+      <Helmet>
+        <title>TaskPulse | Organize Tasks, Projects & Team Work</title>
+        <meta
+          name="description"
+          content="TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity."
+        />
+      </Helmet>
+
       <Hero />
       <Features />
       <HowItWorks />

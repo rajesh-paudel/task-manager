@@ -1,0 +1,218 @@
+import { useState } from "react";
+import { Mail, Clock, CheckCircle2 } from "lucide-react";
+import { db } from "../utils/firebaseConfig";
+import { ref, push } from "firebase/database";
+
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const contactSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters."),
+  email: z.string().email("Please enter a valid email."),
+  subject: z.string().trim().min(3, "Subject is required."),
+  message: z.string().trim().min(10, "Message must be at least 10 characters."),
+});
+
+type ContactForm = z.infer<typeof contactSchema>;
+
+export default function Contact() {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ContactForm>({
+    resolver: zodResolver(contactSchema),
+  });
+
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  const onSubmit = async (data: ContactForm) => {
+    setError("");
+    setSending(true);
+
+    try {
+      await push(ref(db, "/forms"), {
+        ...data,
+        createdAt: Date.now(),
+      });
+
+      setSent(true);
+      reset();
+    } catch (err: any) {
+      setError(err.message || "Couldn't send your message. Try again.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white font-sans">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 grid lg:grid-cols-2 gap-16">
+        <div>
+          <span className="text-xs font-semibold tracking-wide text-orange-600 uppercase">
+            Get in touch
+          </span>
+
+          <h1 className="mt-4 text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight leading-tight">
+            Questions, feedback,
+            <br />
+            or just say hello.
+          </h1>
+
+          <p className="mt-4 text-sm text-slate-500 max-w-sm leading-relaxed">
+            Whether something's broken, you need help getting set up, or you
+            have an idea for TaskPulse — we read every message.
+          </p>
+
+          <div className="mt-10 space-y-5">
+            <div className="flex items-start gap-3">
+              <Mail className="h-4 w-4 text-orange-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-slate-900">Email</p>
+                <p className="text-sm text-slate-500">support@taskpulse.io</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Clock className="h-4 w-4 text-orange-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-slate-900">
+                  Response time
+                </p>
+                <p className="text-sm text-slate-500">
+                  Usually within one business day.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          {sent ? (
+            <div className="flex flex-col items-start gap-3 pt-4">
+              <div className="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+
+              <h2 className="text-lg font-semibold text-slate-900">
+                Message sent
+              </h2>
+
+              <p className="text-sm text-slate-500">
+                Thanks for reaching out — we'll get back to you soon.
+              </p>
+
+              <button
+                onClick={() => {
+                  setSent(false);
+                  reset();
+                }}
+                className="mt-2 text-sm font-medium text-orange-600 hover:text-orange-700"
+              >
+                Send another message
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              {error && (
+                <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                    Name
+                  </label>
+
+                  <input
+                    type="text"
+                    placeholder="Your name"
+                    {...register("name")}
+                    className="w-full border-0 border-b border-slate-200 bg-transparent px-0 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+                  />
+
+                  {errors.name && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.name.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                    Email
+                  </label>
+
+                  <input
+                    type="email"
+                    placeholder="you@company.com"
+                    {...register("email")}
+                    className="w-full border-0 border-b border-slate-200 bg-transparent px-0 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+                  />
+
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Subject
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="What's this about?"
+                  {...register("subject")}
+                  className="w-full border-0 border-b border-slate-200 bg-transparent px-0 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+                />
+
+                {errors.subject && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.subject.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Message
+                </label>
+
+                <textarea
+                  rows={5}
+                  placeholder="Tell us what's going on"
+                  {...register("message")}
+                  className="w-full resize-none border-0 border-b border-slate-200 bg-transparent px-0 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+                />
+
+                {errors.message && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.message.message}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={sending}
+                className="mt-2 w-full rounded-lg bg-orange-600 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
+              >
+                {sending ? "Sending..." : "Send message"}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -9,18 +9,12 @@ interface NavbarProps {
   onLogout: () => void;
 }
 
-const loggedOutLinks = [
+const navLinks = [
   { label: "Features", path: "/features" },
   { label: "Templates", path: "/templates" },
   { label: "Pricing", path: "/pricing" },
   { label: "Resources", path: "/resources" },
-];
-
-const loggedInLinks = [
-  { label: "Dashboard", path: "/dashboard" },
-  { label: "Boards", path: "/boards" },
-  { label: "Calendar", path: "/calendar" },
-  { label: "Reports", path: "/reports" },
+  { label: "Contact", path: "/contact" },
 ];
 
 const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
@@ -37,8 +31,6 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
-
-  const navLinks = userProfile ? loggedInLinks : loggedOutLinks;
 
   return (
     <>

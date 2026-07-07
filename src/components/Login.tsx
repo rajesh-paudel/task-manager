@@ -3,7 +3,7 @@ import { auth } from "../utils/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import { CheckSquare, Eye, EyeOff } from "lucide-react";
-
+import { Helmet } from "react-helmet-async";
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -29,6 +29,10 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 font-sans">
+      <Helmet>
+        <title>Login | TaskPulse</title>
+        <meta name="description" content="Sign in to your TaskPulse account." />
+      </Helmet>
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-10">

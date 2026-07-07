@@ -241,7 +241,7 @@ export default function Profile() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingPhoto}
-              className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center border-2 border-white disabled:opacity-50"
+              className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-orange-600 hover:bg-orange-700 text-white flex items-center justify-center border-2 border-white disabled:opacity-50"
               aria-label="Change profile photo"
             >
               <Camera className="h-3.5 w-3.5" />
