@@ -83,7 +83,7 @@ export default function Register() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-10">
-          <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+          <div className="h-8 w-8 bg-orange-600 rounded-lg flex items-center justify-center text-white">
             <CheckSquare className="h-4 w-4" />
           </div>
           <span className="text-base font-bold text-slate-900 tracking-tight">
@@ -164,7 +164,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 mt-2"
+            className="w-full py-2.5 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 mt-2"
           >
             {loading ? "Creating account..." : "Create account"}
           </button>
@@ -174,7 +174,7 @@ export default function Register() {
           Already have an account?{" "}
           <button
             onClick={() => navigate("/login")}
-            className="font-medium text-slate-900 hover:text-indigo-600"
+            className="font-medium text-slate-900 hover:text-orange-600"
           >
             Sign in
           </button>

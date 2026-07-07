@@ -35,12 +35,12 @@ const socialLinks = [
 export default function Footer() {
   return (
     <footer className="w-full bg-white border-t border-slate-200 font-sans">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="col-span-2 lg:col-span-1">
             <a href="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+              <div className="h-8 w-8 bg-orange-600 rounded-lg flex items-center justify-center text-white">
                 <CheckSquare className="h-4 w-4" />
               </div>
               <span className="text-base font-bold text-slate-900 tracking-tight">

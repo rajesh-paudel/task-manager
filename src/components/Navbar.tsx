@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { CheckSquare, LayoutDashboard, User, LogOut } from "lucide-react";
 import type { UserProfile } from "../types/user";
+import profilePlaceholder from "../assets/profilePlaceholder.png";
 
 interface NavbarProps {
   userProfile: UserProfile | null;
@@ -42,10 +43,10 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
   return (
     <>
       <nav className="w-full bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="h-9 w-9 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+            <div className="h-9 w-9 bg-orange-600 rounded-lg flex items-center justify-center text-white">
               <CheckSquare className="h-5 w-5" />
             </div>
             <span className="text-base font-bold text-slate-900 tracking-tight">
@@ -75,9 +76,13 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
                   className="flex items-center justify-center rounded-full"
                 >
                   <img
-                    src={userProfile.profileUrl}
-                    alt={userProfile.name}
-                    className="h-9 w-9 rounded-full object-cover border-2 border-indigo-600"
+                    src={
+                      userProfile?.profileUrl
+                        ? userProfile.profileUrl
+                        : profilePlaceholder
+                    }
+                    alt={userProfile?.name}
+                    className="h-10 w-10 rounded-full object-cover  "
                   />
                 </button>
 
@@ -85,7 +90,11 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
                   <div className="absolute right-0 mt-3 w-64 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
                     <div className="p-4 flex items-center gap-3 border-b border-slate-100">
                       <img
-                        src={userProfile.profileUrl}
+                        src={
+                          userProfile?.profileUrl
+                            ? userProfile.profileUrl
+                            : profilePlaceholder
+                        }
                         alt={userProfile.name}
                         className="h-11 w-11 rounded-full object-cover"
                       />
@@ -139,7 +148,7 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
                 </Link>
                 <Link
                   to="/register"
-                  className="text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg"
+                  className="text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg"
                 >
                   Get started
                 </Link>

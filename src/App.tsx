@@ -12,6 +12,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Home from "./components/Home";
 import Footer from "./components/Footer";
+import Profile from "./components/Profile";
 
 export default function App() {
   const navigate = useNavigate();
@@ -63,6 +64,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
       {!hideFooter && <Footer />}
     </div>
