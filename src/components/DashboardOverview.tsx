@@ -10,6 +10,9 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { useAppSelector } from "../store/store";
+import { selectAllTasks, selectTaskStats } from "../store/tasksSelectors";
+import { getWeeklyCompletionCounts } from "../store/dateHelpers";
 import {
   CheckCircle2,
   Clock,
@@ -17,9 +20,7 @@ import {
   ListTodo,
   Loader2,
 } from "lucide-react";
-import { useAppSelector } from "../store/store";
-import { selectAllTasks, selectTaskStats } from "../store/tasksSelectors";
-import { getWeeklyCompletionCounts } from "../store/dateHelpers";
+
 export default function Overview() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
   const tasksStatus = useAppSelector((state) => state.tasks.status);
@@ -33,8 +34,8 @@ export default function Overview() {
 
   const statusBreakdown = [
     { name: "Done", value: taskStats.done, color: "#ea580c" },
-    { name: "In progress", value: taskStats.inProgress, color: "#fed7aa" },
-    { name: "To do", value: taskStats.todo, color: "#f8fafc" },
+    { name: "In progress", value: taskStats.inProgress, color: "#fdba74" },
+    { name: "To do", value: taskStats.todo, color: "#e2e8f0" },
   ];
 
   const stats = [
@@ -44,10 +45,10 @@ export default function Overview() {
     { label: "Overdue", value: taskStats.overdue, icon: AlertCircle },
   ];
 
-  if (tasksStatus === "loading") {
+  if (tasksStatus === "loading" || tasksStatus === "idle") {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="h-5 w-5 text-indigo-600 animate-spin" />
+        <Loader2 className="h-5 w-5 text-orange-600 animate-spin" />
       </div>
     );
   }

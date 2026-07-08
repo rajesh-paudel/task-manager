@@ -8,11 +8,21 @@ import {
   Loader2,
 } from "lucide-react";
 
-import type { TaskStatus } from "../types/task";
+import type { NewTask, Task, TaskStatus } from "../types/task";
 import { selectAllTasks } from "../store/tasksSelectors";
-import { createTask, setTaskStatus } from "../store/tasksAPi";
+import TaskModal from "./TaskModal";
+
+import {
+  createTask,
+  updateTask,
+  deleteTask,
+  setTaskStatus,
+} from "../store/tasksAPi";
 import { getDueLabel, isOverdue } from "../store/dateHelpers";
 import { useAppSelector } from "../store/store";
+
+import PriorityBadge from "./PriorityBadge";
+
 const columns: { key: TaskStatus; label: string }[] = [
   { key: "todo", label: "To do" },
   { key: "in_progress", label: "In progress" },
@@ -25,33 +35,43 @@ export default function Tasks() {
   const tasks = useAppSelector(selectAllTasks);
 
   const [view, setView] = useState<"list" | "kanban">("list");
-  const [newTask, setNewTask] = useState("");
-  const [adding, setAdding] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [error, setError] = useState("");
 
-  const addTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTask.trim() || !userProfile) return;
+  const openCreateModal = () => {
+    setEditingTask(null);
+    setModalOpen(true);
+  };
 
-    setAdding(true);
-    setError("");
-    try {
-      await createTask(userProfile.uid, {
-        title: newTask.trim(),
-        description: "",
-        priority: "medium",
-        dueDate: null,
-        status: "todo",
-      });
-      setNewTask("");
-    } catch (err: any) {
-      setError(err.message || "Couldn't add task. Try again.");
-    } finally {
-      setAdding(false);
+  const openEditModal = (task: Task) => {
+    setEditingTask(task);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => setModalOpen(false);
+
+  const handleSaveTask = async (data: NewTask) => {
+    if (!userProfile) return;
+    if (editingTask) {
+      await updateTask(userProfile.uid, editingTask.id, data);
+    } else {
+      await createTask(userProfile.uid, data);
     }
   };
 
-  const toggleDone = async (taskId: string, currentStatus: TaskStatus) => {
+  const handleDeleteTask = async () => {
+    if (!userProfile || !editingTask) return;
+    await deleteTask(userProfile.uid, editingTask.id);
+  };
+
+  // Quick toggle from the checkbox — doesn't open the modal.
+  const toggleDone = async (
+    e: React.MouseEvent,
+    taskId: string,
+    currentStatus: TaskStatus,
+  ) => {
+    e.stopPropagation();
     if (!userProfile) return;
     try {
       await setTaskStatus(
@@ -76,60 +96,47 @@ export default function Tasks() {
           </p>
         </div>
 
-        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1">
+            <button
+              onClick={() => setView("list")}
+              className={`h-8 w-8 flex items-center justify-center rounded-md ${
+                view === "list"
+                  ? "bg-orange-50 text-orange-600"
+                  : "text-slate-400 hover:text-slate-600"
+              }`}
+              aria-label="List view"
+            >
+              <LayoutList className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setView("kanban")}
+              className={`h-8 w-8 flex items-center justify-center rounded-md ${
+                view === "kanban"
+                  ? "bg-orange-50 text-orange-600"
+                  : "text-slate-400 hover:text-slate-600"
+              }`}
+              aria-label="Kanban view"
+            >
+              <KanbanSquare className="h-4 w-4" />
+            </button>
+          </div>
+
           <button
-            onClick={() => setView("list")}
-            className={`h-8 w-8 flex items-center justify-center rounded-md ${
-              view === "list"
-                ? "bg-indigo-50 text-indigo-600"
-                : "text-slate-400 hover:text-slate-600"
-            }`}
-            aria-label="List view"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700"
           >
-            <LayoutList className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setView("kanban")}
-            className={`h-8 w-8 flex items-center justify-center rounded-md ${
-              view === "kanban"
-                ? "bg-indigo-50 text-indigo-600"
-                : "text-slate-400 hover:text-slate-600"
-            }`}
-            aria-label="Kanban view"
-          >
-            <KanbanSquare className="h-4 w-4" />
+            <Plus className="h-4 w-4" />
+            New task
           </button>
         </div>
       </div>
 
-      {/* Add task */}
-      <form onSubmit={addTask} className="mt-6 flex items-center gap-2">
-        <input
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          placeholder="Add a task and press enter"
-          disabled={adding}
-          className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
-        />
-        <button
-          type="submit"
-          disabled={adding}
-          className="h-[38px] w-[38px] shrink-0 flex items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
-          aria-label="Add task"
-        >
-          {adding ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Plus className="h-4 w-4" />
-          )}
-        </button>
-      </form>
-
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
       {tasksStatus === "loading" || tasksStatus === "idle" ? (
         <div className="mt-10 flex justify-center">
-          <Loader2 className="h-5 w-5 text-indigo-600 animate-spin" />
+          <Loader2 className="h-5 w-5 text-orange-600 animate-spin" />
         </div>
       ) : (
         <>
@@ -142,20 +149,21 @@ export default function Tasks() {
                 return (
                   <div
                     key={task.id}
-                    className="flex items-center gap-3 px-4 py-3"
+                    onClick={() => openEditModal(task)}
+                    className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50"
                   >
                     <button
-                      onClick={() => toggleDone(task.id, task.status)}
+                      onClick={(e) => toggleDone(e, task.id, task.status)}
                       className="shrink-0"
                     >
                       {task.status === "done" ? (
-                        <CheckCircle2 className="h-4.5 w-4.5 text-indigo-600" />
+                        <CheckCircle2 className="h-4.5 w-4.5 text-orange-600" />
                       ) : (
                         <Circle className="h-4.5 w-4.5 text-slate-300" />
                       )}
                     </button>
                     <span
-                      className={`text-sm flex-1 ${
+                      className={`text-sm flex-1 truncate ${
                         task.status === "done"
                           ? "text-slate-400 line-through"
                           : "text-slate-900"
@@ -163,9 +171,10 @@ export default function Tasks() {
                     >
                       {task.title}
                     </span>
+                    <PriorityBadge priority={task.priority} />
                     {dueLabel && (
                       <span
-                        className={`text-xs ${
+                        className={`text-xs shrink-0 ${
                           overdue
                             ? "text-red-500 font-medium"
                             : "text-slate-400"
@@ -178,9 +187,15 @@ export default function Tasks() {
                 );
               })}
               {tasks.length === 0 && (
-                <p className="px-4 py-8 text-sm text-slate-400 text-center">
-                  No tasks yet — add your first one above.
-                </p>
+                <div className="px-4 py-12 text-center">
+                  <p className="text-sm text-slate-400">No tasks yet.</p>
+                  <button
+                    onClick={openCreateModal}
+                    className="mt-2 text-sm font-medium text-orange-600 hover:text-orange-700"
+                  >
+                    Add your first task
+                  </button>
+                </div>
               )}
             </div>
           )}
@@ -207,22 +222,26 @@ export default function Tasks() {
                         return (
                           <div
                             key={task.id}
-                            className="bg-white border border-slate-200 rounded-lg px-3 py-2.5"
+                            onClick={() => openEditModal(task)}
+                            className="bg-white border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer hover:border-slate-300"
                           >
                             <p className="text-sm text-slate-900">
                               {task.title}
                             </p>
-                            {dueLabel && (
-                              <p
-                                className={`mt-1 text-xs ${
-                                  overdue
-                                    ? "text-red-500 font-medium"
-                                    : "text-slate-400"
-                                }`}
-                              >
-                                {dueLabel}
-                              </p>
-                            )}
+                            <div className="mt-2 flex items-center justify-between gap-2">
+                              <PriorityBadge priority={task.priority} />
+                              {dueLabel && (
+                                <span
+                                  className={`text-xs shrink-0 ${
+                                    overdue
+                                      ? "text-red-500 font-medium"
+                                      : "text-slate-400"
+                                  }`}
+                                >
+                                  {dueLabel}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         );
                       })}
@@ -239,6 +258,14 @@ export default function Tasks() {
           )}
         </>
       )}
+
+      <TaskModal
+        open={modalOpen}
+        onClose={closeModal}
+        onSave={handleSaveTask}
+        onDelete={editingTask ? handleDeleteTask : undefined}
+        initialTask={editingTask}
+      />
     </div>
   );
 }
