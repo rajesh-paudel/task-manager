@@ -8,8 +8,12 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   dueDate: number | null;
-  position: number;
+
   createdAt: number;
   updatedAt: number;
   completedAt: number | null;
 }
+export type NewTask = Pick<
+  Task,
+  "title" | "description" | "status" | "priority" | "dueDate"
+>;
