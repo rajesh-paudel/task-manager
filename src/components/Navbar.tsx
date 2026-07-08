@@ -10,10 +10,8 @@ interface NavbarProps {
 }
 
 const navLinks = [
-  { label: "Features", path: "/features" },
-  { label: "Templates", path: "/templates" },
   { label: "Pricing", path: "/pricing" },
-  { label: "Resources", path: "/resources" },
+  { label: "About", path: "/about" },
   { label: "Contact", path: "/contact" },
 ];
 

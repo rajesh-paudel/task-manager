@@ -23,6 +23,8 @@ import DashboardLayout from "./components/DashboardLayout";
 import Overview from "./components/DashboardOverview";
 import Tasks from "./components/DashboardTasks";
 import Contact from "./components/Contact";
+import About from "./components/About";
+import Pricing from "./components/Pricing";
 
 export default function App() {
   const navigate = useNavigate();
@@ -84,6 +86,8 @@ export default function App() {
           <Route path="tasks" element={<Tasks />} />
         </Route>
         <Route path="/contact" element={<Contact />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/pricing" element={<Pricing />} />
       </Routes>
       {!hideLayout && !hideFooter && <Footer />}
     </div>

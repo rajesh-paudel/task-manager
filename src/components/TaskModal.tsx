@@ -99,9 +99,11 @@ export default function TaskModal({
     setError("");
     try {
       await onDelete();
+
       onClose();
     } catch (err: any) {
       setError(err.message || "Couldn't delete task. Try again.");
+    } finally {
       setDeleting(false);
     }
   };
