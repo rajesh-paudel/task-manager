@@ -25,6 +25,9 @@ import Tasks from "./components/DashboardTasks";
 import Contact from "./components/Contact";
 import About from "./components/About";
 import Pricing from "./components/Pricing";
+import NotFound from "./components/NotFound";
+import PublicRoute from "./components/PublicRoute";
+import ProtectedRoute from "./components/PrivateRoute";
 
 export default function App() {
   const navigate = useNavigate();
@@ -77,17 +80,22 @@ export default function App() {
       )}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Navigate to="overview" replace />} />
-          <Route path="overview" element={<Overview />} />
-          <Route path="tasks" element={<Tasks />} />
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
+        <Route element={<ProtectedRoute />}>
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Navigate to="overview" replace />} />
+            <Route path="overview" element={<Overview />} />
+            <Route path="tasks" element={<Tasks />} />
+          </Route>
         </Route>
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<About />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       {!hideLayout && !hideFooter && <Footer />}
     </div>
