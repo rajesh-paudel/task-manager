@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { X, Loader2, Trash2 } from "lucide-react";
 
 import type { NewTask, Task, TaskPriority, TaskStatus } from "../types/task";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 interface TaskModalProps {
   open: boolean;
   onClose: () => void;
@@ -23,8 +26,6 @@ const priorityOptions: { value: TaskPriority; label: string; dot: string }[] = [
   { value: "urgent", label: "Urgent", dot: "bg-red-500" },
 ];
 
-// <input type="date"> works in local calendar days, not UTC timestamps —
-// these two convert between that and the epoch-ms values Task stores.
 function toDateInputValue(timestamp: number | null): string {
   if (timestamp === null) return "";
   const d = new Date(timestamp);
@@ -34,8 +35,23 @@ function toDateInputValue(timestamp: number | null): string {
 
 function fromDateInputValue(value: string): number | null {
   if (!value) return null;
+
   return new Date(`${value}T00:00:00`).getTime();
 }
+
+const taskSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title is required")
+    .max(100, "Title is too long."),
+  description: z.string().trim().optional(),
+  status: z.enum(["todo", "in_progress", "done"]),
+  priority: z.enum(["low", "medium", "high", "urgent"]),
+  dueDate: z.string(),
+});
+
+type TaskForm = z.infer<typeof taskSchema>;
 
 export default function TaskModal({
   open,
@@ -46,50 +62,71 @@ export default function TaskModal({
 }: TaskModalProps) {
   const isEditing = !!initialTask;
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<TaskStatus>("todo");
-  const [priority, setPriority] = useState<TaskPriority>("medium");
-  const [dueDate, setDueDate] = useState("");
-  const [saving, setSaving] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<TaskForm>({
+    resolver: zodResolver(taskSchema),
+    mode: "onTouched",
+    defaultValues: {
+      title: "",
+      description: "",
+      status: "todo",
+      priority: "low",
+      dueDate: "",
+    },
+  });
+  const status = watch("status");
+  const priority = watch("priority");
+  useEffect(() => {
+    if (!open) return;
+
+    if (initialTask) {
+      reset({
+        title: initialTask.title,
+        description: initialTask.description,
+        status: initialTask.status,
+        priority: initialTask.priority,
+        dueDate: toDateInputValue(initialTask?.dueDate ?? null),
+      });
+    } else {
+      reset({
+        title: "",
+        description: "",
+        status: "todo",
+        priority: "medium",
+        dueDate: "",
+      });
+    }
+
+    setError("");
+  }, [open, initialTask, reset]);
+
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
-  // Reset the form whenever the modal opens, or swaps between editing
-  // different tasks.
-  useEffect(() => {
-    if (!open) return;
-    setTitle(initialTask?.title ?? "");
-    setDescription(initialTask?.description ?? "");
-    setStatus(initialTask?.status ?? "todo");
-    setPriority(initialTask?.priority ?? "medium");
-    setDueDate(toDateInputValue(initialTask?.dueDate ?? null));
-    setError("");
-  }, [open, initialTask]);
-
   if (!open) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) {
-      setError("Title can't be empty.");
-      return;
-    }
-    setSaving(true);
+  const handleSave = async (data: TaskForm) => {
     setError("");
     try {
-      await onSave({
-        title: title.trim(),
-        description: description.trim(),
-        status,
-        priority,
-        dueDate: fromDateInputValue(dueDate),
-      });
+      const newTask: NewTask = {
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
+        dueDate: fromDateInputValue(data.dueDate),
+      };
+
+      await onSave(newTask);
+      reset();
       onClose();
     } catch (err: any) {
       setError(err.message || "Couldn't save task. Try again.");
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -130,18 +167,22 @@ export default function TaskModal({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-5 space-y-5">
+        <form onSubmit={handleSubmit(handleSave)} className="mt-5 space-y-5">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Title
             </label>
             <input
               autoFocus
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              {...register("title")}
               placeholder="Task title"
               className="w-full px-0 py-2 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent"
             />
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.title.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -150,11 +191,15 @@ export default function TaskModal({
             </label>
             <textarea
               rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              {...register("description")}
               placeholder="Optional details"
               className="w-full px-0 py-2 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent resize-none"
             />
+            {errors.description && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.description.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -166,7 +211,7 @@ export default function TaskModal({
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => setStatus(opt.value)}
+                  onClick={() => setValue("status", opt.value)}
                   className={`flex-1 text-xs font-medium py-1.5 rounded-md ${
                     status === opt.value
                       ? "bg-white text-orange-600 shadow-sm"
@@ -177,6 +222,11 @@ export default function TaskModal({
                 </button>
               ))}
             </div>
+            {errors.status && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.status.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -188,7 +238,7 @@ export default function TaskModal({
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => setPriority(opt.value)}
+                  onClick={() => setValue("priority", opt.value)}
                   className={`flex items-center justify-center gap-1.5 text-xs font-medium py-1.5 rounded-lg border ${
                     priority === opt.value
                       ? "border-orange-600 text-orange-600 bg-orange-50"
@@ -200,6 +250,11 @@ export default function TaskModal({
                 </button>
               ))}
             </div>
+            {errors.priority && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.priority.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -208,10 +263,14 @@ export default function TaskModal({
             </label>
             <input
               type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
+              {...register("dueDate")}
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-orange-500"
             />
+            {errors.dueDate && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.dueDate.message}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-3 pt-2">
@@ -219,7 +278,7 @@ export default function TaskModal({
               <button
                 type="button"
                 onClick={handleDelete}
-                disabled={deleting || saving}
+                disabled={deleting || isSubmitting}
                 className="mr-auto h-9 w-9 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50 disabled:opacity-50"
                 aria-label="Delete task"
               >
@@ -233,17 +292,17 @@ export default function TaskModal({
             <button
               type="button"
               onClick={onClose}
-              disabled={saving || deleting}
+              disabled={isSubmitting || deleting}
               className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={saving || deleting}
+              disabled={isSubmitting || deleting}
               className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50"
             >
-              {saving
+              {isSubmitting
                 ? "Saving..."
                 : isEditing
                   ? "Save changes"

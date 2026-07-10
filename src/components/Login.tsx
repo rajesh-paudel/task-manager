@@ -1,29 +1,43 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { auth } from "../utils/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { CheckSquare, Eye, EyeOff } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const loginSchema = z.object({
+  email: z.email("Please enter a valid email"),
+  password: z.string().trim(),
+});
+type LoginForm = z.infer<typeof loginSchema>;
 export default function Login() {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    mode: "onTouched",
+  });
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (data: LoginForm) => {
     setError("");
-    setLoading(true);
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      reset();
       navigate("/dashboard");
     } catch (err: any) {
       console.log(err.message);
       setError("Invalid email or password.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -55,19 +69,22 @@ export default function Login() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="mt-8 space-y-5">
+        <form onSubmit={handleSubmit(handleLogin)} className="mt-8 space-y-5">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Email address
             </label>
             <input
               type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
               placeholder="you@company.com"
               className="w-full px-0 py-2 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent"
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -79,12 +96,15 @@ export default function Login() {
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password")}
                 placeholder="••••••••"
                 className="w-full px-0 py-2 pr-8 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent"
               />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
+              )}
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
@@ -102,10 +122,10 @@ export default function Login() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isSubmitting}
             className="w-full py-2.5 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 mt-2"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {isSubmitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
 

@@ -136,7 +136,10 @@ export default function Tasks() {
           {view === "list" && (
             <div className="mt-6 bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
               {tasks.map((task) => {
-                const dueLabel = getDueLabel(task.dueDate);
+                let dueLabel;
+                if (task.dueDate) {
+                  dueLabel = getDueLabel(task.dueDate);
+                }
                 const overdue = isOverdue(task);
                 return (
                   <div
@@ -209,7 +212,10 @@ export default function Tasks() {
                     </div>
                     <div className="mt-3 space-y-2">
                       {colTasks.map((task) => {
-                        const dueLabel = getDueLabel(task.dueDate);
+                        let dueLabel;
+                        if (task.dueDate) {
+                          dueLabel = getDueLabel(task.dueDate);
+                        }
                         const overdue = isOverdue(task);
                         return (
                           <div

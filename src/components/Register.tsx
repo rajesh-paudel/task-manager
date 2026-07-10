@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-const formSchema = z.object({
+const registerSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters."),
   email: z.string().trim().email("Please enter a valid email."),
   password: z
@@ -24,7 +24,7 @@ const formSchema = z.object({
       "Password must contain at least one special character.",
     ),
 });
-type Form = z.infer<typeof formSchema>;
+type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const {
@@ -32,14 +32,17 @@ export default function Register() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<Form>({ resolver: zodResolver(formSchema), mode: "onTouched" });
+  } = useForm<RegisterForm>({
+    resolver: zodResolver(registerSchema),
+    mode: "onTouched",
+  });
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
 
   const [error, setError] = useState("");
 
-  const handleRegister = async (data: Form) => {
+  const handleRegister = async (data: RegisterForm) => {
     setError("");
     try {
       const userCredential = await createUserWithEmailAndPassword(

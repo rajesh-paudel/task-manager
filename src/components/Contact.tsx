@@ -9,8 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters."),
-  email: z.string().email("Please enter a valid email."),
-  subject: z.string().trim().min(3, "Subject is required."),
+  email: z.email("Please enter a valid email."),
+  subject: z.string().trim().min(2, "Subject is required."),
   message: z.string().trim().min(10, "Message must be at least 10 characters."),
 });
 
@@ -21,18 +21,16 @@ export default function Contact() {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ContactForm>({
     resolver: zodResolver(contactSchema),
+    mode: "onTouched",
   });
 
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
-
+  const [isSent, setIsSent] = useState(false);
   const onSubmit = async (data: ContactForm) => {
     setError("");
-    setSending(true);
 
     try {
       await push(ref(db, "/forms"), {
@@ -40,12 +38,10 @@ export default function Contact() {
         createdAt: Date.now(),
       });
 
-      setSent(true);
       reset();
+      setIsSent(true);
     } catch (err: any) {
       setError(err.message || "Couldn't send your message. Try again.");
-    } finally {
-      setSending(false);
     }
   };
 
@@ -92,7 +88,7 @@ export default function Contact() {
         </div>
 
         <div>
-          {sent ? (
+          {isSent ? (
             <div className="flex flex-col items-start gap-3 pt-4">
               <div className="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
                 <CheckCircle2 className="h-5 w-5" />
@@ -108,7 +104,7 @@ export default function Contact() {
 
               <button
                 onClick={() => {
-                  setSent(false);
+                  setIsSent(false);
                   reset();
                 }}
                 className="mt-2 text-sm font-medium text-orange-600 hover:text-orange-700"
@@ -204,10 +200,10 @@ export default function Contact() {
 
               <button
                 type="submit"
-                disabled={sending}
+                disabled={isSubmitting}
                 className="mt-2 w-full rounded-lg bg-orange-600 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
               >
-                {sending ? "Sending..." : "Send message"}
+                {isSubmitting ? "Sending..." : "Send message"}
               </button>
             </form>
           )}
