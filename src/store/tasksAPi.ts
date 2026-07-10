@@ -20,26 +20,26 @@ export const createTask = (uid: string, task: NewTask) => {
 
   return set(newTaskRef, fullTask);
 };
-export function updateTask(
+export async function updateTask(
   uid: string,
-  taskId: string,
+  task: Task,
   changes: Partial<Task>,
 ) {
-  return update(ref(db, `tasks/${uid}/${taskId}`), {
+  const updates: Partial<Task> = {
     ...changes,
     updatedAt: Date.now(),
-  });
-}
+  };
 
-export function setTaskStatus(
-  uid: string,
-  taskId: string,
-  status: Task["status"],
-) {
-  return updateTask(uid, taskId, {
-    status,
-    completedAt: status === "done" ? Date.now() : null,
-  });
+  // Did the status change?
+  if (changes.status !== undefined && changes.status !== task.status) {
+    if (changes.status === "done") {
+      updates.completedAt = Date.now();
+    } else {
+      updates.completedAt = null;
+    }
+  }
+
+  return update(ref(db, `tasks/${uid}/${task.id}`), updates);
 }
 
 export function deleteTask(uid: string, taskId: string) {

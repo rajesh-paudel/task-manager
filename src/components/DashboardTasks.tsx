@@ -12,12 +12,7 @@ import type { NewTask, Task, TaskStatus } from "../types/task";
 import { selectAllTasks } from "../store/tasksSelectors";
 import TaskModal from "./TaskModal";
 
-import {
-  createTask,
-  updateTask,
-  deleteTask,
-  setTaskStatus,
-} from "../store/tasksAPi";
+import { createTask, updateTask, deleteTask } from "../store/tasksAPi";
 import { getDueLabel, isOverdue } from "../store/dateHelpers";
 import { useAppSelector } from "../store/store";
 
@@ -51,34 +46,31 @@ export default function Tasks() {
 
   const closeModal = () => setModalOpen(false);
 
+  const handleDeleteTask = async () => {
+    if (!userProfile || !editingTask) return;
+    await deleteTask(userProfile.uid, editingTask.id);
+  };
   const handleSaveTask = async (data: NewTask) => {
     if (!userProfile) return;
     if (editingTask) {
-      await updateTask(userProfile.uid, editingTask.id, data);
+      await updateTask(userProfile.uid, editingTask, data);
     } else {
       await createTask(userProfile.uid, data);
     }
   };
 
-  const handleDeleteTask = async () => {
-    if (!userProfile || !editingTask) return;
-    await deleteTask(userProfile.uid, editingTask.id);
-  };
-
-  // Quick toggle from the checkbox — doesn't open the modal.
   const toggleDone = async (
     e: React.MouseEvent,
-    taskId: string,
+    task: Task,
     currentStatus: TaskStatus,
   ) => {
     e.stopPropagation();
     if (!userProfile) return;
     try {
-      await setTaskStatus(
-        userProfile.uid,
-        taskId,
-        currentStatus === "done" ? "todo" : "done",
-      );
+      await updateTask(userProfile.uid, task, {
+        ...task,
+        status: currentStatus === "done" ? "todo" : "done",
+      });
     } catch (err: any) {
       setError(err.message || "Couldn't update task. Try again.");
     }
@@ -153,7 +145,7 @@ export default function Tasks() {
                     className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50"
                   >
                     <button
-                      onClick={(e) => toggleDone(e, task.id, task.status)}
+                      onClick={(e) => toggleDone(e, task, task.status)}
                       className="shrink-0"
                     >
                       {task.status === "done" ? (

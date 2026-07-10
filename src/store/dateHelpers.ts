@@ -3,7 +3,6 @@ import type { Task } from "../types/task";
 const startOfDay = (d: Date) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-/** Turns a dueDate timestamp into a short relative label, or null if unset. */
 export function getDueLabel(dueDate: number | null): string | null {
   if (dueDate === null) return null;
 
@@ -30,7 +29,6 @@ export function isOverdue(task: Task): boolean {
   );
 }
 
-/** Buckets completed tasks into the last 7 calendar days (including today). */
 export function getWeeklyCompletionCounts(tasks: Task[]) {
   const today = startOfDay(new Date());
 
