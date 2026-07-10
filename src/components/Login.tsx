@@ -75,12 +75,6 @@ export default function Login() {
               <label className="block text-sm font-medium text-slate-700">
                 Password
               </label>
-              <Link
-                to="/forgot-password"
-                className="text-xs text-slate-500 hover:text-slate-900"
-              >
-                Forgot password?
-              </Link>
             </div>
             <div className="relative">
               <input

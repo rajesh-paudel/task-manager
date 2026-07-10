@@ -1,80 +1,83 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { ref, set } from "firebase/database";
 import { Eye, EyeOff, CheckSquare } from "lucide-react";
 import { auth, db } from "../utils/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const formSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters."),
+  email: z.string().trim().email("Please enter a valid email."),
+  password: z
+    .string()
+    .trim()
+    .min(8, "Password must be at least 8 characters.")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter.")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter.")
+    .regex(/\d/, "Password must contain at least one number.")
+    .regex(
+      /[!@#$%^&*(),.?":{}|<>_\-+=/\\[\]`~;]/,
+      "Password must contain at least one special character.",
+    ),
+});
+type Form = z.infer<typeof formSchema>;
+
 export default function Register() {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<Form>({ resolver: zodResolver(formSchema), mode: "onTouched" });
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
 
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const validatePassword = (): Boolean => {
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
-      return false;
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      setError("Password must contain at least one uppercase letter.");
-      return false;
-    }
-
-    if (!/[a-z]/.test(password)) {
-      setError("Password must contain at least one lowercase letter.");
-      return false;
-    }
-
-    if (!/\d/.test(password)) {
-      setError("Password must contain at least one number.");
-      return false;
-    }
-
-    if (!/[!@#$%^&*(),.?":{}|<>_\-+=/\\[\]`~;]/.test(password)) {
-      setError("Password must contain at least one special character.");
-      return false;
-    }
-
+  const handleRegister = async (data: Form) => {
     setError("");
-    return true;
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (!validatePassword()) return;
-    setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        email,
-        password,
+        data.email,
+        data.password,
       );
       const user = userCredential.user;
 
       await set(ref(db, `users/${user.uid}`), {
         uid: user.uid,
-        name: name.trim(),
-        email: email.trim(),
+        name: data.name,
+        email: data.email,
         profileUrl: "",
         title: "",
         bio: "",
         role: "user",
         createdAt: Date.now(),
       });
-
+      reset();
       navigate("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Registration failed. Please check credentials.");
-    } finally {
-      setLoading(false);
+      switch (err.code) {
+        case "auth/email-already-in-use":
+          setError("An account with this email already exists.");
+          break;
+
+        case "auth/invalid-email":
+          setError("Invalid email address.");
+          break;
+
+        case "auth/weak-password":
+          setError("Password is too weak.");
+          break;
+
+        default:
+          setError("Registration failed.");
+      }
     }
   };
 
@@ -108,19 +111,23 @@ export default function Register() {
           </div>
         )}
 
-        <form onSubmit={handleRegister} className="mt-8 space-y-5">
+        <form
+          onSubmit={handleSubmit(handleRegister)}
+          className="mt-8 space-y-5"
+        >
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">
               Full name
             </label>
             <input
               type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...register("name")}
               placeholder="Rajesh Paudel"
               className="w-full px-0 py-2 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent"
             />
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+            )}
           </div>
 
           <div>
@@ -129,12 +136,15 @@ export default function Register() {
             </label>
             <input
               type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
               placeholder="you@company.com"
               className="w-full px-0 py-2 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent"
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -144,12 +154,15 @@ export default function Register() {
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password")}
                 placeholder="••••••••"
                 className="w-full px-0 py-2 pr-8 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent"
               />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
+              )}
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
@@ -167,10 +180,10 @@ export default function Register() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isSubmitting}
             className="w-full py-2.5 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 mt-2"
           >
-            {loading ? "Creating account..." : "Create account"}
+            {isSubmitting ? "Creating account..." : "Create account"}
           </button>
         </form>
 
