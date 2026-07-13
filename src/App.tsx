@@ -28,6 +28,7 @@ import Pricing from "./components/Pricing";
 import NotFound from "./components/NotFound";
 import PublicRoute from "./components/PublicRoute";
 import ProtectedRoute from "./components/PrivateRoute";
+import DashboardAdmin from "./components/DashboardAdmin";
 
 export default function App() {
   const navigate = useNavigate();
@@ -90,6 +91,16 @@ export default function App() {
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<Overview />} />
             <Route path="tasks" element={<Tasks />} />
+            <Route
+              path="admin"
+              element={
+                userProfile?.role === "admin" ? (
+                  <DashboardAdmin />
+                ) : (
+                  <Navigate to="/dashboard/overview" replace />
+                )
+              }
+            />
           </Route>
         </Route>
         <Route path="/contact" element={<Contact />} />

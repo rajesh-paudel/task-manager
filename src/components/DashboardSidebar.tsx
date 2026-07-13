@@ -1,21 +1,33 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { CheckSquare, BarChart3, ListChecks, LogOut } from "lucide-react";
+import { RiAdminFill } from "react-icons/ri";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { signOut } from "firebase/auth";
 import profilePlaceholder from "../assets/profilePlaceholder.png";
 import { auth } from "../utils/firebaseConfig";
 import { clearProfile } from "../store/authSlice";
-const navItems = [
-  { label: "Overview", path: "/dashboard/overview", icon: BarChart3 },
-  { label: "Tasks", path: "/dashboard/tasks", icon: ListChecks },
-];
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const userProfile = useAppSelector((state) => state.auth.userProfile);
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const baseNavItems = [
+    { label: "Overview", path: "/dashboard/overview", icon: BarChart3 },
+    { label: "Tasks", path: "/dashboard/tasks", icon: ListChecks },
+  ];
+  const adminNavItem = {
+    label: "Admin",
+    path: "/dashboard/admin",
+    icon: RiAdminFill,
+  };
+
+  const navItems =
+    userProfile?.role === "admin"
+      ? [...baseNavItems, adminNavItem]
+      : baseNavItems
 
   const handleSignOut = () => {
     signOut(auth).then(() => {
