@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { lazy, useEffect } from "react";
 import { auth, db } from "./utils/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { ref, onValue } from "firebase/database";
@@ -20,15 +20,17 @@ import Home from "./components/Home";
 import Footer from "./components/Footer";
 import Profile from "./components/Profile";
 import DashboardLayout from "./components/DashboardLayout";
-import Overview from "./components/DashboardOverview";
-import Tasks from "./components/DashboardTasks";
 import Contact from "./components/Contact";
 import About from "./components/About";
 import Pricing from "./components/Pricing";
 import NotFound from "./components/NotFound";
 import PublicRoute from "./components/PublicRoute";
 import ProtectedRoute from "./components/PrivateRoute";
-import DashboardAdmin from "./components/DashboardAdmin";
+
+//lazy loading lets say heavy components
+const Overview = lazy(() => import("./components/DashboardOverview"));
+const Tasks = lazy(() => import("./components/DashboardTasks"));
+const DashboardAdmin = lazy(() => import("./components/DashboardAdmin"));
 
 export default function App() {
   const navigate = useNavigate();

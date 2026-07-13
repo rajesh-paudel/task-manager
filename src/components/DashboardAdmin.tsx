@@ -97,7 +97,6 @@ export default function DashboardAdmin() {
         Manage registered users and view contact form submissions.
       </p>
 
-      {/* Tabs */}
       <div className="mt-6 flex items-center gap-3">
         <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1 w-fit">
           <button
@@ -144,7 +143,6 @@ export default function DashboardAdmin() {
         </button>
       </div>
 
-      {/* Users tab */}
       {activeTab === "users" && (
         <div className="mt-6 bg-white border border-slate-200 rounded-xl overflow-hidden">
           {usersLoading ? (
@@ -203,7 +201,6 @@ export default function DashboardAdmin() {
         </div>
       )}
 
-      {/* Messages tab */}
       {activeTab === "messages" && (
         <div className="mt-6 bg-white border border-slate-200 rounded-xl overflow-hidden">
           {messagesLoading ? (

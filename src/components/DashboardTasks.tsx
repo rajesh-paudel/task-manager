@@ -28,7 +28,6 @@ type SortBy = "createdAt" | "dueDate";
 
 export default function Tasks() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
-
   const tasksStatus = useAppSelector((state) => state.tasks.status);
   const tasks = useAppSelector(selectAllTasks);
   const tasksByDue = useAppSelector(selectTasksByDueDate);
