@@ -6,10 +6,12 @@ import {
   Circle,
   CheckCircle2,
   Loader2,
+  X,
+  Search,
 } from "lucide-react";
-
-import type { NewTask, Task, TaskStatus } from "../types/task";
-import { selectAllTasks } from "../store/tasksSelectors";
+import { useMemo } from "react";
+import type { NewTask, Task, TaskPriority, TaskStatus } from "../types/task";
+import { selectAllTasks, selectTasksByDueDate } from "../store/tasksSelectors";
 import TaskModal from "./TaskModal";
 
 import { createTask, updateTask, deleteTask } from "../store/tasksAPi";
@@ -23,12 +25,18 @@ const columns: { key: TaskStatus; label: string }[] = [
   { key: "in_progress", label: "In progress" },
   { key: "done", label: "Done" },
 ];
+type SortBy = "createdAt" | "dueDate";
 
 export default function Tasks() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
   const tasksStatus = useAppSelector((state) => state.tasks.status);
   const tasks = useAppSelector(selectAllTasks);
-
+  const tasksByDue = useAppSelector(selectTasksByDueDate);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">(
+    "all",
+  );
+  const [sortBy, setSortBy] = useState<SortBy>("createdAt");
   const [view, setView] = useState<"list" | "kanban">("list");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -76,8 +84,20 @@ export default function Tasks() {
     }
   };
 
+  const filteredTasks = useMemo(() => {
+    const base = sortBy === "createdAt" ? tasks : tasksByDue;
+    return base?.filter((task) => {
+      const matchedQuery = task.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const matchedPriority =
+        priorityFilter === "all" || task.priority == priorityFilter;
+      return matchedQuery && matchedPriority;
+    });
+  }, [tasks, tasksByDue, sortBy, searchQuery, priorityFilter]);
+
   return (
-    <div className="max-w-5xl mx-auto px-6 sm:px-8 py-10">
+    <div className="max-w-5xl min-h-screen mx-auto px-6 sm:px-8 py-10">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
@@ -124,6 +144,44 @@ export default function Tasks() {
         </div>
       </div>
 
+      {/* search and filter bar */}
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search tasks"
+            className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+          />
+        </div>
+
+        {/* Priority filter */}
+        <select
+          value={priorityFilter}
+          onChange={(e) =>
+            setPriorityFilter(e.target.value as TaskPriority | "all")
+          }
+          className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-orange-500"
+        >
+          <option value="all">All priorities</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+
+        {/* Sort */}
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as SortBy)}
+          className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-orange-500"
+        >
+          <option value="createdAt">Newest first</option>
+          <option value="dueDate">Due date</option>
+        </select>
+      </div>
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
       {tasksStatus === "loading" || tasksStatus === "idle" ? (
@@ -131,11 +189,11 @@ export default function Tasks() {
           <Loader2 className="h-5 w-5 text-orange-600 animate-spin" />
         </div>
       ) : (
-        <>
+        <div className="min-h-screen">
           {/* List view */}
           {view === "list" && (
             <div className="mt-6 bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
-              {tasks.map((task) => {
+              {filteredTasks.map((task) => {
                 let dueLabel;
                 if (task.dueDate) {
                   dueLabel = getDueLabel(task.dueDate);
@@ -199,7 +257,9 @@ export default function Tasks() {
           {view === "kanban" && (
             <div className="mt-6 grid sm:grid-cols-3 gap-4">
               {columns.map((col) => {
-                const colTasks = tasks.filter((t) => t.status === col.key);
+                const colTasks = filteredTasks.filter(
+                  (t) => t.status === col.key,
+                );
                 return (
                   <div key={col.key} className="bg-slate-100/60 rounded-xl p-3">
                     <div className="flex items-center justify-between px-1">
@@ -254,7 +314,7 @@ export default function Tasks() {
               })}
             </div>
           )}
-        </>
+        </div>
       )}
 
       <TaskModal

@@ -30,7 +30,7 @@ export async function updateTask(
     updatedAt: Date.now(),
   };
 
-  // did the status change?
+  //look for status change
   if (changes.status !== undefined && changes.status !== task.status) {
     if (changes.status === "done") {
       updates.completedAt = Date.now();
