@@ -17,9 +17,9 @@ export const createTask = (uid: string, task: NewTask) => {
     updatedAt: now,
     completedAt: task.status == "done" ? Date.now() : null,
   };
-
   return set(newTaskRef, fullTask);
 };
+
 export async function updateTask(
   uid: string,
   task: Task,
