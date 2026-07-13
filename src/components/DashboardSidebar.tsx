@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { CheckSquare, BarChart3, ListChecks, LogOut } from "lucide-react";
+import {
+  CheckSquare,
+  BarChart3,
+  ListChecks,
+  LogOut,
+  Menu,
+  X,
+} from "lucide-react";
 import { RiAdminFill } from "react-icons/ri";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { signOut } from "firebase/auth";
@@ -13,6 +20,7 @@ export default function Sidebar() {
   const dispatch = useAppDispatch();
   const userProfile = useAppSelector((state) => state.auth.userProfile);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const baseNavItems = [
     { label: "Overview", path: "/dashboard/overview", icon: BarChart3 },
@@ -27,7 +35,9 @@ export default function Sidebar() {
   const navItems =
     userProfile?.role === "admin"
       ? [...baseNavItems, adminNavItem]
-      : baseNavItems
+      : baseNavItems;
+
+  const closeMobile = () => setMobileOpen(false);
 
   const handleSignOut = () => {
     signOut(auth).then(() => {
@@ -35,17 +45,59 @@ export default function Sidebar() {
       navigate("/login");
     });
   };
+
   return (
     <>
-      <aside className="w-60 shrink-0 border-r border-slate-200 flex flex-col justify-between h-screen sticky top-0">
+      {/* Mobile top bar — only rendered below md, holds the menu trigger */}
+      <div className="md:hidden h-14 flex items-center justify-between px-4 border-b border-slate-200 bg-white sticky top-0 z-30">
+        <div className="flex items-center gap-2">
+          <div className="h-7 w-7 bg-orange-600 rounded-lg flex items-center justify-center text-white">
+            <CheckSquare className="h-4 w-4" />
+          </div>
+          <span className="text-sm font-bold text-slate-900 tracking-tight">
+            TaskPulse
+          </span>
+        </div>
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50"
+          aria-label="Open menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Backdrop — mobile only, shown while the drawer is open */}
+      {mobileOpen && (
+        <div
+          onClick={closeMobile}
+          className="md:hidden fixed inset-0 z-40 bg-slate-900/40"
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col justify-between transition-transform duration-200 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        } md:static md:translate-x-0 md:z-auto md:w-60 md:shrink-0 md:h-screen md:sticky md:top-0`}
+      >
         <div>
-          <div className="h-16 flex items-center gap-2.5 px-5 border-b border-slate-100">
-            <div className="h-8 w-8 bg-orange-600 rounded-lg flex items-center justify-center text-white">
-              <CheckSquare className="h-4 w-4" />
+          <div className="h-16 flex items-center justify-between gap-2.5 px-5 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 bg-orange-600 rounded-lg flex items-center justify-center text-white">
+                <CheckSquare className="h-4 w-4" />
+              </div>
+              <span className="text-base font-bold text-slate-900 tracking-tight">
+                TaskPulse
+              </span>
             </div>
-            <span className="text-base font-bold text-slate-900 tracking-tight">
-              TaskPulse
-            </span>
+            <button
+              onClick={closeMobile}
+              className="md:hidden h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-50"
+              aria-label="Close menu"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
 
           <nav className="px-3 py-4 space-y-1">
@@ -53,6 +105,7 @@ export default function Sidebar() {
               <NavLink
                 key={path}
                 to={path}
+                onClick={closeMobile}
                 className={({ isActive }) =>
                   `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium ${
                     isActive
@@ -71,7 +124,10 @@ export default function Sidebar() {
         {userProfile && (
           <div className="px-3 py-4 border-t border-slate-100">
             <button
-              onClick={() => navigate("/profile")}
+              onClick={() => {
+                closeMobile();
+                navigate("/profile");
+              }}
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-50 text-left"
             >
               <img

@@ -9,7 +9,7 @@ export default function DashboardLayout() {
   useTasksSync(userProfile?.uid);
 
   return (
-    <div className="min-h-screen flex bg-white font-sans">
+    <div className="min-h-screen flex flex-col md:flex-row bg-white font-sans">
       <Sidebar />
       <main className="flex-1 bg-slate-50 overflow-y-auto">
         <Suspense
