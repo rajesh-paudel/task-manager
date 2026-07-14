@@ -96,22 +96,22 @@ export default function Tasks() {
   }, [tasks, tasksByDue, sortBy, searchQuery, priorityFilter]);
 
   //drag and drop
-  const [draggedTask, setDraggedTask] = useState<Task | null>(null);
-  const handleDragStart = (task: Task) => {
-    setDraggedTask(task);
-  };
+  const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const handleDrop = async (e: React.DragEvent, newStatus: TaskStatus) => {
+    e.preventDefault();
+    setDraggingId(null);
+    setDragOverColumn(null);
+    const taskId = e.dataTransfer.getData("text/plain");
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task || !userProfile || task.status === newStatus) return;
 
-  const handleDrop = async (status: TaskStatus) => {
-    if (!draggedTask) return;
-    if (draggedTask.status == status) return;
-    if (!userProfile) return;
-    await updateTask(userProfile.uid, draggedTask, {
-      ...draggedTask,
-      status: status,
-    });
-    setDraggedTask(null);
+    try {
+      await updateTask(userProfile.uid, task, { ...task, status: newStatus });
+    } catch (err: any) {
+      setError(err.message || "Couldn't move task. Try again.");
+    }
   };
-
   return (
     <div className="max-w-5xl min-h-screen mx-auto px-6 sm:px-8 py-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -292,12 +292,40 @@ export default function Tasks() {
                 const colTasks = filteredTasks.filter(
                   (t) => t.status === col.key,
                 );
+                const draggingTask = tasks.find((t) => t.id === draggingId);
+                const isOriginalColumn = draggingTask?.status === col.key;
                 return (
                   <div
                     key={col.key}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={() => handleDrop(col.key)}
-                    className="bg-slate-100/60 rounded-xl p-3"
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      if (isOriginalColumn) return;
+                      if (dragOverColumn !== col.key) {
+                        setDragOverColumn(col.key);
+                      }
+                    }}
+                    onDragLeave={(e) => {
+                      // Only reset if leaving the column wrapper completely
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const isLeaving =
+                        e.clientX < rect.left ||
+                        e.clientX >= rect.right ||
+                        e.clientY < rect.top ||
+                        e.clientY >= rect.bottom;
+
+                      if (isLeaving) {
+                        setDragOverColumn(null);
+                      }
+                    }}
+                    onDrop={(e) => {
+                      setDragOverColumn(null);
+                      handleDrop(e, col.key);
+                    }}
+                    className={`rounded-xl p-3 min-h-[500px] transition-colors ${
+                      dragOverColumn === col.key
+                        ? "bg-orange-50/80 border border-dashed border-orange-300"
+                        : "bg-slate-100/60 border border-transparent"
+                    }`}
                   >
                     <div className="flex items-center justify-between px-1">
                       <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
@@ -318,9 +346,41 @@ export default function Tasks() {
                           <div
                             key={task.id}
                             draggable
-                            onDragStart={() => handleDragStart(task)}
+                            onDragStart={(e) => {
+                              e.dataTransfer.setData("text/plain", task.id);
+                              setDraggingId(task.id);
+                              e.dataTransfer.effectAllowed = "move";
+
+                              // Create elegant custom drag feedback ghost element
+                              const dragPreview = document.createElement("div");
+                              dragPreview.innerText = task.title;
+                              dragPreview.style.position = "absolute";
+                              dragPreview.style.top = "-1000px";
+                              dragPreview.style.padding = "10px 14px";
+                              dragPreview.style.background = "#ffffff";
+                              dragPreview.style.border = "2px solid #ea580c"; // Orange theme color
+                              dragPreview.style.borderRadius = "8px";
+                              dragPreview.style.boxShadow =
+                                "0 10px 15px -3px rgba(0, 0, 0, 0.1)";
+                              dragPreview.style.fontSize = "14px";
+                              dragPreview.style.color = "#0f172a";
+                              dragPreview.style.fontWeight = "500";
+                              dragPreview.style.pointerEvents = "none";
+                              document.body.appendChild(dragPreview);
+
+                              // Position the custom visual centered under the cursor
+                              e.dataTransfer.setDragImage(dragPreview, 20, 20);
+
+                              // Remove node from DOM immediately after browser captures the frame
+                              setTimeout(() => dragPreview.remove(), 0);
+                            }}
+                            onDragEnd={() => setDraggingId(null)}
                             onClick={() => openEditModal(task)}
-                            className="bg-white border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer hover:border-slate-300"
+                            className={`bg-white border border-slate-200 rounded-lg px-3 py-2.5 cursor-grab active:cursor-grabbing hover:border-slate-300 shadow-sm transition-all ${
+                              draggingId === task.id
+                                ? "opacity-20 scale-95"
+                                : ""
+                            } `}
                           >
                             <p className="text-sm text-slate-900">
                               {task.title}
