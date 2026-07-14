@@ -358,7 +358,7 @@ export default function Tasks() {
                               dragPreview.style.top = "-1000px";
                               dragPreview.style.padding = "10px 14px";
                               dragPreview.style.background = "#ffffff";
-                              dragPreview.style.border = "2px solid #ea580c"; // Orange theme color
+                              dragPreview.style.border = "2px solid #ea580c"; 
                               dragPreview.style.borderRadius = "8px";
                               dragPreview.style.boxShadow =
                                 "0 10px 15px -3px rgba(0, 0, 0, 0.1)";
