@@ -97,7 +97,7 @@ export default function Tasks() {
 
   return (
     <div className="max-w-5xl min-h-screen mx-auto px-6 sm:px-8 py-10">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
             Tasks
@@ -135,7 +135,7 @@ export default function Tasks() {
 
           <button
             onClick={openCreateModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700"
           >
             <Plus className="h-4 w-4" />
             New task

@@ -1,17 +1,20 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Mail, Clock, CheckCircle2 } from "lucide-react";
 import { db } from "../utils/firebaseConfig";
 import { ref, push } from "firebase/database";
-
+import { Turnstile } from "@marsidev/react-turnstile";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+const MIN_FILL_TIME = 3000;
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters."),
   email: z.email("Please enter a valid email."),
   subject: z.string().trim().min(2, "Subject is required."),
   message: z.string().trim().min(10, "Message must be at least 10 characters."),
+  website: z.string().optional(),
 });
 
 type ContactForm = z.infer<typeof contactSchema>;
@@ -27,20 +30,47 @@ export default function Contact() {
     mode: "onTouched",
   });
 
+  const formLoadedAt = useRef(Date.now());
+
+  const [token, setToken] = useState<string>("");
+  const turnstileRef = useRef<any>(null);
+
   const [error, setError] = useState("");
   const [isSent, setIsSent] = useState(false);
+
   const onSubmit = async (data: ContactForm) => {
     setError("");
+    if (!token) {
+      setError("Please verify you're human.");
+      return;
+    }
+
+    //honeypot field
+    if (data.website?.trim()) {
+      return;
+    }
+
+    //checks if form is filled within 3 sec considering it can be bot
+    const elapsed = Date.now() - formLoadedAt.current;
+
+    if (elapsed < MIN_FILL_TIME) {
+      setError("Please take a little more time to complete the form.");
+      return;
+    }
 
     try {
+      const { website, ...contactData } = data;
       await push(ref(db, "/forms"), {
-        ...data,
+        ...contactData,
         createdAt: Date.now(),
       });
-
+      turnstileRef.current?.reset();
+      setToken("");
       reset();
       setIsSent(true);
     } catch (err: any) {
+      turnstileRef.current?.reset();
+      setToken("");
       setError(err.message || "Couldn't send your message. Try again.");
     }
   };
@@ -104,8 +134,11 @@ export default function Contact() {
 
               <button
                 onClick={() => {
+                  formLoadedAt.current = Date.now();
                   setIsSent(false);
                   reset();
+                  setToken("");
+                  turnstileRef.current?.reset();
                 }}
                 className="mt-2 text-sm font-medium text-orange-600 hover:text-orange-700"
               >
@@ -119,8 +152,25 @@ export default function Contact() {
                   {error}
                 </div>
               )}
-
+              {/* honeypot field */}
               <div className="grid sm:grid-cols-2 gap-5">
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "-9999px",
+                    opacity: 0,
+                    pointerEvents: "none",
+                  }}
+                >
+                  <label htmlFor="website">Website</label>
+                  <input
+                    id="website"
+                    type="text"
+                    autoComplete="off"
+                    tabIndex={-1}
+                    {...register("website")}
+                  />
+                </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">
                     Name
@@ -159,7 +209,6 @@ export default function Contact() {
                   )}
                 </div>
               </div>
-
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">
                   Subject
@@ -178,7 +227,6 @@ export default function Contact() {
                   </p>
                 )}
               </div>
-
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">
                   Message
@@ -197,10 +245,16 @@ export default function Contact() {
                   </p>
                 )}
               </div>
-
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={SITE_KEY}
+                onSuccess={(token: string) => setToken(token)}
+                onExpire={() => setToken("")}
+                onError={() => setToken("")}
+              />
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={!token || isSubmitting}
                 className="mt-2 w-full rounded-lg bg-orange-600 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
               >
                 {isSubmitting ? "Sending..." : "Send message"}
