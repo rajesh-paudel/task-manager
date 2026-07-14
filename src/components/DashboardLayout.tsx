@@ -2,12 +2,13 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./DashboardSidebar";
 import { useAppSelector } from "../store/store";
 import { useTasksSync } from "../store/useTasksSync";
+import { useState } from "react";
 import { Suspense } from "react";
 
 export default function DashboardLayout() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
   useTasksSync(userProfile?.uid);
-
+  const [view, setView] = useState<"list" | "kanban">("list");
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white font-sans">
       <Sidebar />
@@ -19,7 +20,7 @@ export default function DashboardLayout() {
             </div>
           }
         >
-          <Outlet />
+          <Outlet context={{ view, setView }} />
         </Suspense>
       </main>
     </div>

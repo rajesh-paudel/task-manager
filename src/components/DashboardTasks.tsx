@@ -12,7 +12,7 @@ import { useMemo } from "react";
 import type { NewTask, Task, TaskPriority, TaskStatus } from "../types/task";
 import { selectAllTasks, selectTasksByDueDate } from "../store/tasksSelectors";
 import TaskModal from "./TaskModal";
-
+import { useOutletContext } from "react-router-dom";
 import { createTask, updateTask, deleteTask } from "../store/tasksAPi";
 import { getDueLabel, isOverdue } from "../store/dateHelpers";
 import { useAppSelector } from "../store/store";
@@ -25,8 +25,12 @@ const columns: { key: TaskStatus; label: string }[] = [
   { key: "done", label: "Done" },
 ];
 type SortBy = "createdAt" | "dueDate";
-
+interface DashboardContextType {
+  view: "list" | "kanban";
+  setView: React.Dispatch<React.SetStateAction<"list" | "kanban">>;
+}
 export default function Tasks() {
+  const { view, setView } = useOutletContext<DashboardContextType>();
   const userProfile = useAppSelector((state) => state.auth.userProfile);
   const tasksStatus = useAppSelector((state) => state.tasks.status);
   const tasks = useAppSelector(selectAllTasks);
@@ -36,7 +40,7 @@ export default function Tasks() {
     "all",
   );
   const [sortBy, setSortBy] = useState<SortBy>("createdAt");
-  const [view, setView] = useState<"list" | "kanban">("list");
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [error, setError] = useState("");
@@ -358,7 +362,7 @@ export default function Tasks() {
                               dragPreview.style.top = "-1000px";
                               dragPreview.style.padding = "10px 14px";
                               dragPreview.style.background = "#ffffff";
-                              dragPreview.style.border = "2px solid #ea580c"; 
+                              dragPreview.style.border = "2px solid #ea580c";
                               dragPreview.style.borderRadius = "8px";
                               dragPreview.style.boxShadow =
                                 "0 10px 15px -3px rgba(0, 0, 0, 0.1)";
