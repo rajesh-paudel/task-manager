@@ -256,8 +256,15 @@ export default function Profile() {
           </div>
 
           <div className="pt-1 min-w-0">
-            <p className="text-lg font-semibold text-slate-900 truncate">
+            <p className="text-lg flex items-center justify-center gap-2 font-semibold text-slate-900 truncate">
               {userProfile.name}
+              {userProfile.role == "admin" && (
+                <span
+                  className={`shrink-0   text-[11px] pb-1 font-medium px-2 py-0.5 rounded-full  bg-orange-50 text-orange-600`}
+                >
+                  {userProfile.role}
+                </span>
+              )}
             </p>
             <p className="text-sm text-slate-500">
               {userProfile.title || "No title set"}
