@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Plus,
   LayoutList,
@@ -18,12 +18,18 @@ import { getDueLabel, isOverdue } from "../store/dateHelpers";
 import { useAppSelector } from "../store/store";
 
 import PriorityBadge from "./PriorityBadge";
+import TaskDetailsModal from "./TaskDetailModal";
 
 const columns: { key: TaskStatus; label: string }[] = [
   { key: "todo", label: "To do" },
   { key: "in_progress", label: "In progress" },
   { key: "done", label: "Done" },
 ];
+
+function getErrorMessage(err: unknown, fallback: string) {
+  return err instanceof Error ? err.message : fallback;
+}
+
 type SortBy = "createdAt" | "dueDate";
 interface DashboardContextType {
   view: "list" | "kanban";
@@ -43,6 +49,7 @@ export default function Tasks() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [detailsTask, setDetailsTask] = useState<Task | null>(null);
   const [error, setError] = useState("");
 
   const openCreateModal = () => {
@@ -70,6 +77,18 @@ export default function Tasks() {
     }
   };
 
+  const handleEditFromDetails = () => {
+    if (!detailsTask) return;
+    const task = detailsTask;
+    setDetailsTask(null);
+    openEditModal(task);
+  };
+
+  const handleDeleteFromDetails = async () => {
+    if (!detailsTask || !userProfile) return;
+    await deleteTask(userProfile.uid, detailsTask.id);
+  };
+
   const toggleDone = async (
     e: React.MouseEvent,
     task: Task,
@@ -82,8 +101,8 @@ export default function Tasks() {
         ...task,
         status: currentStatus === "done" ? "todo" : "done",
       });
-    } catch (err: any) {
-      setError(err.message || "Couldn't update task. Try again.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Couldn't update task. Try again."));
     }
   };
 
@@ -102,18 +121,46 @@ export default function Tasks() {
   //drag and drop
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const dragPreviewRef = useRef<HTMLDivElement | null>(null);
+
+  const removeDragPreview = () => {
+    dragPreviewRef.current?.remove();
+    dragPreviewRef.current = null;
+  };
+
+  const createDragPreview = (sourceCard: HTMLDivElement) => {
+    removeDragPreview();
+
+    const rect = sourceCard.getBoundingClientRect();
+    const dragPreview = sourceCard.cloneNode(true) as HTMLDivElement;
+
+    dragPreview.style.position = "absolute";
+    dragPreview.style.top = "-1000px";
+    dragPreview.style.left = "-1000px";
+    dragPreview.style.width = `${rect.width}px`;
+    dragPreview.style.pointerEvents = "none";
+
+    dragPreview.style.zIndex = "10000";
+
+    document.body.appendChild(dragPreview);
+    dragPreviewRef.current = dragPreview;
+
+    return { node: dragPreview, width: rect.width, height: rect.height };
+  };
+
   const handleDrop = async (e: React.DragEvent, newStatus: TaskStatus) => {
     e.preventDefault();
     setDraggingId(null);
     setDragOverColumn(null);
+    removeDragPreview();
     const taskId = e.dataTransfer.getData("text/plain");
     const task = tasks.find((t) => t.id === taskId);
     if (!task || !userProfile || task.status === newStatus) return;
 
     try {
       await updateTask(userProfile.uid, task, { ...task, status: newStatus });
-    } catch (err: any) {
-      setError(err.message || "Couldn't move task. Try again.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Couldn't move task. Try again."));
     }
   };
   return (
@@ -222,7 +269,7 @@ export default function Tasks() {
                 return (
                   <div
                     key={task.id}
-                    onClick={() => openEditModal(task)}
+                    onClick={() => setDetailsTask(task)}
                     className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50"
                   >
                     <button
@@ -355,31 +402,21 @@ export default function Tasks() {
                               setDraggingId(task.id);
                               e.dataTransfer.effectAllowed = "move";
 
-                              // Create elegant custom drag feedback ghost element
-                              const dragPreview = document.createElement("div");
-                              dragPreview.innerText = task.title;
-                              dragPreview.style.position = "absolute";
-                              dragPreview.style.top = "-1000px";
-                              dragPreview.style.padding = "10px 14px";
-                              dragPreview.style.background = "#ffffff";
-                              dragPreview.style.border = "2px solid #ea580c";
-                              dragPreview.style.borderRadius = "8px";
-                              dragPreview.style.boxShadow =
-                                "0 10px 15px -3px rgba(0, 0, 0, 0.1)";
-                              dragPreview.style.fontSize = "14px";
-                              dragPreview.style.color = "#0f172a";
-                              dragPreview.style.fontWeight = "500";
-                              dragPreview.style.pointerEvents = "none";
-                              document.body.appendChild(dragPreview);
-
-                              // Position the custom visual centered under the cursor
-                              e.dataTransfer.setDragImage(dragPreview, 20, 20);
-
-                              // Remove node from DOM immediately after browser captures the frame
-                              setTimeout(() => dragPreview.remove(), 0);
+                              const preview = createDragPreview(
+                                e.currentTarget,
+                              );
+                              e.dataTransfer.setDragImage(
+                                preview.node,
+                                preview.width / 2,
+                                preview.height / 2,
+                              );
                             }}
-                            onDragEnd={() => setDraggingId(null)}
-                            onClick={() => openEditModal(task)}
+                            onDragEnd={() => {
+                              setDraggingId(null);
+                              setDragOverColumn(null);
+                              removeDragPreview();
+                            }}
+                            onClick={() => setDetailsTask(task)}
                             className={`bg-white border border-slate-200 rounded-lg px-3 py-2.5 cursor-grab active:cursor-grabbing hover:border-slate-300 shadow-sm transition-all ${
                               draggingId === task.id
                                 ? "opacity-20 scale-95"
@@ -426,6 +463,13 @@ export default function Tasks() {
         onSave={handleSaveTask}
         onDelete={editingTask ? handleDeleteTask : undefined}
         initialTask={editingTask}
+      />
+      <TaskDetailsModal
+        open={detailsTask !== null}
+        task={detailsTask}
+        onClose={() => setDetailsTask(null)}
+        onEdit={handleEditFromDetails}
+        onDelete={handleDeleteFromDetails}
       />
     </div>
   );

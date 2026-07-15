@@ -256,7 +256,7 @@ export default function Profile() {
           </div>
 
           <div className="pt-1 min-w-0">
-            <p className="text-lg flex items-center justify-center gap-2 font-semibold text-slate-900 truncate">
+            <p className="text-lg flex items-center justify-start gap-2 font-semibold text-slate-900 truncate">
               {userProfile.name}
               {userProfile.role == "admin" && (
                 <span
