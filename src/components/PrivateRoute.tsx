@@ -8,9 +8,5 @@ export default function ProtectedRoute() {
     return <div>Loading...</div>;
   }
 
-  if (!userProfile) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <Outlet />;
+  return userProfile ? <Outlet /> : <Navigate to="/login" />;
 }
