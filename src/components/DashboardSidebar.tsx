@@ -48,6 +48,7 @@ export default function Sidebar() {
 
   return (
     <>
+      {/* Mobile top bar — only rendered below md, holds the menu trigger */}
       <div className="md:hidden h-14 flex items-center justify-between px-4 border-b border-slate-200 bg-white sticky top-0 z-30">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 bg-orange-600 rounded-lg flex items-center justify-center text-white">
@@ -66,6 +67,7 @@ export default function Sidebar() {
         </button>
       </div>
 
+      {/* Backdrop — mobile only, shown while the drawer is open */}
       {mobileOpen && (
         <div
           onClick={closeMobile}
@@ -75,9 +77,9 @@ export default function Sidebar() {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col justify-between transition-transform duration-200 ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        } md:static md:translate-x-0 md:z-auto md:w-60 md:shrink-0 md:h-screen md:sticky md:top-0`}
+        className={`fixed inset-y-0 right-0 z-50 w-64 bg-white border-l border-slate-200 flex flex-col justify-between transition-transform duration-200 ${
+          mobileOpen ? "translate-x-0" : "translate-x-full"
+        } md:static md:translate-x-0 md:z-auto md:w-60 md:shrink-0 md:h-screen md:sticky md:top-0 md:border-l-0 md:border-r`}
       >
         <div>
           <div className="h-16 flex items-center justify-between gap-2.5 px-5 border-b border-slate-100">
