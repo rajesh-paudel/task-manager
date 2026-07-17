@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { CheckSquare, LayoutDashboard, User, LogOut } from "lucide-react";
 import type { UserProfile } from "../types/user";
 import profilePlaceholder from "../assets/profilePlaceholder.png";
@@ -10,6 +10,7 @@ interface NavbarProps {
 }
 
 const navLinks = [
+  { label: "Home", path: "/" },
   { label: "Pricing", path: "/pricing" },
   { label: "About", path: "/about" },
   { label: "Contact", path: "/contact" },
@@ -47,13 +48,19 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
           {/* Center nav */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
-              <Link
+              <NavLink
                 key={link.path}
                 to={link.path}
-                className="px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg"
+                className={({ isActive }) =>
+                  `px-3.5 py-2 text-sm font-medium rounded-lg hover:bg-slate-50 ${
+                    isActive
+                      ? "text-orange-600"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`
+                }
               >
                 {link.label}
-              </Link>
+              </NavLink>
             ))}
           </div>
 
