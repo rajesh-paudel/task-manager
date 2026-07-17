@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ref, get, remove } from "firebase/database";
-import { db } from "../utils/firebaseConfig";
-import { useAppSelector } from "../store/store";
+import { db } from "../../utils/firebaseConfig";
+import { useAppSelector } from "../../store/store";
 import {
   Users,
   Mail,
@@ -10,8 +10,8 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
-import type { UserProfile } from "../types/user";
-import profilePlaceholder from "../assets/profilePlaceholder.png";
+import type { UserProfile } from "../../types/user";
+import profilePlaceholder from "../../assets/profilePlaceholder.png";
 
 interface ContactMessage {
   id: string;

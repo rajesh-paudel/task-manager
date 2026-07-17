@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { X, Pencil, Trash2, Calendar, Loader2 } from "lucide-react";
-import type { Task, TaskStatus } from "../types/task";
-import PriorityBadge from "./PriorityBadge";
-import { getDueLabel, isOverdue } from "../store/dateHelpers";
+import type { Task, TaskStatus } from "../../types/task";
+import PriorityBadge from "../PriorityBadge";
+import { getDueLabel, isOverdue } from "../../store/dateHelpers";
 interface TaskDetailsModalProps {
   open: boolean;
   task: Task | null;

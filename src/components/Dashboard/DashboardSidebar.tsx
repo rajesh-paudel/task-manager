@@ -9,11 +9,11 @@ import {
   X,
 } from "lucide-react";
 import { RiAdminFill } from "react-icons/ri";
-import { useAppDispatch, useAppSelector } from "../store/store";
+import { useAppDispatch, useAppSelector } from "../../store/store";
 import { signOut } from "firebase/auth";
-import profilePlaceholder from "../assets/profilePlaceholder.png";
-import { auth } from "../utils/firebaseConfig";
-import { clearProfile } from "../store/authSlice";
+import profilePlaceholder from "../../assets/profilePlaceholder.png";
+import { auth } from "../../utils/firebaseConfig";
+import { clearProfile } from "../../store/authSlice";
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -48,7 +48,6 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile top bar — only rendered below md, holds the menu trigger */}
       <div className="md:hidden h-14 flex items-center justify-between px-4 border-b border-slate-200 bg-white sticky top-0 z-30">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 bg-orange-600 rounded-lg flex items-center justify-center text-white">
@@ -67,7 +66,6 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* Backdrop — mobile only, shown while the drawer is open */}
       {mobileOpen && (
         <div
           onClick={closeMobile}

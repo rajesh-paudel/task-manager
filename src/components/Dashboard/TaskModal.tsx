@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { X, Loader2, Trash2 } from "lucide-react";
 
-import type { NewTask, Task, TaskPriority, TaskStatus } from "../types/task";
+import type { NewTask, Task, TaskPriority, TaskStatus } from "../../types/task";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";

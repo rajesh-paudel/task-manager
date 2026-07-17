@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 
 const tiers = [
@@ -51,6 +52,13 @@ const tiers = [
 export default function Pricing() {
   return (
     <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-100">
+      <Helmet>
+        <title>TaskPulse | TaskPulse</title>
+        <meta
+          name="description"
+          content="Explore pricing for different upgrades for taskpulse"
+        />
+      </Helmet>
       <div className="max-w-lg mx-auto text-center">
         <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
           Simple pricing, no surprises

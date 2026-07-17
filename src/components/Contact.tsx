@@ -6,6 +6,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Helmet } from "react-helmet-async";
 
 const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 const MIN_FILL_TIME = 3000;
@@ -77,6 +78,10 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-white font-sans">
+      <Helmet>
+        <title>Contact | TaskPulse</title>
+        <meta name="description" content="Contact us if you have any query " />
+      </Helmet>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 grid lg:grid-cols-2 gap-16">
         <div>
           <span className="text-xs font-semibold tracking-wide text-orange-600 uppercase">

@@ -16,10 +16,10 @@ import { setProfile, clearProfile } from "./store/authSlice";
 import Navbar from "./components/Navbar";
 import Login from "./components/Login";
 import Register from "./components/Register";
-import Home from "./components/Home";
+import Home from "./components/Home/Home";
 import Footer from "./components/Footer";
 import Profile from "./components/Profile";
-import DashboardLayout from "./components/DashboardLayout";
+import DashboardLayout from "./components/Dashboard/DashboardLayout";
 import Contact from "./components/Contact";
 import About from "./components/About";
 import Pricing from "./components/Pricing";
@@ -27,9 +27,11 @@ import NotFound from "./components/NotFound";
 import PublicRoute from "./components/PublicRoute";
 import ProtectedRoute from "./components/PrivateRoute";
 
-const Overview = lazy(() => import("./components/DashboardOverview"));
-const Tasks = lazy(() => import("./components/DashboardTasks"));
-const DashboardAdmin = lazy(() => import("./components/DashboardAdmin"));
+const Overview = lazy(() => import("./components/Dashboard/DashboardOverview"));
+const Tasks = lazy(() => import("./components/Dashboard/DashboardTasks"));
+const DashboardAdmin = lazy(
+  () => import("./components/Dashboard/DashboardAdmin"),
+);
 
 export default function App() {
   const navigate = useNavigate();

@@ -10,9 +10,9 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { useAppSelector } from "../store/store";
-import { selectAllTasks, selectTaskStats } from "../store/tasksSelectors";
-import { getWeeklyCompletionCounts } from "../store/dateHelpers";
+import { useAppSelector } from "../../store/store";
+import { selectAllTasks, selectTaskStats } from "../../store/tasksSelectors";
+import { getWeeklyCompletionCounts } from "../../store/dateHelpers";
 import {
   CheckCircle2,
   Clock,

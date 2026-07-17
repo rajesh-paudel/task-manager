@@ -1,9 +1,10 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./DashboardSidebar";
-import { useAppSelector } from "../store/store";
-import { useTasksSync } from "../store/useTasksSync";
+import { useAppSelector } from "../../store/store";
+import { useTasksSync } from "../../store/useTasksSync";
 import { useState } from "react";
 import { Suspense } from "react";
+import { Helmet } from "react-helmet-async";
 
 export default function DashboardLayout() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
@@ -11,6 +12,13 @@ export default function DashboardLayout() {
   const [view, setView] = useState<"list" | "kanban">("list");
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white font-sans">
+      <Helmet>
+        <title>Dashboard | TaskPulse </title>
+        <meta
+          name="description"
+          content="TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity."
+        />
+      </Helmet>
       <Sidebar />
       <main className="flex-1 bg-slate-50 overflow-y-auto">
         <Suspense

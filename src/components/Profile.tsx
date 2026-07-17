@@ -14,6 +14,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import profilePlaceholder from "../assets/profilePlaceholder.png";
+import { Helmet } from "react-helmet-async";
 
 function useEditableField(
   initialValue: string,
@@ -215,6 +216,13 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-white font-sans">
+      <Helmet>
+        <title>Profile | TaskPulse </title>
+        <meta
+          name="description"
+          content="TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity."
+        />
+      </Helmet>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
           Profile

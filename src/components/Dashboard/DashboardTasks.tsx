@@ -9,15 +9,18 @@ import {
   Search,
 } from "lucide-react";
 import { useMemo } from "react";
-import type { NewTask, Task, TaskPriority, TaskStatus } from "../types/task";
-import { selectAllTasks, selectTasksByDueDate } from "../store/tasksSelectors";
+import type { NewTask, Task, TaskPriority, TaskStatus } from "../../types/task";
+import {
+  selectAllTasks,
+  selectTasksByDueDate,
+} from "../../store/tasksSelectors";
 import TaskModal from "./TaskModal";
 import { useOutletContext } from "react-router-dom";
-import { createTask, updateTask, deleteTask } from "../store/tasksAPi";
-import { getDueLabel, isOverdue } from "../store/dateHelpers";
-import { useAppSelector } from "../store/store";
+import { createTask, updateTask, deleteTask } from "../../store/tasksAPi";
+import { getDueLabel, isOverdue } from "../../store/dateHelpers";
+import { useAppSelector } from "../../store/store";
 
-import PriorityBadge from "./PriorityBadge";
+import PriorityBadge from "../PriorityBadge";
 import TaskDetailsModal from "./TaskDetailModal";
 
 const columns: { key: TaskStatus; label: string }[] = [

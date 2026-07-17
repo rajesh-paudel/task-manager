@@ -1,4 +1,5 @@
 import { Target, Users, Sparkles } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 
 const values = [
@@ -25,6 +26,13 @@ const values = [
 export default function About() {
   return (
     <div className="bg-white font-sans">
+      <Helmet>
+        <title>About | TaskPulse </title>
+        <meta
+          name="description"
+          content="TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity."
+        />
+      </Helmet>
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">
         <span className="text-xs font-semibold tracking-wide text-orange-600 uppercase">
           About TaskPulse
