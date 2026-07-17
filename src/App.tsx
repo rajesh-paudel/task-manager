@@ -27,7 +27,6 @@ import NotFound from "./components/NotFound";
 import PublicRoute from "./components/PublicRoute";
 import ProtectedRoute from "./components/PrivateRoute";
 
-//lazy loading lets say heavy components
 const Overview = lazy(() => import("./components/DashboardOverview"));
 const Tasks = lazy(() => import("./components/DashboardTasks"));
 const DashboardAdmin = lazy(() => import("./components/DashboardAdmin"));

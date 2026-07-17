@@ -8,7 +8,7 @@ export function getDueLabel(dueDate: number | null): string | null {
 
   const today = startOfDay(new Date());
   const due = startOfDay(new Date(dueDate));
-  const diffDays = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+  const diffDays = Math.round((due.getTime() - today.getTime()) / 86400000);
 
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Tomorrow";

@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
-import { ref, get } from "firebase/database";
+import { ref, get, remove } from "firebase/database";
 import { db } from "../utils/firebaseConfig";
 import { useAppSelector } from "../store/store";
-import { Users, Mail, Loader2, ShieldCheck, RefreshCw } from "lucide-react";
+import {
+  Users,
+  Mail,
+  Loader2,
+  ShieldCheck,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import type { UserProfile } from "../types/user";
 import profilePlaceholder from "../assets/profilePlaceholder.png";
 
@@ -74,6 +81,20 @@ export default function DashboardAdmin() {
       setMessagesError(err.message || "Couldn't load messages.");
     } finally {
       setMessagesLoading(false);
+    }
+  };
+
+  const handleDeleteMessage = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+
+    try {
+      await remove(ref(db, `forms/${id}`));
+
+      setMessages((prev) => {
+        return prev.filter((msg) => msg.id !== id);
+      });
+    } catch (error: any) {
+      setMessagesError(error.message || "Failed to delete message.");
     }
   };
 
@@ -238,6 +259,11 @@ export default function DashboardAdmin() {
                       <span className="shrink-0 text-xs text-slate-400">
                         {formatDate(msg.createdAt)}
                       </span>
+                      <Trash2
+                        onClick={(e) => handleDeleteMessage(e, msg.id)}
+                        className="text-red-500 hover:bg-red-100 p-1 cursor-pointer"
+                        size={20}
+                      ></Trash2>
                     </button>
                     {isExpanded && (
                       <p className="mt-2 text-sm text-slate-600 leading-relaxed">
