@@ -14,16 +14,17 @@ import { useAppSelector } from "./store/store";
 import { setProfile, clearProfile } from "./store/authSlice";
 
 import Navbar from "./components/Navbar";
-import Login from "./components/Login";
-import Register from "./components/Register";
-import Home from "./components/Home/Home";
+import Login from "./Pages/Login";
+import Register from "./Pages/Register";
+
+import Home from "./Pages/Home";
 import Footer from "./components/Footer";
-import Profile from "./components/Profile";
+import Profile from "./Pages/Profile";
 import DashboardLayout from "./components/Dashboard/DashboardLayout";
-import Contact from "./components/Contact";
-import About from "./components/About";
-import Pricing from "./components/Pricing";
-import NotFound from "./components/NotFound";
+import Contact from "./Pages/Contact";
+import About from "./Pages/About";
+import Pricing from "./Pages/Pricing";
+import NotFound from "./Pages/NotFound";
 import PublicRoute from "./components/PublicRoute";
 import ProtectedRoute from "./components/PrivateRoute";
 

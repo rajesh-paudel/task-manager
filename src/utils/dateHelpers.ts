@@ -1,5 +1,4 @@
 import type { Task } from "../types/task";
-
 const startOfDay = (d: Date) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate());
 

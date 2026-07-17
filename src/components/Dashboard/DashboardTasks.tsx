@@ -17,7 +17,7 @@ import {
 import TaskModal from "./TaskModal";
 import { useOutletContext } from "react-router-dom";
 import { createTask, updateTask, deleteTask } from "../../store/tasksAPi";
-import { getDueLabel, isOverdue } from "../../store/dateHelpers";
+import { getDueLabel, isOverdue } from "../../utils/dateHelpers";
 import { useAppSelector } from "../../store/store";
 
 import PriorityBadge from "../PriorityBadge";

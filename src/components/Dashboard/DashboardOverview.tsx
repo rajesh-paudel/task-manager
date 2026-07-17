@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { useAppSelector } from "../../store/store";
 import { selectAllTasks, selectTaskStats } from "../../store/tasksSelectors";
-import { getWeeklyCompletionCounts } from "../../store/dateHelpers";
+import { getWeeklyCompletionCounts } from "../../utils/dateHelpers";
 import {
   CheckCircle2,
   Clock,
