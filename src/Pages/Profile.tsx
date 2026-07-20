@@ -29,6 +29,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+//zod schema for changePassword form fields
 const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
@@ -54,6 +55,7 @@ const changePasswordSchema = z
 
 type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 
+//zod schema for deleteAccount password field
 const deleteAccountSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
@@ -206,6 +208,7 @@ export default function Profile() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  //initialize hook form for changing password
   const {
     register,
     handleSubmit,
@@ -216,6 +219,7 @@ export default function Profile() {
     mode: "onTouched",
   });
 
+  //initialize hoook form for deleting account
   const {
     register: registerDelete,
     handleSubmit: handleDeleteSubmit,
@@ -259,6 +263,7 @@ export default function Profile() {
     );
   }
 
+  //handling account deletion
   const handleDeleteAccount = async (data: DeleteAccountForm) => {
     setDeleteError("");
 
@@ -289,11 +294,13 @@ export default function Profile() {
     }
   };
 
+  //handling profile field update
   const saveField = async (field: "name" | "title" | "bio", value: string) => {
     await update(ref(db, `users/${userProfile.uid}`), { [field]: value });
     dispatch(setProfile({ ...userProfile, [field]: value }));
   };
 
+  //handling profile photo update
   const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -351,6 +358,7 @@ export default function Profile() {
     }
   }
 
+  //handling password change
   const handleNewPassword = async (data: ChangePasswordForm) => {
     setChangePasswordError("");
 
@@ -522,6 +530,8 @@ export default function Profile() {
           </button>
         </div>
       </div>
+
+      {/* dialog for deleting account */}
       {deleteDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
           <div className="w-full max-w-sm rounded-xl bg-white shadow-xl">
@@ -616,6 +626,8 @@ export default function Profile() {
           </div>
         </div>
       )}
+
+      {/* dialog for changing password change */}
       {passwordDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
