@@ -63,7 +63,7 @@ export default function DashboardAdmin() {
     } catch (err: any) {
       setUsersError(err.message || "Couldn't load users.");
       console.log(err);
-    } finally {  
+    } finally {
       setUsersLoading(false);
     }
   };
@@ -131,7 +131,7 @@ export default function DashboardAdmin() {
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto px-6 sm:px-8 py-10">
+    <div className="min-h-screen max-w-5xl mx-auto px-6 sm:px-8 py-10">
       <div className="flex items-center gap-2">
         <ShieldCheck className="h-5 w-5 text-orange-600" />
         <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
@@ -256,7 +256,7 @@ export default function DashboardAdmin() {
       )}
 
       {activeTab === "messages" && (
-        <div className="mt-6 bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className=" mt-6 bg-white border border-slate-200 rounded-xl overflow-hidden">
           {messagesLoading ? (
             <div className="py-12 flex justify-center">
               <Loader2 className="h-5 w-5 text-orange-600 animate-spin" />

@@ -54,7 +54,7 @@ export default function Overview() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 sm:px-8 py-10">
+    <div className="min-h-screen max-w-5xl mx-auto px-6 sm:px-8 py-10">
       <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
         {userProfile
           ? `Welcome back, ${userProfile.name.split(" ")[0]}`

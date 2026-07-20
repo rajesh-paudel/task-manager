@@ -4,7 +4,10 @@ import {
   deleteUser,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  updatePassword,
 } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
+import { z } from "zod";
 import { auth, db } from "../utils/firebaseConfig";
 import { uploadImageToCloudinary } from "../utils/cloudinary.";
 import { useAppDispatch, useAppSelector } from "../store/store";
@@ -17,10 +20,45 @@ import {
   X,
   Mail,
   CalendarDays,
+  EyeOff,
+  Eye,
 } from "lucide-react";
 import profilePlaceholder from "../assets/profilePlaceholder.png";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+
+    newPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[a-z]/, "Password must contain a lowercase letter")
+      .regex(/[A-Z]/, "Password must contain an uppercase letter")
+      .regex(/[0-9]/, "Password must contain a number")
+      .regex(/[^A-Za-z0-9]/, "Password must contain a special character"),
+
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "New password must be different from your current password",
+    path: ["newPassword"],
+  });
+
+type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
+
+const deleteAccountSchema = z.object({
+  password: z.string().min(1, "Password is required"),
+});
+
+type DeleteAccountForm = z.infer<typeof deleteAccountSchema>;
 
 function useEditableField(
   initialValue: string,
@@ -167,18 +205,51 @@ function EditableField({
 export default function Profile() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ChangePasswordForm>({
+    resolver: zodResolver(changePasswordSchema),
+    mode: "onTouched",
+  });
+
+  const {
+    register: registerDelete,
+    handleSubmit: handleDeleteSubmit,
+    reset: resetDelete,
+    formState: { errors: deleteErrors, isSubmitting: deleting },
+  } = useForm<DeleteAccountForm>({
+    resolver: zodResolver(deleteAccountSchema),
+  });
   const userProfile = useAppSelector((state) => state.auth.userProfile);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState("");
 
+  const [changePasswordError, setChangePasswordError] = useState("");
+
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [confirmText, setConfirmText] = useState("");
-  const [deleting, setDeleting] = useState(false);
+
   const [deleteError, setDeleteError] = useState("");
-  const [needsReauth, setNeedsReauth] = useState(false);
-  const [reauthPassword, setReauthPassword] = useState("");
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
+  const [showPassword, setShowPassword] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+
+  const togglePassword = (key: "current" | "new" | "confirm") => {
+    setShowPassword((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
   if (!userProfile) {
     return (
@@ -188,50 +259,33 @@ export default function Profile() {
     );
   }
 
-  const performDelete = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    await remove(ref(db, `tasks/${user.uid}`));
-    await remove(ref(db, `users/${user.uid}`));
-    await deleteUser(user);
-
-    navigate("/login");
-  };
-
-  const handleDeleteAccount = async () => {
-    setDeleting(true);
+  const handleDeleteAccount = async (data: DeleteAccountForm) => {
     setDeleteError("");
+
     try {
-      await performDelete();
-    } catch (err: any) {
-      if (err.code === "auth/requires-recent-login") {
-        setNeedsReauth(true);
-      } else {
-        setDeleteError(err.message || "Couldn't delete account. Try again.");
+      const user = auth.currentUser;
+
+      if (!user?.email) {
+        throw new Error("User is not signed in.");
       }
-    } finally {
-      setDeleting(false);
-    }
-  };
 
-  const handleReauthAndDelete = async () => {
-    const user = auth.currentUser;
-    if (!user?.email) return;
-
-    setDeleting(true);
-    setDeleteError("");
-    try {
+      // Reauthenticate
       const credential = EmailAuthProvider.credential(
         user.email,
-        reauthPassword,
+        data.password,
       );
+
       await reauthenticateWithCredential(user, credential);
-      await performDelete();
-    } catch (err: any) {
-      setDeleteError(err.message || "Incorrect password.");
-    } finally {
-      setDeleting(false);
+
+      // Delete user's
+      await remove(ref(db, `tasks/${user.uid}`));
+      await remove(ref(db, `users/${user.uid}`));
+      // Delete Firebase Auth account
+      await deleteUser(user);
+      resetDelete();
+      navigate("/login");
+    } catch (err) {
+      setDeleteError(getErrorMessage(err));
     }
   };
 
@@ -264,6 +318,63 @@ export default function Profile() {
     } finally {
       setUploadingPhoto(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  function getErrorMessage(err: unknown): string {
+    if (!(err instanceof FirebaseError)) {
+      return "Something went wrong. Please try again.";
+    }
+
+    switch (err.code) {
+      case "auth/invalid-credential":
+        return "Current password is incorrect.";
+
+      case "auth/wrong-password":
+        return "Current password is incorrect.";
+
+      case "auth/weak-password":
+        return "Your new password is too weak.";
+
+      case "auth/requires-recent-login":
+        return "Please sign in again and try changing your password.";
+
+      case "auth/too-many-requests":
+        return "Too many attempts. Please try again later.";
+
+      case "auth/network-request-failed":
+        return "Network error. Check your internet connection.";
+
+      default:
+        return err.message || "Something went wrong.";
+    }
+  }
+
+  const handleNewPassword = async (data: ChangePasswordForm) => {
+    setChangePasswordError("");
+
+    try {
+      const user = auth.currentUser;
+
+      if (!user?.email) {
+        throw new Error("User is not signed in.");
+      }
+      const credential = EmailAuthProvider.credential(
+        user.email,
+        data.currentPassword,
+      );
+
+      // Verify current password
+      await reauthenticateWithCredential(user, credential);
+
+      // Update password
+      await updatePassword(user, data.newPassword);
+
+      reset();
+      setChangePasswordError("");
+      setPasswordDialogOpen(false);
+    } catch (err) {
+      setChangePasswordError(getErrorMessage(err));
     }
   };
 
@@ -378,6 +489,24 @@ export default function Profile() {
             onSave={(v) => saveField("bio", v)}
           />
         </div>
+        <div className="mt-10 pt-8 border-t border-slate-200">
+          <h2 className="text-sm font-semibold text-slate-900">Security</h2>
+
+          <p className="mt-1 text-sm text-slate-500">
+            Keep your account secure by updating your password regularly.
+          </p>
+
+          <button
+            onClick={() => {
+              resetDelete();
+              setChangePasswordError("");
+              setPasswordDialogOpen(true);
+            }}
+            className="mt-4 px-4 py-2 rounded-lg text-sm font-medium text-slate-700 border border-slate-300 hover:bg-slate-50"
+          >
+            Change password
+          </button>
+        </div>
         <div className="mt-10 pt-8 border-t border-red-100">
           <h2 className="text-sm font-semibold text-red-600">Danger zone</h2>
           <p className="mt-1 text-sm text-slate-500">
@@ -394,60 +523,288 @@ export default function Profile() {
       </div>
       {deleteDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 border-t-4 border-red-500">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Delete your account?
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">
-              This permanently deletes your account and all tasks. Type your
-              email (<span className="font-medium">{userProfile.email}</span>)
-              to confirm.
-            </p>
+          <div className="w-full max-w-sm rounded-xl bg-white shadow-xl">
+            {/* Header */}
+            <div className="border-b border-slate-200 px-6 py-4">
+              <h2 className="text-lg font-semibold text-slate-900">
+                Delete account
+              </h2>
 
-            <input
-              value={confirmText}
-              onChange={(e) => setConfirmText(e.target.value)}
-              placeholder={userProfile.email}
-              className="mt-4 w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-red-500"
-            />
-
-            {needsReauth && (
-              <input
-                type="password"
-                value={reauthPassword}
-                onChange={(e) => setReauthPassword(e.target.value)}
-                placeholder="Confirm your password"
-                className="mt-3 w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-red-500"
-              />
-            )}
-
-            {deleteError && (
-              <p className="mt-3 text-sm text-red-600">{deleteError}</p>
-            )}
-
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setDeleteDialogOpen(false);
-                  setConfirmText("");
-                  setNeedsReauth(false);
-                  setDeleteError("");
-                }}
-                disabled={deleting}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={
-                  needsReauth ? handleReauthAndDelete : handleDeleteAccount
-                }
-                disabled={confirmText !== userProfile.email || deleting}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg disabled:opacity-50"
-              >
-                {deleting ? "Deleting..." : "Delete account"}
-              </button>
+              <p className="mt-1 text-sm text-slate-500">
+                This permanently deletes your account and all associated data,
+                including your profile and tasks. This action cannot be undone.
+              </p>
             </div>
+
+            {/* Body */}
+            <form
+              onSubmit={handleDeleteSubmit(handleDeleteAccount)}
+              className="space-y-5 p-6"
+            >
+              <div>
+                <label
+                  htmlFor="deletePassword"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
+                  Password
+                </label>
+
+                <div className="relative">
+                  <input
+                    id="deletePassword"
+                    type={showDeletePassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    {...registerDelete("password")}
+                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition
+              ${
+                deleteErrors.password
+                  ? "border-red-500"
+                  : "border-slate-300 focus:border-red-500"
+              }`}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowDeletePassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  >
+                    {showDeletePassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
+
+                {deleteErrors.password && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {deleteErrors.password.message}
+                  </p>
+                )}
+              </div>
+
+              {deleteError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {deleteError}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    reset();
+                    setDeleteError("");
+                    setDeleteDialogOpen(false);
+                  }}
+                  disabled={deleting}
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={deleting}
+                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                >
+                  {deleting ? "Deleting..." : "Delete account"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {passwordDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+            {/* Header */}
+            <div className="border-b border-slate-200 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Change password
+                </h2>
+
+                <button
+                  onClick={() => {
+                    reset();
+                    setChangePasswordError("");
+                    setPasswordDialogOpen(false);
+                  }}
+                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Enter your current password and choose a new one.
+              </p>
+            </div>
+
+            <form
+              onSubmit={handleSubmit(handleNewPassword)}
+              className="space-y-5 p-6"
+            >
+              {/* Current Password */}
+
+              <div>
+                <label
+                  htmlFor="currentPassword"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
+                  Current password
+                </label>
+
+                <div className="relative">
+                  <input
+                    id="currentPassword"
+                    type={showPassword.current ? "text" : "password"}
+                    placeholder="Current password"
+                    {...register("currentPassword")}
+                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition
+        ${
+          errors.currentPassword
+            ? "border-red-500"
+            : "border-slate-300 focus:border-orange-500"
+        }`}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => togglePassword("current")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  >
+                    {showPassword.current ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
+
+                {errors.currentPassword && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.currentPassword.message}
+                  </p>
+                )}
+              </div>
+
+              {/* New Password */}
+
+              <div>
+                <label
+                  htmlFor="newPassword"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
+                  New password
+                </label>
+
+                <div className="relative">
+                  <input
+                    id="newPassword"
+                    type={showPassword.new ? "text" : "password"}
+                    placeholder="New password"
+                    {...register("newPassword")}
+                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition
+        ${
+          errors.newPassword
+            ? "border-red-500"
+            : "border-slate-300 focus:border-orange-500"
+        }`}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => togglePassword("new")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  >
+                    {showPassword.new ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
+
+                {errors.newPassword && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.newPassword.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
+                  Confirm new password
+                </label>
+
+                <div className="relative">
+                  <input
+                    id="confirmPassword"
+                    type={showPassword.confirm ? "text" : "password"}
+                    placeholder="Confirm new password"
+                    {...register("confirmPassword")}
+                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition
+        ${
+          errors.confirmPassword
+            ? "border-red-500"
+            : "border-slate-300 focus:border-orange-500"
+        }`}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => togglePassword("confirm")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  >
+                    {showPassword.confirm ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
+
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+              {changePasswordError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {changePasswordError}
+                </div>
+              )}
+              <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    reset();
+                    setChangePasswordError("");
+                    setPasswordDialogOpen(false);
+                  }}
+                  disabled={isSubmitting}
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSubmitting ? "Updating..." : "Update password"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
