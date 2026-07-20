@@ -321,6 +321,7 @@ export default function Profile() {
     }
   };
 
+  //handle firebase errros and translate to user friendly messages
   function getErrorMessage(err: unknown): string {
     if (!(err instanceof FirebaseError)) {
       return "Something went wrong. Please try again.";
