@@ -26,6 +26,7 @@ export default function Sidebar() {
     { label: "Overview", path: "/dashboard/overview", icon: BarChart3 },
     { label: "Tasks", path: "/dashboard/tasks", icon: ListChecks },
   ];
+
   const adminNavItem = {
     label: "Admin",
     path: "/dashboard/admin",

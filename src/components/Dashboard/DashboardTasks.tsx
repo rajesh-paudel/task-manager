@@ -71,6 +71,7 @@ export default function Tasks() {
     if (!userProfile || !editingTask) return;
     await deleteTask(userProfile.uid, editingTask.id);
   };
+
   const handleSaveTask = async (data: NewTask) => {
     if (!userProfile) return;
     if (editingTask) {

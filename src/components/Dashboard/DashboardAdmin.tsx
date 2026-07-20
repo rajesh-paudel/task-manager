@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ref, get, remove } from "firebase/database";
+import { ref, get, remove, update } from "firebase/database";
 import { db } from "../../utils/firebaseConfig";
 import { useAppSelector } from "../../store/store";
 import {
@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   RefreshCw,
   Trash2,
+  ShieldPlus,
 } from "lucide-react";
 import type { UserProfile } from "../../types/user";
 import profilePlaceholder from "../../assets/profilePlaceholder.png";
@@ -45,6 +46,10 @@ export default function DashboardAdmin() {
   const [expandedMessageId, setExpandedMessageId] = useState<string | null>(
     null,
   );
+
+  const [promotingUser, setPromotingUser] = useState<UserProfile | null>(null);
+  const [promoting, setPromoting] = useState(false);
+  const [promoteError, setPromoteError] = useState("");
 
   const fetchUsers = async () => {
     setUsersLoading(true);
@@ -95,6 +100,25 @@ export default function DashboardAdmin() {
       });
     } catch (error: any) {
       setMessagesError(error.message || "Failed to delete message.");
+    }
+  };
+
+  const handleConfirmPromote = async () => {
+    if (!promotingUser) return;
+    setPromoting(true);
+    setPromoteError("");
+    try {
+      await update(ref(db, `users/${promotingUser.uid}`), { role: "admin" });
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.uid === promotingUser.uid ? { ...u, role: "admin" } : u,
+        ),
+      );
+      setPromotingUser(null);
+    } catch (err: any) {
+      setPromoteError(err.message || "Couldn't promote this user. Try again.");
+    } finally {
+      setPromoting(false);
     }
   };
 
@@ -212,6 +236,15 @@ export default function DashboardAdmin() {
                   >
                     {user.role}
                   </span>
+                  {user.role !== "admin" && user.uid !== currentUserId && (
+                    <button
+                      onClick={() => setPromotingUser(user)}
+                      className="shrink-0 flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700"
+                    >
+                      <ShieldPlus className="h-3.5 w-3.5" />
+                      Promote
+                    </button>
+                  )}
                   <span className="shrink-0 text-xs text-slate-400 w-20 text-right">
                     {formatDate(user.createdAt)}
                   </span>
@@ -275,6 +308,44 @@ export default function DashboardAdmin() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Promote confirmation */}
+      {promotingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Promote to admin?
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              <span className="font-medium text-slate-700">
+                {promotingUser.name}
+              </span>{" "}
+              will gain full admin access, including viewing all users and
+              contact messages, and promoting others.
+            </p>
+            {promoteError && (
+              <p className="mt-3 text-sm text-red-600">{promoteError}</p>
+            )}
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setPromotingUser(null)}
+                disabled={promoting}
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmPromote}
+                disabled={promoting}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg disabled:opacity-50"
+              >
+                {promoting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                {promoting ? "Promoting..." : "Promote to admin"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
