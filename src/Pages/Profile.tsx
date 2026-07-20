@@ -277,7 +277,7 @@ export default function Profile() {
 
       await reauthenticateWithCredential(user, credential);
 
-      // Delete user's
+      // Delete user's data
       await remove(ref(db, `tasks/${user.uid}`));
       await remove(ref(db, `users/${user.uid}`));
       // Delete Firebase Auth account
