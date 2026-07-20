@@ -63,7 +63,7 @@ export default function DashboardAdmin() {
     } catch (err: any) {
       setUsersError(err.message || "Couldn't load users.");
       console.log(err);
-    } finally {
+    } finally {  
       setUsersLoading(false);
     }
   };

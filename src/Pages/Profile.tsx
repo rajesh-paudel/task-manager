@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ref, update } from "firebase/database";
-import { db } from "../utils/firebaseConfig";
+import { ref, update, remove } from "firebase/database";
+import {
+  deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from "firebase/auth";
+import { auth, db } from "../utils/firebaseConfig";
 import { uploadImageToCloudinary } from "../utils/cloudinary.";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { setProfile } from "../store/authSlice";
@@ -15,6 +20,7 @@ import {
 } from "lucide-react";
 import profilePlaceholder from "../assets/profilePlaceholder.png";
 import { Helmet } from "react-helmet-async";
+import { useNavigate } from "react-router-dom";
 
 function useEditableField(
   initialValue: string,
@@ -160,11 +166,19 @@ function EditableField({
 
 export default function Profile() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const userProfile = useAppSelector((state) => state.auth.userProfile);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState("");
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [needsReauth, setNeedsReauth] = useState(false);
+  const [reauthPassword, setReauthPassword] = useState("");
 
   if (!userProfile) {
     return (
@@ -173,6 +187,53 @@ export default function Profile() {
       </div>
     );
   }
+
+  const performDelete = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    await remove(ref(db, `tasks/${user.uid}`));
+    await remove(ref(db, `users/${user.uid}`));
+    await deleteUser(user);
+
+    navigate("/login");
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await performDelete();
+    } catch (err: any) {
+      if (err.code === "auth/requires-recent-login") {
+        setNeedsReauth(true);
+      } else {
+        setDeleteError(err.message || "Couldn't delete account. Try again.");
+      }
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleReauthAndDelete = async () => {
+    const user = auth.currentUser;
+    if (!user?.email) return;
+
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      const credential = EmailAuthProvider.credential(
+        user.email,
+        reauthPassword,
+      );
+      await reauthenticateWithCredential(user, credential);
+      await performDelete();
+    } catch (err: any) {
+      setDeleteError(err.message || "Incorrect password.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const saveField = async (field: "name" | "title" | "bio", value: string) => {
     await update(ref(db, `users/${userProfile.uid}`), { [field]: value });
@@ -317,7 +378,79 @@ export default function Profile() {
             onSave={(v) => saveField("bio", v)}
           />
         </div>
+        <div className="mt-10 pt-8 border-t border-red-100">
+          <h2 className="text-sm font-semibold text-red-600">Danger zone</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Deleting your account permanently removes your profile and all
+            tasks. This can't be undone.
+          </p>
+          <button
+            onClick={() => setDeleteDialogOpen(true)}
+            className="mt-4 px-4 py-2 rounded-lg text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50"
+          >
+            Delete account
+          </button>
+        </div>
       </div>
+      {deleteDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 border-t-4 border-red-500">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Delete your account?
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              This permanently deletes your account and all tasks. Type your
+              email (<span className="font-medium">{userProfile.email}</span>)
+              to confirm.
+            </p>
+
+            <input
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder={userProfile.email}
+              className="mt-4 w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-red-500"
+            />
+
+            {needsReauth && (
+              <input
+                type="password"
+                value={reauthPassword}
+                onChange={(e) => setReauthPassword(e.target.value)}
+                placeholder="Confirm your password"
+                className="mt-3 w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-red-500"
+              />
+            )}
+
+            {deleteError && (
+              <p className="mt-3 text-sm text-red-600">{deleteError}</p>
+            )}
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setDeleteDialogOpen(false);
+                  setConfirmText("");
+                  setNeedsReauth(false);
+                  setDeleteError("");
+                }}
+                disabled={deleting}
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={
+                  needsReauth ? handleReauthAndDelete : handleDeleteAccount
+                }
+                disabled={confirmText !== userProfile.email || deleting}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete account"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
