@@ -1,5 +1,6 @@
 import { CheckSquare } from "lucide-react";
 import { FaGithub, FaTwitter, FaLinkedin } from "react-icons/fa";
+import { Link } from "react-router-dom";
 const footerLinks = {
   Product: [
     { label: "Features", path: "/features" },
@@ -75,12 +76,12 @@ export default function Footer() {
               <ul className="mt-4 space-y-3">
                 {links.map((link) => (
                   <li key={link.path}>
-                    <a
-                      href={link.path}
+                    <Link
+                      to={link.path}
                       className="text-sm text-slate-500 hover:text-slate-900"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
