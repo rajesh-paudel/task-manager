@@ -14,6 +14,7 @@ import { useAppSelector } from "./store/store";
 import { setProfile, clearProfile } from "./store/authSlice";
 
 import Navbar from "./components/Navbar";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 
@@ -90,35 +91,37 @@ export default function App() {
       {!hideLayout && (
         <Navbar userProfile={userProfile} onLogout={handleLogout} />
       )}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </Route>
-        <Route element={<ProtectedRoute />}>
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Navigate to="overview" replace />} />
-            <Route path="overview" element={<Overview />} />
-            <Route path="tasks" element={<Tasks />} />
-            <Route
-              path="admin"
-              element={
-                userProfile?.role === "admin" ? (
-                  <DashboardAdmin />
-                ) : (
-                  <Navigate to="/dashboard/overview" replace />
-                )
-              }
-            />
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route element={<PublicRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
           </Route>
-        </Route>
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<Navigate to="overview" replace />} />
+              <Route path="overview" element={<Overview />} />
+              <Route path="tasks" element={<Tasks />} />
+              <Route
+                path="admin"
+                element={
+                  userProfile?.role === "admin" ? (
+                    <DashboardAdmin />
+                  ) : (
+                    <Navigate to="/dashboard/overview" replace />
+                  )
+                }
+              />
+            </Route>
+          </Route>
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ErrorBoundary>
       {!hideLayout && !hideFooter && <Footer />}
     </div>
   );

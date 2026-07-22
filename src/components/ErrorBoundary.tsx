@@ -22,10 +22,6 @@ export default class ErrorBoundary extends Component<Props, State> {
     console.error("Error boundary caught:", error, info.componentStack);
   }
 
-  handleRetry = () => {
-    this.setState({ hasError: false, error: null });
-  };
-
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
@@ -36,10 +32,10 @@ export default class ErrorBoundary extends Component<Props, State> {
             Something went wrong loading this section.
           </p>
           <button
-            onClick={this.handleRetry}
+            onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg"
           >
-            Try again
+            Reload page
           </button>
         </div>
       );
