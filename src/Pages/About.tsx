@@ -44,8 +44,8 @@ export default function About() {
           property="og:image"
           content="https://task-manager-five-omega-36.vercel.app/og-image.png"
         />
-        <meta property="og:image:width" content="1727" />
-        <meta property="og:image:height" content="911" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta
           property="og:url"
           content="https://task-manager-five-omega-36.vercel.app/about"
