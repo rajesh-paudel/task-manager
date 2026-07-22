@@ -2,9 +2,9 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./DashboardSidebar";
 import { useAppSelector } from "../../store/store";
 import { useTasksSync } from "../../store/useTasksSync";
-import { useState } from "react";
-import { Suspense } from "react";
+import { useState, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
+import ErrorBoundary from "../ErrorBoundary";
 
 export default function DashboardLayout() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
@@ -21,15 +21,17 @@ export default function DashboardLayout() {
       </Helmet>
       <Sidebar />
       <main className="flex-1 bg-slate-50 overflow-y-auto">
-        <Suspense
-          fallback={
-            <div className="flex items-center justijfy-center h-full min-h-[calc(100vh-4rem)]">
-              <div className="h-8 w-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          }
-        >
-          <Outlet context={{ view, setView }} />
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-full min-h-[calc(100vh-4rem)]">
+                <div className="h-8 w-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            }
+          >
+            <Outlet context={{ view, setView }} />
+          </Suspense>
+        </ErrorBoundary>
       </main>
     </div>
   );
