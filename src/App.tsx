@@ -42,10 +42,14 @@ export default function App() {
   const hideLayout = location.pathname.startsWith("/dashboard");
   const { userProfile, loading } = useAppSelector((state) => state.auth);
   useEffect(() => {
+    let unsubscribeProfile: (() => void) | undefined;
+
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (unsubscribeProfile) unsubscribeProfile();
+
       if (user) {
         const userRef = ref(db, `users/${user.uid}`);
-        onValue(userRef, (snapshot) => {
+        unsubscribeProfile = onValue(userRef, (snapshot) => {
           const profileData = snapshot.val();
           if (
             profileData &&
@@ -61,7 +65,10 @@ export default function App() {
       }
     });
 
-    return () => unsubscribeAuth();
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeProfile) unsubscribeProfile();
+    };
   }, [dispatch]);
 
   const handleLogout = () => {

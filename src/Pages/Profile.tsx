@@ -9,7 +9,7 @@ import {
 import { FirebaseError } from "firebase/app";
 import { z } from "zod";
 import { auth, db } from "../utils/firebaseConfig";
-import { uploadImageToCloudinary } from "../utils/cloudinary.";
+import { uploadImageToCloudinary } from "../utils/cloudinary";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { setProfile } from "../store/authSlice";
 import {
