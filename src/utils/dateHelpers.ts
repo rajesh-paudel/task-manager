@@ -2,8 +2,8 @@ import type { Task } from "../types/task";
 const startOfDay = (d: Date) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-export function getDueLabel(dueDate: number | null): string | null {
-  if (dueDate === null) return null;
+export function getDueLabel(dueDate: number | null | undefined): string | null {
+  if (dueDate == null) return null;
 
   const today = startOfDay(new Date());
   const due = startOfDay(new Date(dueDate));
@@ -24,7 +24,7 @@ export function getDueLabel(dueDate: number | null): string | null {
 
 export function isOverdue(task: Task): boolean {
   return (
-    task.status !== "done" && task.dueDate !== null && task.dueDate < Date.now()
+    task.status !== "done" && task.dueDate != null && task.dueDate < Date.now()
   );
 }
 

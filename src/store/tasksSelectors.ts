@@ -11,9 +11,12 @@ export const selectAllTasks = createSelector(selectTasksItems, (items) =>
 // Tasks with no due date sort to the end, regardless of direction.
 export const selectTasksByDueDate = createSelector(selectAllTasks, (tasks) =>
   [...tasks].sort((a, b) => {
-    if (a.dueDate === null) return 1;
-    if (b.dueDate === null) return -1;
-    return a.dueDate - b.dueDate;
+    if (a.dueDate == null && b.dueDate == null) return 0;
+    if (a.dueDate == null) return 1;
+    if (b.dueDate == null) return -1;
+    const diff = a.dueDate - b.dueDate;
+    if (diff !== 0) return diff;
+    return b.createdAt - a.createdAt;
   }),
 );
 
@@ -25,7 +28,7 @@ export const selectTasksByStatus = (status: TaskStatus) =>
 export const selectOverdueTasks = createSelector(selectAllTasks, (tasks) => {
   const now = Date.now();
   return tasks.filter(
-    (t) => t.status !== "done" && t.dueDate !== null && t.dueDate < now,
+    (t) => t.status !== "done" && t.dueDate != null && t.dueDate < now,
   );
 });
 
