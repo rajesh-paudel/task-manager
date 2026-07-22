@@ -91,7 +91,7 @@ export default function App() {
       {!hideLayout && (
         <Navbar userProfile={userProfile} onLogout={handleLogout} />
       )}
-      <ErrorBoundary>
+      <ErrorBoundary key={location.pathname}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route element={<PublicRoute />}>
