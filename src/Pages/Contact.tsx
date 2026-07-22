@@ -80,7 +80,36 @@ export default function Contact() {
     <div className="min-h-screen bg-white font-sans">
       <Helmet>
         <title>Contact | TaskPulse</title>
-        <meta name="description" content="Contact us if you have any query " />
+        <meta
+          name="description"
+          content="Have a question, feedback, or need help with TaskPulse? Reach out — we read every message."
+        />
+        <meta
+          property="og:title"
+          content="Contact | TaskPulse"
+        />
+        <meta
+          property="og:description"
+          content="Have a question, feedback, or need help with TaskPulse? Reach out — we read every message."
+        />
+        <meta
+          property="og:image"
+          content="https://task-manager-five-omega-36.vercel.app/og-image.png"
+        />
+        <meta property="og:image:width" content="1727" />
+        <meta property="og:image:height" content="911" />
+        <meta
+          property="og:url"
+          content="https://task-manager-five-omega-36.vercel.app/contact"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="TaskPulse" />
+        <meta property="og:locale" content="en_US" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link
+          rel="canonical"
+          href="https://task-manager-five-omega-36.vercel.app/contact"
+        />
       </Helmet>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 grid lg:grid-cols-2 gap-16">
         <div>

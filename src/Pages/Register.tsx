@@ -88,7 +88,36 @@ export default function Register() {
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 font-sans">
       <Helmet>
         <title>Create Account | TaskPulse</title>
-        <meta name="description" content="Create your TaskPulse account." />
+        <meta
+          name="description"
+          content="Create your TaskPulse account and start organizing tasks, projects, and team work in minutes."
+        />
+        <meta
+          property="og:title"
+          content="Create Account | TaskPulse"
+        />
+        <meta
+          property="og:description"
+          content="Create your TaskPulse account and start organizing tasks, projects, and team work in minutes."
+        />
+        <meta
+          property="og:image"
+          content="https://task-manager-five-omega-36.vercel.app/og-image.png"
+        />
+        <meta property="og:image:width" content="1727" />
+        <meta property="og:image:height" content="911" />
+        <meta
+          property="og:url"
+          content="https://task-manager-five-omega-36.vercel.app/register"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="TaskPulse" />
+        <meta property="og:locale" content="en_US" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link
+          rel="canonical"
+          href="https://task-manager-five-omega-36.vercel.app/register"
+        />
       </Helmet>
       <div className="w-full max-w-sm">
         {/* Logo */}

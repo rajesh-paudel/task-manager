@@ -27,10 +27,36 @@ export default function About() {
   return (
     <div className="bg-white font-sans">
       <Helmet>
-        <title>About | TaskPulse </title>
+        <title>About | TaskPulse</title>
         <meta
           name="description"
-          content="TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity."
+          content="Learn about TaskPulse — a simpler, quieter project management tool built for small teams who need to see what needs doing and who's doing it."
+        />
+        <meta
+          property="og:title"
+          content="About | TaskPulse"
+        />
+        <meta
+          property="og:description"
+          content="TaskPulse is a simpler project management tool built for small teams who need to see what needs doing and who's doing it."
+        />
+        <meta
+          property="og:image"
+          content="https://task-manager-five-omega-36.vercel.app/og-image.png"
+        />
+        <meta property="og:image:width" content="1727" />
+        <meta property="og:image:height" content="911" />
+        <meta
+          property="og:url"
+          content="https://task-manager-five-omega-36.vercel.app/about"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="TaskPulse" />
+        <meta property="og:locale" content="en_US" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link
+          rel="canonical"
+          href="https://task-manager-five-omega-36.vercel.app/about"
         />
       </Helmet>
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">

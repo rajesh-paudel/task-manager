@@ -398,10 +398,15 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-white font-sans">
       <Helmet>
-        <title>Profile | TaskPulse </title>
+        <title>Profile | TaskPulse</title>
         <meta
           name="description"
-          content="TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity."
+          content="Manage your TaskPulse profile information."
+        />
+        <meta name="robots" content="noindex, nofollow" />
+        <link
+          rel="canonical"
+          href="https://task-manager-five-omega-36.vercel.app/profile"
         />
       </Helmet>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-14">

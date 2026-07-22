@@ -13,10 +13,15 @@ export default function DashboardLayout() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white font-sans">
       <Helmet>
-        <title>Dashboard | TaskPulse </title>
+        <title>Dashboard | TaskPulse</title>
         <meta
           name="description"
-          content="TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity."
+          content="Manage your tasks, projects, and team workflow on the TaskPulse dashboard."
+        />
+        <meta name="robots" content="noindex, nofollow" />
+        <link
+          rel="canonical"
+          href="https://task-manager-five-omega-36.vercel.app/dashboard"
         />
       </Helmet>
       <Sidebar />

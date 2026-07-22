@@ -33,6 +33,9 @@ export default function Home() {
           property="og:image"
           content="https://task-manager-five-omega-36.vercel.app/og-image.png"
         />
+        <meta property="og:image:width" content="1727" />
+        <meta property="og:image:height" content="911" />
+        <meta property="og:locale" content="en_US" />
 
         <meta
           property="og:url"
@@ -44,6 +47,30 @@ export default function Home() {
         <meta property="og:site_name" content="TaskPulse" />
 
         <meta name="twitter:card" content="summary_large_image" />
+        <link
+          rel="canonical"
+          href="https://task-manager-five-omega-36.vercel.app/"
+        />
+
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "TaskPulse",
+            url: "https://task-manager-five-omega-36.vercel.app/",
+            logo: "https://task-manager-five-omega-36.vercel.app/og-image.png",
+            description:
+              "TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity.",
+          })}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "TaskPulse",
+            url: "https://task-manager-five-omega-36.vercel.app/",
+          })}
+        </script>
       </Helmet>
 
       <Hero />
