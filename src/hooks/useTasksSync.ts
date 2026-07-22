@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { useAppDispatch } from "./store";
+import { useAppDispatch } from "../store/store";
 import {
   tasksLoading,
   tasksCleared,
   tasksError,
   tasksReceived,
-} from "./taskSlice";
+} from "../store/taskSlice";
 import { db } from "../utils/firebaseConfig";
 import { onValue, ref } from "firebase/database";
 

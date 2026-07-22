@@ -16,11 +16,11 @@ import {
 } from "../../store/tasksSelectors";
 import TaskModal from "./TaskModal";
 import { useOutletContext } from "react-router-dom";
-import { createTask, updateTask, deleteTask } from "../../store/tasksAPi";
+import { createTask, updateTask, deleteTask } from "../../api/tasks";
 import { getDueLabel, isOverdue } from "../../utils/dateHelpers";
 import { useAppSelector } from "../../store/store";
 
-import PriorityBadge from "../PriorityBadge";
+import PriorityBadge from "../ui/PriorityBadge";
 import TaskDetailsModal from "./TaskDetailModal";
 
 const columns: { key: TaskStatus; label: string }[] = [

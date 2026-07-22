@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAppSelector } from "../store/store";
+import { useAppSelector } from "../../store/store";
 
 export default function PublicRoute() {
   const { userProfile, loading } = useAppSelector((state) => state.auth);

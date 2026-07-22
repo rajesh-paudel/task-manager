@@ -13,21 +13,21 @@ import { useAppDispatch } from "./store/store";
 import { useAppSelector } from "./store/store";
 import { setProfile, clearProfile } from "./store/authSlice";
 
-import Navbar from "./components/Navbar";
-import ErrorBoundary from "./components/ErrorBoundary";
+import Navbar from "./components/layout/Navbar";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 
 import Home from "./Pages/Home";
-import Footer from "./components/Footer";
+import Footer from "./components/layout/Footer";
 import Profile from "./Pages/Profile";
 import DashboardLayout from "./components/Dashboard/DashboardLayout";
 import Contact from "./Pages/Contact";
 import About from "./Pages/About";
 import Pricing from "./Pages/Pricing";
 import NotFound from "./Pages/NotFound";
-import PublicRoute from "./components/PublicRoute";
-import ProtectedRoute from "./components/PrivateRoute";
+import PublicRoute from "./components/ui/PublicRoute";
+import ProtectedRoute from "./components/ui/PrivateRoute";
 
 const Overview = lazy(() => import("./components/Dashboard/DashboardOverview"));
 const Tasks = lazy(() => import("./components/Dashboard/DashboardTasks"));

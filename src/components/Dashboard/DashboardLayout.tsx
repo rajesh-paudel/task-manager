@@ -1,10 +1,10 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./DashboardSidebar";
 import { useAppSelector } from "../../store/store";
-import { useTasksSync } from "../../store/useTasksSync";
+import { useTasksSync } from "../../hooks/useTasksSync";
 import { useState, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
-import ErrorBoundary from "../ErrorBoundary";
+import ErrorBoundary from "../ui/ErrorBoundary";
 
 export default function DashboardLayout() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);

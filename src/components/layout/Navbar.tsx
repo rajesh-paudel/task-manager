@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { CheckSquare, LayoutDashboard, User, LogOut } from "lucide-react";
-import type { UserProfile } from "../types/user";
-import profilePlaceholder from "../assets/profilePlaceholder.png";
+import type { UserProfile } from "../../types/user";
+import profilePlaceholder from "../../assets/profilePlaceholder.png";
 
 interface NavbarProps {
   userProfile: UserProfile | null;
