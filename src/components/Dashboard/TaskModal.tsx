@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, Loader2, Trash2 } from "lucide-react";
+import { X } from "lucide-react";
 
 import type { NewTask, Task, TaskPriority, TaskStatus } from "../../types/task";
 import { z } from "zod";
@@ -9,7 +9,6 @@ interface TaskModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (data: NewTask) => Promise<void>;
-  onDelete?: () => Promise<void>;
   initialTask?: Task | null;
 }
 
@@ -57,7 +56,6 @@ export default function TaskModal({
   open,
   onClose,
   onSave,
-  onDelete,
   initialTask,
 }: TaskModalProps) {
   const isEditing = !!initialTask;
@@ -106,7 +104,6 @@ export default function TaskModal({
     setError("");
   }, [open, initialTask, reset]);
 
-  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
   if (!open) return null;
@@ -127,21 +124,6 @@ export default function TaskModal({
       onClose();
     } catch (err: any) {
       setError(err.message || "Couldn't save task. Try again.");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!onDelete) return;
-    setDeleting(true);
-    setError("");
-    try {
-      await onDelete();
-
-      onClose();
-    } catch (err: any) {
-      setError(err.message || "Couldn't delete task. Try again.");
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -274,32 +256,17 @@ export default function TaskModal({
           </div>
 
           <div className="flex items-center gap-3 pt-2">
-            {isEditing && onDelete && (
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={deleting || isSubmitting}
-                className="mr-auto h-9 w-9 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50 disabled:opacity-50"
-                aria-label="Delete task"
-              >
-                {deleting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="h-4 w-4" />
-                )}
-              </button>
-            )}
             <button
               type="button"
               onClick={onClose}
-              disabled={isSubmitting || deleting}
+              disabled={isSubmitting}
               className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || deleting}
+              disabled={isSubmitting}
               className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50"
             >
               {isSubmitting

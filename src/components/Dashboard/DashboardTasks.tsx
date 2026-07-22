@@ -67,11 +67,6 @@ export default function Tasks() {
 
   const closeModal = () => setModalOpen(false);
 
-  const handleDeleteTask = async () => {
-    if (!userProfile || !editingTask) return;
-    await deleteTask(userProfile.uid, editingTask.id);
-  };
-
   const handleSaveTask = async (data: NewTask) => {
     if (!userProfile) return;
     if (editingTask) {
@@ -465,7 +460,6 @@ export default function Tasks() {
         open={modalOpen}
         onClose={closeModal}
         onSave={handleSaveTask}
-        onDelete={editingTask ? handleDeleteTask : undefined}
         initialTask={editingTask}
       />
       <TaskDetailsModal
