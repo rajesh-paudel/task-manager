@@ -1,4 +1,4 @@
-import { lazy, useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { auth, db } from "./utils/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { ref, onValue } from "firebase/database";
@@ -15,17 +15,17 @@ import { setProfile, clearProfile } from "./store/authSlice";
 
 import Navbar from "./components/layout/Navbar";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
-import Login from "./Pages/Login";
-import Register from "./Pages/Register";
-
-import Home from "./Pages/Home";
 import Footer from "./components/layout/Footer";
-import Profile from "./Pages/Profile";
 import DashboardLayout from "./components/Dashboard/DashboardLayout";
-import Contact from "./Pages/Contact";
-import About from "./Pages/About";
-import Pricing from "./Pages/Pricing";
-import NotFound from "./Pages/NotFound";
+
+const Home = lazy(() => import("./Pages/Home"));
+const Login = lazy(() => import("./Pages/Login"));
+const Register = lazy(() => import("./Pages/Register"));
+const Profile = lazy(() => import("./Pages/Profile"));
+const Contact = lazy(() => import("./Pages/Contact"));
+const About = lazy(() => import("./Pages/About"));
+const Pricing = lazy(() => import("./Pages/Pricing"));
+const NotFound = lazy(() => import("./Pages/NotFound"));
 import PublicRoute from "./components/ui/PublicRoute";
 import ProtectedRoute from "./components/ui/PrivateRoute";
 
@@ -92,6 +92,7 @@ export default function App() {
         <Navbar userProfile={userProfile} onLogout={handleLogout} />
       )}
       <ErrorBoundary key={location.pathname}>
+        <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="h-6 w-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" /></div>}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route element={<PublicRoute />}>
@@ -121,6 +122,7 @@ export default function App() {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </ErrorBoundary>
       {!hideLayout && !hideFooter && <Footer />}
     </div>
