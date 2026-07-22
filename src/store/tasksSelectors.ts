@@ -2,10 +2,10 @@ import { createSelector } from "@reduxjs/toolkit";
 
 import type { RootState } from "./store";
 import type { Task, TaskStatus } from "../types/task";
-const selectTasksState = (state: RootState) => state.tasks;
+const selectTasksItems = (state: RootState) => state.tasks.items;
 
-export const selectAllTasks = createSelector(selectTasksState, (tasks) =>
-  Object.values(tasks.items).sort((a, b) => b.createdAt - a.createdAt),
+export const selectAllTasks = createSelector(selectTasksItems, (items) =>
+  Object.values(items).sort((a, b) => b.createdAt - a.createdAt),
 );
 
 // Tasks with no due date sort to the end, regardless of direction.
@@ -43,6 +43,6 @@ export const selectTaskStats = createSelector(
 
 export const selectTaskById = (id: string) =>
   createSelector(
-    selectTasksState,
-    (tasks): Task | undefined => tasks.items[id],
+    selectTasksItems,
+    (items): Task | undefined => items[id],
   );

@@ -23,7 +23,7 @@ export default function DashboardLayout() {
       <main className="flex-1 bg-slate-50 overflow-y-auto">
         <Suspense
           fallback={
-            <div className="flex items-center justify-center h-full min-h-[calc(100vh-4rem)]">
+            <div className="flex items-center justijfy-center h-full min-h-[calc(100vh-4rem)]">
               <div className="h-8 w-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           }
