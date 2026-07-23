@@ -85,7 +85,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 font-sans">
+    <main id="main-content" className="min-h-screen bg-white flex flex-col items-center justify-center px-6 font-sans">
       <Helmet>
         <title>Create Account | TaskPulse</title>
         <meta
@@ -229,6 +229,6 @@ export default function Register() {
           </button>
         </p>
       </div>
-    </div>
+    </main>
   );
 }

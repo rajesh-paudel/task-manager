@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
+    <main id="main-content" className="min-h-screen flex flex-col items-center justify-center">
       <Helmet>
         <title>404 | TaskPulse</title>
         <meta name="description" content="Page not found." />
@@ -17,6 +17,6 @@ export default function NotFound() {
       <Link to="/" className="mt-6 rounded bg-blue-600 px-4 py-2 text-white">
         Go Home
       </Link>
-    </div>
+    </main>
   );
 }

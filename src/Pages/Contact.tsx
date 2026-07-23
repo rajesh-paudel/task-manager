@@ -76,8 +76,10 @@ export default function Contact() {
     }
   };
 
+const SITE_URL = "https://task-manager-five-omega-36.vercel.app";
+
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <main id="main-content" className="min-h-screen bg-white font-sans">
       <Helmet>
         <title>Contact | TaskPulse</title>
         <meta
@@ -110,6 +112,26 @@ export default function Contact() {
           rel="canonical"
           href="https://task-manager-five-omega-36.vercel.app/contact"
         />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: SITE_URL,
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Contact",
+                item: `${SITE_URL}/contact`,
+              },
+            ],
+          })}
+        </script>
       </Helmet>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 grid lg:grid-cols-2 gap-16">
         <div>
@@ -297,6 +319,6 @@ export default function Contact() {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

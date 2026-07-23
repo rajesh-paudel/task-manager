@@ -88,8 +88,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen  flex flex-col bg-slate-50">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-orange-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
+      >
+        Skip to content
+      </a>
       {!hideLayout && (
-        <Navbar userProfile={userProfile} onLogout={handleLogout} />
+        <header>
+          <Navbar userProfile={userProfile} onLogout={handleLogout} />
+        </header>
       )}
       <ErrorBoundary key={location.pathname}>
         <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="h-6 w-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" /></div>}>

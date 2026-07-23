@@ -46,12 +46,13 @@ export default function Hero() {
             </div>
             <div className="flex -space-x-2">
               {["12", "32", "54"].map((id) => (
-                <img
-                  key={id}
-                  src={`https://i.pravatar.cc/64?img=${id}`}
-                  alt=""
-                  className="h-7 w-7 rounded-full border-2 border-white object-cover"
-                />
+                  <img
+                    key={id}
+                    src={`https://i.pravatar.cc/64?img=${id}`}
+                    alt=""
+                    loading="lazy"
+                    className="h-7 w-7 rounded-full border-2 border-white object-cover"
+                  />
               ))}
             </div>
           </div>

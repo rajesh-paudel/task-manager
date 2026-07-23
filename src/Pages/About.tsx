@@ -23,9 +23,11 @@ const values = [
   },
 ];
 
+const SITE_URL = "https://task-manager-five-omega-36.vercel.app";
+
 export default function About() {
   return (
-    <div className="bg-white font-sans">
+    <main id="main-content" className="bg-white font-sans">
       <Helmet>
         <title>About | TaskPulse</title>
         <meta
@@ -58,6 +60,26 @@ export default function About() {
           rel="canonical"
           href="https://task-manager-five-omega-36.vercel.app/about"
         />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: SITE_URL,
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "About",
+                item: `${SITE_URL}/about`,
+              },
+            ],
+          })}
+        </script>
       </Helmet>
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">
         <span className="text-xs font-semibold tracking-wide text-orange-600 uppercase">
@@ -109,6 +131,6 @@ export default function About() {
           Get in touch
         </Link>
       </section>
-    </div>
+    </main>
   );
 }

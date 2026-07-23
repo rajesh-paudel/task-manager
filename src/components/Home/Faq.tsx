@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-const faqs = [
+export const faqs = [
   {
     question: "Is there a free plan?",
     answer:

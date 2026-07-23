@@ -42,7 +42,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 font-sans">
+    <main id="main-content" className="min-h-screen bg-white flex flex-col items-center justify-center px-6 font-sans">
       <Helmet>
         <title>Login | TaskPulse</title>
         <meta
@@ -168,6 +168,6 @@ export default function Login() {
           </button>
         </p>
       </div>
-    </div>
+    </main>
   );
 }

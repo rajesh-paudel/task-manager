@@ -49,9 +49,11 @@ const tiers = [
   },
 ];
 
+const SITE_URL = "https://task-manager-five-omega-36.vercel.app";
+
 export default function Pricing() {
   return (
-    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-100">
+    <main id="main-content" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <Helmet>
         <title>Pricing | TaskPulse</title>
         <meta
@@ -84,11 +86,31 @@ export default function Pricing() {
           rel="canonical"
           href="https://task-manager-five-omega-36.vercel.app/pricing"
         />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: SITE_URL,
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Pricing",
+                item: `${SITE_URL}/pricing`,
+              },
+            ],
+          })}
+        </script>
       </Helmet>
       <div className="max-w-lg mx-auto text-center">
-        <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
           Simple pricing, no surprises
-        </h2>
+        </h1>
         <p className="mt-3 text-sm text-slate-500 leading-relaxed">
           Start free. Upgrade only when your team actually needs to.
         </p>
@@ -145,6 +167,6 @@ export default function Pricing() {
           </div>
         ))}
       </div>
-    </section>
+    </main>
   );
 }

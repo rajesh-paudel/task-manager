@@ -10,6 +10,7 @@ export default function Testimonial() {
           <img
             src="https://i.pravatar.cc/80?img=47"
             alt=""
+            loading="lazy"
             className="h-9 w-9 rounded-full object-cover"
           />
           <div className="text-left">
