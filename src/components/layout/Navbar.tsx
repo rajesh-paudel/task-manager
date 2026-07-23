@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { CheckSquare, LayoutDashboard, User, LogOut } from "lucide-react";
 import type { UserProfile } from "../../types/user";
 import profilePlaceholder from "../../assets/profilePlaceholder.png";
+import ThemeToggle from "../ui/ThemeToggle";
 
 interface NavbarProps {
   userProfile: UserProfile | null;
@@ -65,7 +66,8 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
+            <ThemeToggle />
             {userProfile ? (
               <div className="relative" ref={menuRef}>
                 <button
