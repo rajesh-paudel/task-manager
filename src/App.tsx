@@ -91,53 +91,53 @@ export default function App() {
 
   return (
     <ThemeProvider>
-    <div className="min-h-screen  flex flex-col bg-slate-50">
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-orange-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
-      >
-        Skip to content
-      </a>
-      {!hideLayout && (
-        <header>
-          <Navbar userProfile={userProfile} onLogout={handleLogout} />
-        </header>
-      )}
-      <ErrorBoundary key={location.pathname}>
-        <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="h-6 w-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" /></div>}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route element={<PublicRoute />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-          </Route>
-          <Route element={<ProtectedRoute />}>
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<Navigate to="overview" replace />} />
-              <Route path="overview" element={<Overview />} />
-              <Route path="tasks" element={<Tasks />} />
-              <Route
-                path="admin"
-                element={
-                  userProfile?.role === "admin" ? (
-                    <DashboardAdmin />
-                  ) : (
-                    <Navigate to="/dashboard/overview" replace />
-                  )
-                }
-              />
-            </Route>
-          </Route>
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        </Suspense>
-      </ErrorBoundary>
-      {!hideLayout && !hideFooter && <Footer />}
-    </div>
+      <div className="min-h-screen  flex flex-col bg-slate-50">
+        {!hideLayout && (
+          <header>
+            <Navbar userProfile={userProfile} onLogout={handleLogout} />
+          </header>
+        )}
+        <ErrorBoundary key={location.pathname}>
+          <Suspense
+            fallback={
+              <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="h-6 w-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            }
+          >
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route element={<PublicRoute />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+              </Route>
+              <Route element={<ProtectedRoute />}>
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/dashboard" element={<DashboardLayout />}>
+                  <Route index element={<Navigate to="overview" replace />} />
+                  <Route path="overview" element={<Overview />} />
+                  <Route path="tasks" element={<Tasks />} />
+                  <Route
+                    path="admin"
+                    element={
+                      userProfile?.role === "admin" ? (
+                        <DashboardAdmin />
+                      ) : (
+                        <Navigate to="/dashboard/overview" replace />
+                      )
+                    }
+                  />
+                </Route>
+              </Route>
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
+        {!hideLayout && !hideFooter && <Footer />}
+      </div>
     </ThemeProvider>
   );
 }

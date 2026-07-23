@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { CheckSquare, LayoutDashboard, User, LogOut } from "lucide-react";
+import { CheckSquare, LayoutDashboard, User, LogOut, X } from "lucide-react";
 import type { UserProfile } from "../../types/user";
 import profilePlaceholder from "../../assets/profilePlaceholder.png";
 import ThemeToggle from "../ui/ThemeToggle";
@@ -18,23 +18,38 @@ const navLinks = [
 ];
 
 const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [sidebarOpen]);
+
   return (
     <>
-      <nav aria-label="Main navigation" className="w-full bg-white border-b border-slate-200 sticky top-0 z-50">
+      <nav
+        aria-label="Main navigation"
+        className="w-full bg-white border-b border-slate-200 sticky top-0 z-50"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
@@ -46,7 +61,7 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
             </span>
           </Link>
 
-          {/* Center nav */}
+          {/* Center nav - desktop */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <NavLink
@@ -65,13 +80,24 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
             ))}
           </div>
 
-          {/* Right side */}
-          <div className="flex items-center gap-1 shrink-0">
+          {/* Hamburger */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="md:hidden flex flex-col gap-1 p-2 rounded-lg hover:bg-slate-50"
+            aria-label="Open menu"
+          >
+            <span className="block h-0.5 w-5 bg-slate-600" />
+            <span className="block h-0.5 w-5 bg-slate-600" />
+            <span className="block h-0.5 w-5 bg-slate-600" />
+          </button>
+
+          {/* Right side - desktop */}
+          <div className="hidden md:flex items-center gap-3 shrink-0">
             <ThemeToggle />
             {userProfile ? (
-              <div className="relative" ref={menuRef}>
+              <div className="relative" ref={profileRef}>
                 <button
-                  onClick={() => setMenuOpen((open) => !open)}
+                  onClick={() => setProfileOpen((open) => !open)}
                   className="flex items-center justify-center rounded-full"
                 >
                   <img
@@ -81,11 +107,11 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
                         : profilePlaceholder
                     }
                     alt={userProfile?.name}
-                    className="h-10 w-10 rounded-full object-cover  "
+                    className="h-10 w-10 rounded-full object-cover"
                   />
                 </button>
 
-                {menuOpen && (
+                {profileOpen && (
                   <div className="absolute right-0 mt-3 w-64 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
                     <div className="p-4 flex items-center gap-3 border-b border-slate-100">
                       <img
@@ -109,7 +135,7 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
                     <div className="p-1.5">
                       <Link
                         to="/dashboard"
-                        onClick={() => setMenuOpen(false)}
+                        onClick={() => setProfileOpen(false)}
                         className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg"
                       >
                         <LayoutDashboard className="h-4 w-4" />
@@ -117,7 +143,7 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
                       </Link>
                       <Link
                         to="/profile"
-                        onClick={() => setMenuOpen(false)}
+                        onClick={() => setProfileOpen(false)}
                         className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg"
                       >
                         <User className="h-4 w-4" />
@@ -125,7 +151,7 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
                       </Link>
                       <button
                         onClick={() => {
-                          setMenuOpen(false);
+                          setProfileOpen(false);
                           setConfirmOpen(true);
                         }}
                         className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
@@ -157,9 +183,145 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
         </div>
       </nav>
 
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-900/40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile right sidebar */}
+      <div
+        className={`fixed top-0 right-0 z-50 h-full w-72 bg-white shadow-xl border-l border-slate-200 transform transition-transform duration-200 ease-in-out md:hidden ${
+          sidebarOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Sidebar header */}
+          <div className="flex items-center justify-between px-4 h-16 border-b border-slate-200 shrink-0">
+            <span className="text-base font-bold text-slate-900">Menu</span>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-2 rounded-lg hover:bg-slate-50"
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5 text-slate-600" />
+            </button>
+          </div>
+
+          {/* Profile section */}
+          {userProfile ? (
+            <div className="p-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <img
+                  src={
+                    userProfile.profileUrl
+                      ? userProfile.profileUrl
+                      : profilePlaceholder
+                  }
+                  alt={userProfile.name}
+                  className="h-11 w-11 rounded-full object-cover"
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 truncate">
+                    {userProfile.name}
+                  </p>
+                  <p className="text-xs text-slate-500 truncate">
+                    {userProfile.email}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 border-b border-slate-100 space-y-2">
+              <Link
+                to="/login"
+                onClick={() => setSidebarOpen(false)}
+                className="block w-full text-center text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50"
+              >
+                Log in
+              </Link>
+              <Link
+                to="/register"
+                onClick={() => setSidebarOpen(false)}
+                className="block w-full text-center text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg"
+              >
+                Get started
+              </Link>
+            </div>
+          )}
+
+          {/* Dashboard link (when logged in) */}
+          {userProfile && (
+            <div className="px-3 pt-2">
+              <Link
+                to="/dashboard"
+                onClick={() => setSidebarOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Link>
+              <Link
+                to="/profile"
+                onClick={() => setSidebarOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
+              >
+                <User className="h-4 w-4" />
+                Profile
+              </Link>
+            </div>
+          )}
+
+          {/* Nav links */}
+          <div className="flex-1 px-3 pt-2 pb-4 overflow-y-auto">
+            <p className="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Navigation
+            </p>
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `block px-3 py-2 text-sm font-medium rounded-lg ${
+                    isActive
+                      ? "text-orange-600 bg-orange-50"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </div>
+
+          {/* Bottom actions */}
+          <div className="border-t border-slate-200 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-600">Theme</span>
+              <ThemeToggle />
+            </div>
+            {userProfile && (
+              <button
+                onClick={() => {
+                  setSidebarOpen(false);
+                  setConfirmOpen(true);
+                }}
+                className="w-full flex items-center justify-start gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Sign out confirmation dialog */}
       {confirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 px-4">
           <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
             <h2 className="text-lg font-semibold text-slate-900">Log out?</h2>
             <p className="mt-2 text-sm text-slate-500">
