@@ -25,7 +25,10 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(e.target as Node)
+      ) {
         setProfileOpen(false);
       }
     }
@@ -61,7 +64,6 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
             </span>
           </Link>
 
-          {/* Center nav - desktop */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <NavLink
@@ -80,7 +82,6 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
             ))}
           </div>
 
-          {/* Hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
             className="md:hidden flex flex-col gap-1 p-2 rounded-lg hover:bg-slate-50"
@@ -91,7 +92,6 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
             <span className="block h-0.5 w-5 bg-slate-600" />
           </button>
 
-          {/* Right side - desktop */}
           <div className="hidden md:flex items-center gap-3 shrink-0">
             <ThemeToggle />
             {userProfile ? (
@@ -183,7 +183,6 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
         </div>
       </nav>
 
-      {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-slate-900/40 md:hidden"
@@ -191,7 +190,6 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
         />
       )}
 
-      {/* Mobile right sidebar */}
       <div
         className={`fixed top-0 right-0 z-50 h-full w-72 bg-white shadow-xl border-l border-slate-200 transform transition-transform duration-200 ease-in-out md:hidden ${
           sidebarOpen ? "translate-x-0" : "translate-x-full"
