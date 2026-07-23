@@ -539,14 +539,14 @@ export default function Profile() {
       {/* dialog for deleting account */}
       {deleteDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-          <div className="w-full max-w-sm rounded-xl bg-white shadow-xl">
+          <div className="w-full max-w-sm rounded-xl bg-white dark:bg-slate-800 shadow-xl">
             {/* Header */}
-            <div className="border-b border-slate-200 px-6 py-4">
-              <h2 className="text-lg font-semibold text-slate-900">
+            <div className="border-b border-slate-200 dark:border-slate-700 px-6 py-4">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                 Delete account
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 This permanently deletes your account and all associated data,
                 including your profile and tasks. This action cannot be undone.
               </p>
@@ -560,7 +560,7 @@ export default function Profile() {
               <div>
                 <label
                   htmlFor="deletePassword"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
                 >
                   Password
                 </label>
@@ -571,18 +571,18 @@ export default function Profile() {
                     type={showDeletePassword ? "text" : "password"}
                     placeholder="Enter your password"
                     {...registerDelete("password")}
-                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition
+                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400
               ${
                 deleteErrors.password
                   ? "border-red-500"
-                  : "border-slate-300 focus:border-red-500"
+                  : "border-slate-300 dark:border-slate-600 focus:border-red-500"
               }`}
                   />
 
                   <button
                     type="button"
                     onClick={() => setShowDeletePassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                   >
                     {showDeletePassword ? (
                       <EyeOff size={18} />
@@ -600,12 +600,12 @@ export default function Profile() {
               </div>
 
               {deleteError && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
                   {deleteError}
                 </div>
               )}
 
-              <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
+              <div className="flex justify-end gap-3 border-t border-slate-200 dark:border-slate-700 pt-5">
                 <button
                   type="button"
                   onClick={() => {
@@ -614,7 +614,7 @@ export default function Profile() {
                     setDeleteDialogOpen(false);
                   }}
                   disabled={deleting}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                  className="rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -635,11 +635,11 @@ export default function Profile() {
       {/* dialog for changing password change */}
       {passwordDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white dark:bg-slate-800 shadow-xl">
             {/* Header */}
-            <div className="border-b border-slate-200 px-6 py-4">
+            <div className="border-b border-slate-200 dark:border-slate-700 px-6 py-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                   Change password
                 </h2>
 
@@ -649,13 +649,13 @@ export default function Profile() {
                     setChangePasswordError("");
                     setPasswordDialogOpen(false);
                   }}
-                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
                 >
                   ✕
                 </button>
               </div>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Enter your current password and choose a new one.
               </p>
             </div>
@@ -669,7 +669,7 @@ export default function Profile() {
               <div>
                 <label
                   htmlFor="currentPassword"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
                 >
                   Current password
                 </label>
@@ -680,18 +680,18 @@ export default function Profile() {
                     type={showPassword.current ? "text" : "password"}
                     placeholder="Current password"
                     {...register("currentPassword")}
-                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition
+                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400
         ${
           errors.currentPassword
             ? "border-red-500"
-            : "border-slate-300 focus:border-orange-500"
+            : "border-slate-300 dark:border-slate-600 focus:border-orange-500"
         }`}
                   />
 
                   <button
                     type="button"
                     onClick={() => togglePassword("current")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                   >
                     {showPassword.current ? (
                       <EyeOff size={18} />
@@ -713,7 +713,7 @@ export default function Profile() {
               <div>
                 <label
                   htmlFor="newPassword"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
                 >
                   New password
                 </label>
@@ -724,18 +724,18 @@ export default function Profile() {
                     type={showPassword.new ? "text" : "password"}
                     placeholder="New password"
                     {...register("newPassword")}
-                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition
+                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400
         ${
           errors.newPassword
             ? "border-red-500"
-            : "border-slate-300 focus:border-orange-500"
+            : "border-slate-300 dark:border-slate-600 focus:border-orange-500"
         }`}
                   />
 
                   <button
                     type="button"
                     onClick={() => togglePassword("new")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                   >
                     {showPassword.new ? (
                       <EyeOff size={18} />
@@ -757,7 +757,7 @@ export default function Profile() {
               <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
                 >
                   Confirm new password
                 </label>
@@ -768,18 +768,18 @@ export default function Profile() {
                     type={showPassword.confirm ? "text" : "password"}
                     placeholder="Confirm new password"
                     {...register("confirmPassword")}
-                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition
+                    className={`w-full rounded-lg border px-3 py-2.5 pr-11 outline-none transition bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400
         ${
           errors.confirmPassword
             ? "border-red-500"
-            : "border-slate-300 focus:border-orange-500"
+            : "border-slate-300 dark:border-slate-600 focus:border-orange-500"
         }`}
                   />
 
                   <button
                     type="button"
                     onClick={() => togglePassword("confirm")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                   >
                     {showPassword.confirm ? (
                       <EyeOff size={18} />
@@ -796,11 +796,11 @@ export default function Profile() {
                 )}
               </div>
               {changePasswordError && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
                   {changePasswordError}
                 </div>
               )}
-              <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
+              <div className="flex justify-end gap-3 border-t border-slate-200 dark:border-slate-700 pt-5">
                 <button
                   type="button"
                   onClick={() => {
@@ -809,7 +809,7 @@ export default function Profile() {
                     setPasswordDialogOpen(false);
                   }}
                   disabled={isSubmitting}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Cancel
                 </button>
