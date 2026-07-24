@@ -137,7 +137,7 @@ src/components/Home/     → Landing page sections only
   completedAt: number | null }
 ```
 
-## Environment Variables
+## Environment Variables (see .env.example for all keys)
 ```
 VITE_FIREBASE_API_KEY
 VITE_FIREBASE_AUTH_DOMAIN

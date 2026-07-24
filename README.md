@@ -25,9 +25,12 @@ A task management web app built with React 19, TypeScript, and Firebase.
 ## Getting Started
 
 ```bash
+cp .env.example .env
 npm install
 npm run dev
 ```
+
+Fill in the required values in `.env` (see `.env.example` for all needed keys).
 
 ## Commands
 
@@ -37,6 +40,10 @@ npm run dev
 | `npm run build`     | Type-check + build          |
 | `npm run lint`      | Run ESLint                  |
 | `npm run preview`   | Preview production build    |
+
+## Environment Variables
+
+All env vars are listed in `.env.example`. You need Firebase, Cloudinary, and Turnstile credentials.
 
 ## Project Structure
 
