@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   Plus,
   LayoutList,
@@ -120,38 +120,11 @@ export default function Tasks() {
   //drag and drop
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const dragPreviewRef = useRef<HTMLDivElement | null>(null);
-
-  const removeDragPreview = () => {
-    dragPreviewRef.current?.remove();
-    dragPreviewRef.current = null;
-  };
-
-  const createDragPreview = (sourceCard: HTMLDivElement) => {
-    removeDragPreview();
-
-    const rect = sourceCard.getBoundingClientRect();
-    const dragPreview = sourceCard.cloneNode(true) as HTMLDivElement;
-
-    dragPreview.style.position = "absolute";
-    dragPreview.style.top = "-1000px";
-    dragPreview.style.left = "-1000px";
-    dragPreview.style.width = `${rect.width}px`;
-    dragPreview.style.pointerEvents = "none";
-
-    dragPreview.style.zIndex = "10000";
-
-    document.body.appendChild(dragPreview);
-    dragPreviewRef.current = dragPreview;
-
-    return { node: dragPreview, width: rect.width, height: rect.height };
-  };
 
   const handleDrop = async (e: React.DragEvent, newStatus: TaskStatus) => {
     e.preventDefault();
     setDraggingId(null);
     setDragOverColumn(null);
-    removeDragPreview();
     const taskId = e.dataTransfer.getData("text/plain");
     const task = tasks.find((t) => t.id === taskId);
     if (!task || !userProfile || task.status === newStatus) return;
@@ -400,20 +373,10 @@ export default function Tasks() {
                               e.dataTransfer.setData("text/plain", task.id);
                               setDraggingId(task.id);
                               e.dataTransfer.effectAllowed = "move";
-
-                              const preview = createDragPreview(
-                                e.currentTarget,
-                              );
-                              e.dataTransfer.setDragImage(
-                                preview.node,
-                                preview.width / 2,
-                                preview.height / 2,
-                              );
                             }}
                             onDragEnd={() => {
                               setDraggingId(null);
                               setDragOverColumn(null);
-                              removeDragPreview();
                             }}
                             onClick={() => setDetailsTask(task)}
                             className={`bg-white border border-slate-200 rounded-lg px-3 py-2.5 cursor-grab active:cursor-grabbing hover:border-slate-300 shadow-sm transition-all ${
