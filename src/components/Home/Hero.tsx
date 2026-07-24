@@ -34,7 +34,6 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Product mockup */}
       <div className="relative">
         <div className="rounded-xl border border-slate-200 shadow-sm bg-white overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
