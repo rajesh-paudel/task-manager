@@ -30,7 +30,6 @@ export default function Login() {
 
   const handleLogin = async (data: LoginForm) => {
     setError("");
-
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
       reset();
@@ -42,17 +41,17 @@ export default function Login() {
   };
 
   return (
-    <main id="main-content" className="min-h-screen bg-white flex flex-col items-center justify-center px-6 font-sans">
+    <main
+      id="main-content"
+      className="min-h-screen bg-white flex flex-col items-center justify-center px-6 font-sans"
+    >
       <Helmet>
         <title>Login | TaskPulse</title>
         <meta
           name="description"
           content="Sign in to your TaskPulse account to manage tasks, track projects, and stay organized."
         />
-        <meta
-          property="og:title"
-          content="Login | TaskPulse"
-        />
+        <meta property="og:title" content="Login | TaskPulse" />
         <meta
           property="og:description"
           content="Sign in to your TaskPulse account to manage tasks, track projects, and stay organized."
