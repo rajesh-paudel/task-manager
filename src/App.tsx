@@ -27,14 +27,14 @@ const Contact = lazy(() => import("./Pages/Contact"));
 const About = lazy(() => import("./Pages/About"));
 const Pricing = lazy(() => import("./Pages/Pricing"));
 const NotFound = lazy(() => import("./Pages/NotFound"));
-import PublicRoute from "./components/ui/PublicRoute";
-import ProtectedRoute from "./components/ui/PrivateRoute";
-
 const Overview = lazy(() => import("./components/Dashboard/DashboardOverview"));
 const Tasks = lazy(() => import("./components/Dashboard/DashboardTasks"));
 const DashboardAdmin = lazy(
   () => import("./components/Dashboard/DashboardAdmin"),
 );
+
+import PublicRoute from "./components/ui/PublicRoute";
+import ProtectedRoute from "./components/ui/PrivateRoute";
 
 export default function App() {
   const navigate = useNavigate();
