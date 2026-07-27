@@ -14,7 +14,9 @@ export default function Testimonial() {
             className="h-9 w-9 rounded-full object-cover"
           />
           <div className="text-left">
-            <p className="text-sm font-semibold text-slate-900">Meera Shah</p>
+            <p className="text-sm font-semibold text-slate-900">
+              Mandeep Chaudhary
+            </p>
             <p className="text-xs text-slate-500">Ops Lead, Loop Studio</p>
           </div>
         </footer>
