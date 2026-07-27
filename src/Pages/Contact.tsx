@@ -52,9 +52,9 @@ export default function Contact() {
     }
 
     //checks if form is filled within 3 sec considering it can be bot
-    const elapsed = Date.now() - formLoadedAt.current;
+    const diff = Date.now() - formLoadedAt.current;
 
-    if (elapsed < MIN_FILL_TIME) {
+    if (diff < MIN_FILL_TIME) {
       setError("Please take a little more time to complete the form.");
       return;
     }
@@ -76,7 +76,7 @@ export default function Contact() {
     }
   };
 
-const SITE_URL = "https://task-manager-five-omega-36.vercel.app";
+  const SITE_URL = "https://task-manager-five-omega-36.vercel.app";
 
   return (
     <main id="main-content" className="min-h-screen bg-white font-sans">
@@ -86,10 +86,7 @@ const SITE_URL = "https://task-manager-five-omega-36.vercel.app";
           name="description"
           content="Have a question, feedback, or need help with TaskPulse? Reach out — we read every message."
         />
-        <meta
-          property="og:title"
-          content="Contact | TaskPulse"
-        />
+        <meta property="og:title" content="Contact | TaskPulse" />
         <meta
           property="og:description"
           content="Have a question, feedback, or need help with TaskPulse? Reach out — we read every message."
