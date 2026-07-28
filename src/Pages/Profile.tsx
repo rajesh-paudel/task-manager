@@ -64,11 +64,11 @@ const deleteAccountSchema = z.object({
 });
 
 type DeleteAccountForm = z.infer<typeof deleteAccountSchema>;
-
+  
 function useEditableField(
   initialValue: string,
   onSave: (value: string) => Promise<void>,
-) {
+) { 
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(initialValue);
   const [saving, setSaving] = useState(false);

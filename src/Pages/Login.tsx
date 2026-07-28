@@ -12,6 +12,7 @@ const loginSchema = z.object({
   email: z.email("Please enter a valid email"),
   password: z.string().trim(),
 });
+
 type LoginForm = z.infer<typeof loginSchema>;
 export default function Login() {
   const {
