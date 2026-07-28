@@ -13,7 +13,7 @@ export default function CTABanner() {
         </p>
         <Link
           to="/register"
-          className="mt-7 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-orange-600 bg-white hover:bg-orange-50"
+          className="mt-7 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-orange-600 dark:text-white bg-white  hover:opacity-90"
         >
           Get started free
           <ArrowRight className="h-4 w-4" />
