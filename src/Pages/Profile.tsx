@@ -64,11 +64,11 @@ const deleteAccountSchema = z.object({
 });
 
 type DeleteAccountForm = z.infer<typeof deleteAccountSchema>;
-  
+
 function useEditableField(
   initialValue: string,
   onSave: (value: string) => Promise<void>,
-) { 
+) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(initialValue);
   const [saving, setSaving] = useState(false);
@@ -812,7 +812,7 @@ export default function Profile() {
                     setPasswordDialogOpen(false);
                   }}
                   disabled={isSubmitting}
-                  className="rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-slate-700  hover:bg-slate-50 dark:hover:text-gray-700 dark:hover:bg-white  disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Cancel
                 </button>
