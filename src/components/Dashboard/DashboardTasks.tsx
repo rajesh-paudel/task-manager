@@ -38,6 +38,7 @@ interface DashboardContextType {
   view: "list" | "kanban";
   setView: React.Dispatch<React.SetStateAction<"list" | "kanban">>;
 }
+
 export default function Tasks() {
   const { view, setView } = useOutletContext<DashboardContextType>();
   const userProfile = useAppSelector((state) => state.auth.userProfile);
