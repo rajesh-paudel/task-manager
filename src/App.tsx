@@ -19,6 +19,7 @@ import ErrorBoundary from "./components/ui/ErrorBoundary";
 import Footer from "./components/layout/Footer";
 import DashboardLayout from "./components/Dashboard/DashboardLayout";
 
+//lazy loading or code splitting
 const Home = lazy(() => import("./Pages/Home"));
 const Login = lazy(() => import("./Pages/Login"));
 const Register = lazy(() => import("./Pages/Register"));
