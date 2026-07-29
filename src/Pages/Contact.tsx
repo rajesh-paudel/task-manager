@@ -35,7 +35,6 @@ export default function Contact() {
 
   const [token, setToken] = useState<string>("");
   const turnstileRef = useRef<any>(null);
-
   const [error, setError] = useState("");
   const [isSent, setIsSent] = useState(false);
 
