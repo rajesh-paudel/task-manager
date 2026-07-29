@@ -5,6 +5,7 @@ import { useTasksSync } from "../../hooks/useTasksSync";
 import { useState, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import ErrorBoundary from "../ui/ErrorBoundary";
+import { SITE_URL } from "../../utils/constants";
 
 export default function DashboardLayout() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
@@ -22,7 +23,7 @@ export default function DashboardLayout() {
         <meta name="robots" content="noindex, nofollow" />
         <link
           rel="canonical"
-          href="https://task-manager-five-omega-36.vercel.app/dashboard"
+          href={`${SITE_URL}/dashboard`}
         />
       </Helmet>
       <Sidebar />

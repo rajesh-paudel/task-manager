@@ -1,6 +1,7 @@
 import { Target, Users, Sparkles } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { SITE_URL } from "../utils/constants";
 
 const values = [
   {
@@ -23,7 +24,6 @@ const values = [
   },
 ];
 
-const SITE_URL = "https://task-manager-five-omega-36.vercel.app";
 
 export default function About() {
   return (
@@ -44,13 +44,13 @@ export default function About() {
         />
         <meta
           property="og:image"
-          content="https://task-manager-five-omega-36.vercel.app/og-image.png"
+          content={`${SITE_URL}/og-image.png`}
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta
           property="og:url"
-          content="https://task-manager-five-omega-36.vercel.app/about"
+          content={`${SITE_URL}/about`}
         />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="TaskPulse" />
@@ -58,7 +58,7 @@ export default function About() {
         <meta name="twitter:card" content="summary_large_image" />
         <link
           rel="canonical"
-          href="https://task-manager-five-omega-36.vercel.app/about"
+          href={`${SITE_URL}/about`}
         />
         <script type="application/ld+json">
           {JSON.stringify({

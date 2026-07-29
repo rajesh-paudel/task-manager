@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Helmet } from "react-helmet-async";
+import { SITE_URL } from "../utils/constants";
 
 const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 const MIN_FILL_TIME = 3000;
@@ -75,7 +76,7 @@ export default function Contact() {
     }
   };
 
-  const SITE_URL = "https://task-manager-five-omega-36.vercel.app";
+
 
   return (
     <main id="main-content" className="min-h-screen bg-white font-sans">
@@ -92,13 +93,13 @@ export default function Contact() {
         />
         <meta
           property="og:image"
-          content="https://task-manager-five-omega-36.vercel.app/og-image.png"
+          content={`${SITE_URL}/og-image.png`}
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta
           property="og:url"
-          content="https://task-manager-five-omega-36.vercel.app/contact"
+          content={`${SITE_URL}/contact`}
         />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="TaskPulse" />
@@ -106,7 +107,7 @@ export default function Contact() {
         <meta name="twitter:card" content="summary_large_image" />
         <link
           rel="canonical"
-          href="https://task-manager-five-omega-36.vercel.app/contact"
+          href={`${SITE_URL}/contact`}
         />
         <script type="application/ld+json">
           {JSON.stringify({

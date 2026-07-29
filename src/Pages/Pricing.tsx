@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { SITE_URL } from "../utils/constants";
 
 const tiers = [
   {
@@ -49,7 +50,6 @@ const tiers = [
   },
 ];
 
-const SITE_URL = "https://task-manager-five-omega-36.vercel.app";
 
 export default function Pricing() {
   return (
@@ -70,13 +70,13 @@ export default function Pricing() {
         />
         <meta
           property="og:image"
-          content="https://task-manager-five-omega-36.vercel.app/og-image.png"
+          content={`${SITE_URL}/og-image.png`}
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta
           property="og:url"
-          content="https://task-manager-five-omega-36.vercel.app/pricing"
+          content={`${SITE_URL}/pricing`}
         />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="TaskPulse" />
@@ -84,7 +84,7 @@ export default function Pricing() {
         <meta name="twitter:card" content="summary_large_image" />
         <link
           rel="canonical"
-          href="https://task-manager-five-omega-36.vercel.app/pricing"
+          href={`${SITE_URL}/pricing`}
         />
         <script type="application/ld+json">
           {JSON.stringify({

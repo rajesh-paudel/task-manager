@@ -26,6 +26,7 @@ import {
 import profilePlaceholder from "../assets/profilePlaceholder.png";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
+import { SITE_URL } from "../utils/constants";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -409,7 +410,7 @@ export default function Profile() {
         <meta name="robots" content="noindex, nofollow" />
         <link
           rel="canonical"
-          href="https://task-manager-five-omega-36.vercel.app/profile"
+          href={`${SITE_URL}/profile`}
         />
       </Helmet>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-14">

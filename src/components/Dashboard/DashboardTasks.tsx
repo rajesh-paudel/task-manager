@@ -359,7 +359,7 @@ export default function Tasks() {
                     }}
                     className={`rounded-xl p-3 min-h-[500px] transition-colors ${
                       dragOverColumn === col.key
-                        ? "bg-orange-50/80 border border-dashed border-orange-300"
+                        ? "bg-orange-50/80 border border-dashed border-orange-300 dark:bg-slate-50"
                         : "bg-slate-100/60 border border-transparent"
                     }`}
                   >

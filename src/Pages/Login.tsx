@@ -7,6 +7,7 @@ import { Helmet } from "react-helmet-async";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { SITE_URL } from "../utils/constants";
 
 const loginSchema = z.object({
   email: z.email("Please enter a valid email"),
@@ -59,13 +60,13 @@ export default function Login() {
         />
         <meta
           property="og:image"
-          content="https://task-manager-five-omega-36.vercel.app/og-image.png"
+          content={`${SITE_URL}/og-image.png`}
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta
           property="og:url"
-          content="https://task-manager-five-omega-36.vercel.app/login"
+          content={`${SITE_URL}/login`}
         />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="TaskPulse" />
@@ -73,7 +74,7 @@ export default function Login() {
         <meta name="twitter:card" content="summary_large_image" />
         <link
           rel="canonical"
-          href="https://task-manager-five-omega-36.vercel.app/login"
+          href={`${SITE_URL}/login`}
         />
       </Helmet>
       <div className="w-full max-w-sm">

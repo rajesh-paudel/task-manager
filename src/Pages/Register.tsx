@@ -8,6 +8,7 @@ import { Helmet } from "react-helmet-async";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { SITE_URL } from "../utils/constants";
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters."),
@@ -102,13 +103,13 @@ export default function Register() {
         />
         <meta
           property="og:image"
-          content="https://task-manager-five-omega-36.vercel.app/og-image.png"
+          content={`${SITE_URL}/og-image.png`}
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta
           property="og:url"
-          content="https://task-manager-five-omega-36.vercel.app/register"
+          content={`${SITE_URL}/register`}
         />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="TaskPulse" />
@@ -116,7 +117,7 @@ export default function Register() {
         <meta name="twitter:card" content="summary_large_image" />
         <link
           rel="canonical"
-          href="https://task-manager-five-omega-36.vercel.app/register"
+          href={`${SITE_URL}/register`}
         />
       </Helmet>
       <div className="w-full max-w-sm">

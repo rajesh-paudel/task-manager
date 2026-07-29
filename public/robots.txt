@@ -3,4 +3,4 @@ Allow: /
 Disallow: /dashboard
 Disallow: /profile
 
-Sitemap: https://task-manager-five-omega-36.vercel.app/sitemap.xml
+Sitemap: https://task-manager.rajesh-paudel.com.np/sitemap.xml

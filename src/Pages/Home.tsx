@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { SITE_URL } from "../utils/constants";
 
 import Hero from "../components/Home/Hero";
 import StatsBar from "../components/Home/StatsBar";
@@ -31,7 +32,7 @@ export default function Home() {
 
         <meta
           property="og:image"
-          content="https://task-manager-five-omega-36.vercel.app/og-image.png"
+          content={`${SITE_URL}/og-image.png`}
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -39,7 +40,7 @@ export default function Home() {
 
         <meta
           property="og:url"
-          content="https://task-manager-five-omega-36.vercel.app/"
+          content={`${SITE_URL}/`}
         />
 
         <meta property="og:type" content="website" />
@@ -49,7 +50,7 @@ export default function Home() {
         <meta name="twitter:card" content="summary_large_image" />
         <link
           rel="canonical"
-          href="https://task-manager-five-omega-36.vercel.app/"
+          href={`${SITE_URL}/`}
         />
 
         <script type="application/ld+json">
@@ -57,8 +58,8 @@ export default function Home() {
             "@context": "https://schema.org",
             "@type": "Organization",
             name: "TaskPulse",
-            url: "https://task-manager-five-omega-36.vercel.app/",
-            logo: "https://task-manager-five-omega-36.vercel.app/og-image.png",
+            url: `${SITE_URL}/`,
+            logo: `${SITE_URL}/og-image.png`,
             description:
               "TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity.",
           })}
@@ -68,7 +69,7 @@ export default function Home() {
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: "TaskPulse",
-            url: "https://task-manager-five-omega-36.vercel.app/",
+            url: `${SITE_URL}/`,
           })}
         </script>
         <script type="application/ld+json">
@@ -90,7 +91,7 @@ export default function Home() {
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
             name: "TaskPulse",
-            url: "https://task-manager-five-omega-36.vercel.app/",
+            url: `${SITE_URL}/`,
             applicationCategory: "ProjectManagement",
             operatingSystem: "Web",
             description:
