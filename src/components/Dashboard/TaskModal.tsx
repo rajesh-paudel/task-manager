@@ -28,7 +28,7 @@ const priorityOptions: { value: TaskPriority; label: string; dot: string }[] = [
 function toDateInputValue(timestamp: number | null): string {
   if (timestamp === null) return "";
   const d = new Date(timestamp);
-  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60_000);
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
   return local.toISOString().slice(0, 10);
 }
 
