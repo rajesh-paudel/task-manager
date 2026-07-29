@@ -98,7 +98,7 @@ export default function App() {
             <Navbar userProfile={userProfile} onLogout={handleLogout} />
           </header>
         )}
-        <ErrorBoundary key={location.pathname}>
+        <ErrorBoundary>
           <Suspense
             fallback={
               <div className="min-h-screen bg-slate-50 flex items-center justify-center">
