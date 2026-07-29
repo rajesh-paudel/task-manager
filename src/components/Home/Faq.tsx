@@ -52,7 +52,7 @@ export default function FAQ() {
                 </span>
                 <ChevronDown
                   className={`h-4 w-4 text-slate-400 shrink-0 ${
-                    isOpen ? "rotate-180" : ""
+                    isOpen ? "rotate-180 ease-in-out duration-300" : ""
                   }`}
                 />
               </button>
