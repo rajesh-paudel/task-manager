@@ -19,7 +19,7 @@ import { useOutletContext } from "react-router-dom";
 import { createTask, updateTask, deleteTask } from "../../api/tasks";
 import { getDueLabel, isOverdue } from "../../utils/dateHelpers";
 import { useAppSelector } from "../../store/store";
-
+import { useSearchParams } from "react-router-dom";
 import PriorityBadge from "../ui/PriorityBadge";
 import TaskDetailsModal from "./TaskDetailModal";
 
@@ -33,7 +33,7 @@ function getErrorMessage(err: unknown, fallback: string) {
   return err instanceof Error ? err.message : fallback;
 }
 
-type SortBy = "createdAt" | "dueDate";
+type SortBy = "newest" | "dueDate";
 interface DashboardContextType {
   view: "list" | "kanban";
   setView: React.Dispatch<React.SetStateAction<"list" | "kanban">>;
@@ -45,11 +45,13 @@ export default function Tasks() {
   const tasksStatus = useAppSelector((state) => state.tasks.status);
   const tasks = useAppSelector(selectAllTasks);
   const tasksByDue = useAppSelector(selectTasksByDueDate);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const priority =
+    (searchParams.get("priority") as TaskPriority | "all") || "all";
+  const sort = (searchParams.get("sort") as SortBy) ?? "newest";
+
   const [searchQuery, setSearchQuery] = useState("");
-  const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">(
-    "all",
-  );
-  const [sortBy, setSortBy] = useState<SortBy>("createdAt");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -107,16 +109,15 @@ export default function Tasks() {
   };
 
   const filteredTasks = useMemo(() => {
-    const base = sortBy === "createdAt" ? tasks : tasksByDue;
+    const base = sort === "newest" ? tasks : tasksByDue;
     return base?.filter((task) => {
       const matchedQuery = task.title
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
-      const matchedPriority =
-        priorityFilter === "all" || task.priority == priorityFilter;
+      const matchedPriority = priority === "all" || task.priority === priority;
       return matchedQuery && matchedPriority;
     });
-  }, [tasks, tasksByDue, sortBy, searchQuery, priorityFilter]);
+  }, [tasks, tasksByDue, sort, searchQuery, priority]);
 
   //drag and drop
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
@@ -199,10 +200,17 @@ export default function Tasks() {
 
         {/* Priority filter */}
         <select
-          value={priorityFilter}
-          onChange={(e) =>
-            setPriorityFilter(e.target.value as TaskPriority | "all")
-          }
+          value={priority}
+          onChange={(e) => {
+            const next = new URLSearchParams(searchParams);
+            if (e.target.value === "all") {
+              next.delete("priority");
+            } else {
+              next.set("priority", e.target.value);
+            }
+
+            setSearchParams(next);
+          }}
           className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-orange-500"
         >
           <option value="all">All priorities</option>
@@ -214,11 +222,15 @@ export default function Tasks() {
 
         {/* Sort */}
         <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as SortBy)}
+          value={sort}
+          onChange={(e) => {
+            const next = new URLSearchParams(searchParams);
+            next.set("sort", e.target.value);
+            setSearchParams(next);
+          }}
           className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-orange-500"
         >
-          <option value="createdAt">Newest first</option>
+          <option value="newest">Newest first</option>
           <option value="dueDate">Due date</option>
         </select>
       </div>
@@ -298,7 +310,7 @@ export default function Tasks() {
                     <button
                       onClick={() => {
                         setSearchQuery("");
-                        setPriorityFilter("all");
+                        setSearchParams({});
                       }}
                       className="mt-2 text-sm font-medium text-orange-600 hover:text-orange-700"
                     >
