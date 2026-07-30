@@ -12,16 +12,8 @@ import {
   ShieldPlus,
 } from "lucide-react";
 import type { UserProfile } from "../../types/user";
+import type { ContactMessage } from "../../types/contact";
 import profilePlaceholder from "../../assets/profilePlaceholder.png";
-
-interface ContactMessage {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  createdAt: number;
-}
 
 function formatDate(timestamp: number) {
   return new Date(timestamp).toLocaleDateString(undefined, {
