@@ -8,7 +8,8 @@ import Integrations from "../components/Home/Integrations";
 import HowItWorks from "../components/Home/HowItWorks";
 import Features from "../components/Home/Features";
 import Testimonial from "../components/Home/Testimonial";
-import FAQ, { faqs } from "../components/Home/Faq";
+import FAQ from "../components/Home/Faq";
+import { faqs } from "../utils/faqs";
 import CTABanner from "../components/Home/Ctabanner";
 
 export default function Home() {
@@ -75,7 +76,7 @@ export default function Home() {
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "FAQPage",
+            "@type": "FAQPage", 
             mainEntity: faqs.map((faq) => ({
               "@type": "Question",
               name: faq.question,
