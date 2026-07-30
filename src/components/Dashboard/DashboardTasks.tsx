@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Plus,
   LayoutList,
@@ -9,7 +9,7 @@ import {
   Search,
   Download,
 } from "lucide-react";
-import { useMemo } from "react";
+
 import type { NewTask, Task, TaskPriority, TaskStatus } from "../../types/task";
 import {
   selectAllTasks,
@@ -41,6 +41,7 @@ interface DashboardContextType {
 }
 
 export default function Tasks() {
+  const searchRef = useRef<HTMLInputElement>(null);
   const { view, setView } = useOutletContext<DashboardContextType>();
   const userProfile = useAppSelector((state) => state.auth.userProfile);
   const tasksStatus = useAppSelector((state) => state.tasks.status);
@@ -62,6 +63,25 @@ export default function Tasks() {
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportScope, setExportScope] = useState<"all" | "current">("current");
   const [exportFormat, setExportFormat] = useState<"json" | "csv">("json");
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      if (e.key === "/") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+
+      if (e.key === "n" && !modalOpen && !detailsTask && !exportModalOpen) {
+        e.preventDefault();
+        openCreateModal();
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [modalOpen, detailsTask, exportModalOpen]);
 
   const openCreateModal = () => {
     setEditingTask(null);
@@ -130,7 +150,6 @@ export default function Tasks() {
 
     if (exportFormat === "json") {
       const json = JSON.stringify(data, null, 2);
-
       downloadFile(json, "tasks.json", "application/json");
       return;
     }
@@ -164,7 +183,7 @@ export default function Tasks() {
       new Date(task.updatedAt).toLocaleString(),
       task.completedAt ? new Date(task.completedAt).toLocaleString() : "",
     ]);
-  
+
     return [headers, ...rows]
       .map((row) => row.map(escapeCsvValue).join(","))
       .join("\n");
@@ -271,6 +290,7 @@ export default function Tasks() {
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
+            ref={searchRef}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search tasks"
