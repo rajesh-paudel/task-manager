@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Loader2,
   Search,
+  Download,
 } from "lucide-react";
 import { useMemo } from "react";
 import type { NewTask, Task, TaskPriority, TaskStatus } from "../../types/task";
@@ -57,6 +58,10 @@ export default function Tasks() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [detailsTask, setDetailsTask] = useState<Task | null>(null);
   const [error, setError] = useState("");
+
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportScope, setExportScope] = useState<"all" | "current">("current");
+  const [exportFormat, setExportFormat] = useState<"json" | "csv">("json");
 
   const openCreateModal = () => {
     setEditingTask(null);
@@ -120,6 +125,80 @@ export default function Tasks() {
     });
   }, [tasks, tasksByDue, sort, searchQuery, priority, status]);
 
+  const handleExportData = () => {
+    const data = exportScope === "all" ? tasks : filteredTasks;
+
+    if (exportFormat === "json") {
+      const json = JSON.stringify(data, null, 2);
+
+      downloadFile(json, "tasks.json", "application/json");
+      return;
+    }
+
+    if (exportFormat === "csv") {
+      const csv = buildCsv(data);
+
+      downloadFile(csv, "tasks.csv", "text/csv;charset=utf-8");
+    }
+  };
+
+  const buildCsv = (tasks: Task[]) => {
+    const headers = [
+      "Title",
+      "Description",
+      "Status",
+      "Priority",
+      "Due Date",
+      "Created At",
+      "Updated At",
+      "Completed At",
+    ];
+
+    const rows = tasks.map((task) => [
+      task.title,
+      task.description,
+      task.status,
+      task.priority,
+      task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "",
+      new Date(task.createdAt).toLocaleString(),
+      new Date(task.updatedAt).toLocaleString(),
+      task.completedAt ? new Date(task.completedAt).toLocaleString() : "",
+    ]);
+  
+    return [headers, ...rows]
+      .map((row) => row.map(escapeCsvValue).join(","))
+      .join("\n");
+  };
+  const escapeCsvValue = (value: unknown): string => {
+    if (value == null) return "";
+
+    const str = String(value);
+
+    if (/[",\n]/.test(str)) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+
+    return str;
+  };
+
+  const downloadFile = (
+    content: string,
+    fileName: string,
+    mimeType: string,
+  ) => {
+    const blob = new Blob([content], { type: mimeType });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+    setExportModalOpen(false);
+  };
   //drag and drop
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -255,6 +334,15 @@ export default function Tasks() {
           <option value="newest">Newest first</option>
           <option value="dueDate">Due date</option>
         </select>
+
+        {/* Export */}
+        <button
+          onClick={() => setExportModalOpen(true)}
+          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50"
+        >
+          <Download className="h-4 w-4" />
+          Export
+        </button>
       </div>
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
@@ -451,6 +539,89 @@ export default function Tasks() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {exportModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setExportModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-slate-900">
+              Export tasks
+            </h3>
+
+            <div className="mt-4">
+              <p className="text-sm font-medium text-slate-700 mb-2">Scope</p>
+              <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="scope"
+                  value="current"
+                  checked={exportScope === "current"}
+                  onChange={() => setExportScope("current")}
+                  className="text-orange-600"
+                />
+                <span className="text-sm text-slate-700">Current view</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="scope"
+                  value="all"
+                  checked={exportScope === "all"}
+                  onChange={() => setExportScope("all")}
+                  className="text-orange-600"
+                />
+                <span className="text-sm text-slate-700">All tasks</span>
+              </label>
+            </div>
+
+            <div className="mt-4">
+              <p className="text-sm font-medium text-slate-700 mb-2">Format</p>
+              <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="format"
+                  value="json"
+                  checked={exportFormat === "json"}
+                  onChange={() => setExportFormat("json")}
+                  className="text-orange-600"
+                />
+                <span className="text-sm text-slate-700">JSON</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="format"
+                  value="csv"
+                  checked={exportFormat === "csv"}
+                  onChange={() => setExportFormat("csv")}
+                  className="text-orange-600"
+                />
+                <span className="text-sm text-slate-700">CSV</span>
+              </label>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setExportModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExportData}
+                className="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700"
+              >
+                Export
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
