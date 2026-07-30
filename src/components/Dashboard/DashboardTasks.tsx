@@ -50,7 +50,7 @@ export default function Tasks() {
   const priority =
     (searchParams.get("priority") as TaskPriority | "all") || "all";
   const sort = (searchParams.get("sort") as SortBy) ?? "newest";
-
+  const status = (searchParams.get("status") as TaskStatus | "all") || "all";
   const [searchQuery, setSearchQuery] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -115,9 +115,10 @@ export default function Tasks() {
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
       const matchedPriority = priority === "all" || task.priority === priority;
-      return matchedQuery && matchedPriority;
+      const matchedStatus = status === "all" || task.status === status;
+      return matchedQuery && matchedPriority && matchedStatus;
     });
-  }, [tasks, tasksByDue, sort, searchQuery, priority]);
+  }, [tasks, tasksByDue, sort, searchQuery, priority, status]);
 
   //drag and drop
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
@@ -218,6 +219,27 @@ export default function Tasks() {
           <option value="medium">Medium</option>
           <option value="high">High</option>
           <option value="urgent">Urgent</option>
+        </select>
+
+        {/* status filter */}
+        <select
+          value={status}
+          onChange={(e) => {
+            const next = new URLSearchParams(searchParams);
+            if (e.target.value === "all") {
+              next.delete("status");
+            } else {
+              next.set("status", e.target.value);
+            }
+
+            setSearchParams(next);
+          }}
+          className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-orange-500"
+        >
+          <option value="all">All status</option>
+          <option value="todo">Todo</option>
+          <option value="in_progress">In progress</option>
+          <option value="done">Done</option>
         </select>
 
         {/* Sort */}
