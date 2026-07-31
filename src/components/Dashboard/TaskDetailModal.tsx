@@ -49,6 +49,7 @@ export default function TaskDetailsModal({
 
   const handleClose = () => {
     setConfirmingDelete(false);
+    setDeleting(false);
     setError("");
     onClose();
   };
