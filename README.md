@@ -12,12 +12,18 @@ A task management web app built with React 19, TypeScript, and Firebase.
 - **Forms:** React Hook Form + Zod
 - **Charts:** Recharts
 - **Icons:** Lucide React
+- **Image Upload:** Cloudinary
+- **Bot Protection:** Cloudflare Turnstile
+- **SEO:** react-helmet-async
 
 ## Features
 
 - Firebase Authentication (email/password)
 - Role-based dashboards (admin / user)
 - Task CRUD with realtime sync
+- List, kanban, and calendar views (calendar shows tasks by due date)
+- Filters, sorting, search, and JSON/CSV export
+- Keyboard shortcuts (`n` new task, `/` focus search)
 - Admin panel for user & task management
 - Dark/light theme toggle
 - Responsive design

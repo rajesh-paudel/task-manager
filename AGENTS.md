@@ -82,6 +82,7 @@ src/components/Home/     → Landing page sections only
 /dashboard          → DashboardLayout (protected, noindex)
   /dashboard/overview   → Overview (stats + charts)
   /dashboard/tasks      → Tasks (list/kanban CRUD)
+  /dashboard/calendar   → Calendar (month view of tasks by due date)
   /dashboard/admin      → Admin panel (role === "admin" only)
 *                   → NotFound
 ```
