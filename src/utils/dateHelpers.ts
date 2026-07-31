@@ -1,5 +1,5 @@
 import type { Task } from "../types/task";
-const startOfDay = (d: Date) =>
+export const startOfDay = (d: Date) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
 export function getDueLabel(dueDate: number | null | undefined): string | null {

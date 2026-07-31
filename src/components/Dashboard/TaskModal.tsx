@@ -10,6 +10,7 @@ interface TaskModalProps {
   onClose: () => void;
   onSave: (data: NewTask) => Promise<void>;
   initialTask?: Task | null;
+  defaultDueDate?: number | null;
 }
 
 const statusOptions: { value: TaskStatus; label: string }[] = [
@@ -57,6 +58,7 @@ export default function TaskModal({
   onClose,
   onSave,
   initialTask,
+  defaultDueDate,
 }: TaskModalProps) {
   const isEditing = !!initialTask;
 
@@ -97,12 +99,12 @@ export default function TaskModal({
         description: "",
         status: "todo",
         priority: "medium",
-        dueDate: "",
+        dueDate: toDateInputValue(defaultDueDate ?? null),
       });
     }
 
     setError("");
-  }, [open, initialTask, reset]);
+  }, [open, initialTask, defaultDueDate, reset]);
 
   const [error, setError] = useState("");
 

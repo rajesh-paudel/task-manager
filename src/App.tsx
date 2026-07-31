@@ -30,6 +30,9 @@ const Pricing = lazy(() => import("./Pages/Pricing"));
 const NotFound = lazy(() => import("./Pages/NotFound"));
 const Overview = lazy(() => import("./components/Dashboard/DashboardOverview"));
 const Tasks = lazy(() => import("./components/Dashboard/DashboardTasks"));
+const Calendar = lazy(
+  () => import("./components/Dashboard/DashboardCalendar"),
+);
 const DashboardAdmin = lazy(
   () => import("./components/Dashboard/DashboardAdmin"),
 );
@@ -118,6 +121,7 @@ export default function App() {
                   <Route index element={<Navigate to="overview" replace />} />
                   <Route path="overview" element={<Overview />} />
                   <Route path="tasks" element={<Tasks />} />
+                  <Route path="calendar" element={<Calendar />} />
                   <Route
                     path="admin"
                     element={
