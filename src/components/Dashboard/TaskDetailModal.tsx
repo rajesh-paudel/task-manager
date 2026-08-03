@@ -60,8 +60,8 @@ export default function TaskDetailsModal({
     try {
       await onDelete();
       handleClose();
-    } catch (err: any) {
-      setError(err.message || "Couldn't delete task. Try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't delete task. Try again.");
       setDeleting(false);
     }
   };

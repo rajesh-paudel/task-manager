@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { ref, update, remove } from "firebase/database";
 import {
   deleteUser,
@@ -74,10 +74,12 @@ function useEditableField(
   const [value, setValue] = useState(initialValue);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [prevInitial, setPrevInitial] = useState(initialValue);
 
-  useEffect(() => {
-    if (!editing) setValue(initialValue);
-  }, [initialValue, editing]);
+  if (!editing && prevInitial !== initialValue) {
+    setPrevInitial(initialValue);
+    setValue(initialValue);
+  }
 
   const start = () => {
     setValue(initialValue);
@@ -96,8 +98,8 @@ function useEditableField(
     try {
       await onSave(value.trim());
       setEditing(false);
-    } catch (err: any) {
-      setError(err.message || "Couldn't save. Try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't save. Try again.");
     } finally {
       setSaving(false);
     }
@@ -324,8 +326,10 @@ export default function Profile() {
       const url = await uploadImageToCloudinary(file);
       await update(ref(db, `users/${userProfile.uid}`), { profileUrl: url });
       dispatch(setProfile({ ...userProfile, profileUrl: url }));
-    } catch (err: any) {
-      setPhotoError(err.message || "Upload failed. Try again.");
+    } catch (err) {
+      setPhotoError(
+        err instanceof Error ? err.message : "Upload failed. Try again.",
+      );
     } finally {
       setUploadingPhoto(false);
       if (fileInputRef.current) fileInputRef.current.value = "";

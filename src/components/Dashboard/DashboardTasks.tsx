@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import {
   Plus,
   LayoutList,
@@ -64,6 +64,11 @@ export default function Tasks() {
   const [exportScope, setExportScope] = useState<"all" | "current">("current");
   const [exportFormat, setExportFormat] = useState<"json" | "csv">("json");
 
+  const openCreateModal = useCallback(() => {
+    setEditingTask(null);
+    setModalOpen(true);
+  }, []);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName;
@@ -81,12 +86,7 @@ export default function Tasks() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [modalOpen, detailsTask, exportModalOpen]);
-
-  const openCreateModal = () => {
-    setEditingTask(null);
-    setModalOpen(true);
-  };
+  }, [modalOpen, detailsTask, exportModalOpen, openCreateModal]);
 
   const openEditModal = (task: Task) => {
     setEditingTask(task);

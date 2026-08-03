@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { ref, set } from "firebase/database";
+import { FirebaseError } from "firebase/app";
 import { Eye, EyeOff, CheckSquare } from "lucide-react";
-import { auth, db } from "../utils/firebaseConfig";
+import { auth } from "../utils/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SITE_URL } from "../utils/constants";
+import { createUserProfile } from "../api/users";
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters."),
@@ -53,20 +54,12 @@ export default function Register() {
       );
       const user = userCredential.user;
 
-      await set(ref(db, `users/${user.uid}`), {
-        uid: user.uid,
-        name: data.name,
-        email: data.email,
-        profileUrl: "",
-        title: "",
-        bio: "",
-        role: "user",
-        createdAt: Date.now(),
-      });
+      await createUserProfile(user.uid, data.name, data.email);
       reset();
       navigate("/dashboard");
-    } catch (err: any) {
-      switch (err.code) {
+    } catch (err) {
+      const code = err instanceof FirebaseError ? err.code : "";
+      switch (code) {
         case "auth/email-already-in-use":
           setError("An account with this email already exists.");
           break;

@@ -1,16 +1,18 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Mail, Clock, CheckCircle2 } from "lucide-react";
-import { db } from "../utils/firebaseConfig";
-import { ref, push } from "firebase/database";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Helmet } from "react-helmet-async";
 import { SITE_URL } from "../utils/constants";
+import {
+  submitContactForm,
+  isFilledTooFast,
+  resetFormLoadedAt,
+} from "../api/forms";
 
 const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
-const MIN_FILL_TIME = 3000;
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters."),
   email: z.email("Please enter a valid email."),
@@ -32,12 +34,12 @@ export default function Contact() {
     mode: "onTouched",
   });
 
-  const formLoadedAt = useRef(Date.now());
-
   const [token, setToken] = useState<string>("");
-  const turnstileRef = useRef<any>(null);
+  const [widgetKey, setWidgetKey] = useState(0);
   const [error, setError] = useState("");
   const [isSent, setIsSent] = useState(false);
+
+  const resetTurnstile = () => setWidgetKey((k) => k + 1);
 
   const onSubmit = async (data: ContactForm) => {
     setError("");
@@ -52,27 +54,26 @@ export default function Contact() {
     }
 
     //checks if form is filled within 3 sec considering it can be bot
-    const diff = Date.now() - formLoadedAt.current;
-
-    if (diff < MIN_FILL_TIME) {
+    if (isFilledTooFast()) {
       setError("Please take a little more time to complete the form.");
       return;
     }
 
     try {
-      const { website, ...contactData } = data;
-      await push(ref(db, "/forms"), {
-        ...contactData,
-        createdAt: Date.now(),
+      await submitContactForm({
+        name: data.name,
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
       });
-      turnstileRef.current?.reset();
+      resetTurnstile();
       setToken("");
       reset();
       setIsSent(true);
-    } catch (err: any) {
-      turnstileRef.current?.reset();
+    } catch (err) {
+      resetTurnstile();
       setToken("");
-      setError(err.message || "Couldn't send your message. Try again.");
+      setError(err instanceof Error ? err.message : "Couldn't send your message. Try again.");
     }
   };
 
@@ -187,11 +188,11 @@ export default function Contact() {
 
               <button
                 onClick={() => {
-                  formLoadedAt.current = Date.now();
+                  resetFormLoadedAt();
                   setIsSent(false);
                   reset();
                   setToken("");
-                  turnstileRef.current?.reset();
+                  resetTurnstile();
                 }}
                 className="mt-2 text-sm font-medium text-orange-600 hover:text-orange-700"
               >
@@ -299,7 +300,7 @@ export default function Contact() {
                 )}
               </div>
               <Turnstile
-                ref={turnstileRef}
+                key={widgetKey}
                 siteKey={SITE_KEY}
                 onSuccess={(token: string) => setToken(token)}
                 onExpire={() => setToken("")}

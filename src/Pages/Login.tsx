@@ -36,8 +36,7 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, data.email, data.password);
       reset();
       navigate("/dashboard");
-    } catch (err: any) {
-      console.log(err.message);
+    } catch {
       setError("Invalid email or password.");
     }
   };

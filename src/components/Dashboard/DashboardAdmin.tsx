@@ -44,25 +44,22 @@ export default function DashboardAdmin() {
   const [promoteError, setPromoteError] = useState("");
 
   const fetchUsers = async () => {
-    setUsersLoading(true);
-    setUsersError("");
     try {
       const snapshot = await get(ref(db, "users"));
       const data = snapshot.val() || {};
       const list: UserProfile[] = Object.values(data);
       list.sort((a, b) => b.createdAt - a.createdAt);
       setUsers(list);
-    } catch (err: any) {
-      setUsersError(err.message || "Couldn't load users.");
-      console.log(err);
+    } catch (err) {
+      setUsersError(
+        err instanceof Error ? err.message : "Couldn't load users.",
+      );
     } finally {
       setUsersLoading(false);
     }
   };
 
   const fetchMessages = async () => {
-    setMessagesLoading(true);
-    setMessagesError("");
     try {
       const snapshot = await get(ref(db, "forms"));
       const data = snapshot.val() || {};
@@ -74,11 +71,25 @@ export default function DashboardAdmin() {
       );
       list.sort((a, b) => b.createdAt - a.createdAt);
       setMessages(list);
-    } catch (err: any) {
-      setMessagesError(err.message || "Couldn't load messages.");
+    } catch (err) {
+      setMessagesError(
+        err instanceof Error ? err.message : "Couldn't load messages.",
+      );
     } finally {
       setMessagesLoading(false);
     }
+  };
+
+  const reloadUsers = () => {
+    setUsersLoading(true);
+    setUsersError("");
+    void fetchUsers();
+  };
+
+  const reloadMessages = () => {
+    setMessagesLoading(true);
+    setMessagesError("");
+    void fetchMessages();
   };
 
   const handleDeleteMessage = async (e: React.MouseEvent, id: string) => {
@@ -90,8 +101,10 @@ export default function DashboardAdmin() {
       setMessages((prev) => {
         return prev.filter((msg) => msg.id !== id);
       });
-    } catch (error: any) {
-      setMessagesError(error.message || "Failed to delete message.");
+    } catch (err) {
+      setMessagesError(
+        err instanceof Error ? err.message : "Failed to delete message.",
+      );
     }
   };
 
@@ -107,19 +120,27 @@ export default function DashboardAdmin() {
         ),
       );
       setPromotingUser(null);
-    } catch (err: any) {
-      setPromoteError(err.message || "Couldn't promote this user. Try again.");
+    } catch (err) {
+      setPromoteError(
+        err instanceof Error
+          ? err.message
+          : "Couldn't promote this user. Try again.",
+      );
     } finally {
       setPromoting(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    void (async () => {
+      await fetchUsers();
+    })();
   }, []);
 
   useEffect(() => {
-    fetchMessages();
+    void (async () => {
+      await fetchMessages();
+    })();
   }, []);
 
   return (
@@ -164,7 +185,7 @@ export default function DashboardAdmin() {
 
         <button
           onClick={() =>
-            activeTab === "users" ? fetchUsers() : fetchMessages()
+            activeTab === "users" ? reloadUsers() : reloadMessages()
           }
           disabled={activeTab === "users" ? usersLoading : messagesLoading}
           className="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 disabled:opacity-50"

@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import type { NewTask, Task, TaskPriority, TaskStatus } from "../../types/task";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 interface TaskModalProps {
   open: boolean;
   onClose: () => void;
@@ -66,7 +66,7 @@ export default function TaskModal({
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<TaskForm>({
@@ -80,8 +80,10 @@ export default function TaskModal({
       dueDate: "",
     },
   });
-  const status = watch("status");
-  const priority = watch("priority");
+  const status = useWatch({ control, name: "status" });
+  const priority = useWatch({ control, name: "priority" });
+  const [error, setError] = useState("");
+
   useEffect(() => {
     if (!open) return;
 
@@ -103,10 +105,9 @@ export default function TaskModal({
       });
     }
 
-    setError("");
+    const timer = setTimeout(() => setError(""), 0);
+    return () => clearTimeout(timer);
   }, [open, initialTask, defaultDueDate, reset]);
-
-  const [error, setError] = useState("");
 
   if (!open) return null;
 
@@ -124,8 +125,8 @@ export default function TaskModal({
       await onSave(newTask);
       reset();
       onClose();
-    } catch (err: any) {
-      setError(err.message || "Couldn't save task. Try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't save task. Try again.");
     }
   };
 
