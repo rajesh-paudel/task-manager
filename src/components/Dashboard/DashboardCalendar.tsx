@@ -139,8 +139,7 @@ export default function DashboardCalendar() {
             Calendar
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Tasks organized by their due date — spot your deadlines at a
-            glance.
+            Tasks organized by their due date — spot your deadlines at a glance.
           </p>
         </div>
 
@@ -209,11 +208,9 @@ export default function DashboardCalendar() {
                   key={cellKey}
                   onClick={() => openCreateModal(cell.date)}
                   className={`min-h-[100px] p-1.5 cursor-pointer transition-colors ${
-                    isToday
-                      ? "bg-orange-50/70 hover:bg-orange-50"
-                      : cell.inMonth
-                        ? "bg-white hover:bg-slate-50"
-                        : "bg-slate-50/70 hover:bg-slate-100/80"
+                    cell.inMonth
+                      ? "bg-white hover:bg-slate-50"
+                      : "bg-slate-50/70 hover:bg-slate-100/80"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -228,11 +225,6 @@ export default function DashboardCalendar() {
                     >
                       {cell.date.getDate()}
                     </span>
-                    {isToday && (
-                      <span className="text-[10px] font-medium text-orange-600">
-                        Today
-                      </span>
-                    )}
                   </div>
 
                   <div className="mt-1.5 space-y-1">
