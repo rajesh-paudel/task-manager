@@ -12,6 +12,7 @@ import {
 import { useAppDispatch } from "./store/store";
 import { useAppSelector } from "./store/store";
 import { setProfile, clearProfile } from "./store/authSlice";
+import { isUserProfile } from "./utils/typeGuards";
 
 import { ThemeProvider } from "./context/ThemeContext";
 import Navbar from "./components/layout/Navbar";
@@ -57,10 +58,7 @@ export default function App() {
         const userRef = ref(db, `users/${user.uid}`);
         unsubscribeProfile = onValue(userRef, (snapshot) => {
           const profileData = snapshot.val();
-          if (
-            profileData &&
-            (profileData.role === "admin" || profileData.role === "user")
-          ) {
+          if (isUserProfile(profileData)) {
             dispatch(setProfile(profileData));
           } else {
             dispatch(clearProfile());

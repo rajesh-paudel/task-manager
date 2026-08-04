@@ -10,6 +10,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SITE_URL } from "../utils/constants";
 import { createUserProfile } from "../api/users";
+import { useAppDispatch } from "../store/store";
+import { setProfile } from "../store/authSlice";
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters."),
@@ -39,6 +41,7 @@ export default function Register() {
     mode: "onTouched",
   });
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -54,7 +57,8 @@ export default function Register() {
       );
       const user = userCredential.user;
 
-      await createUserProfile(user.uid, data.name, data.email);
+      const profile = await createUserProfile(user.uid, data.name, data.email);
+      dispatch(setProfile(profile));
       reset();
       navigate("/dashboard");
     } catch (err) {

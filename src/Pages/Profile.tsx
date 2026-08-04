@@ -546,11 +546,26 @@ export default function Profile() {
 
       {/* dialog for deleting account */}
       {deleteDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-dialog-title"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              reset();
+              setDeleteError("");
+              setDeleteDialogOpen(false);
+            }
+          }}
+        >
           <div className="w-full max-w-sm rounded-xl bg-white dark:bg-slate-800 shadow-xl">
             {/* Header */}
             <div className="border-b border-slate-200 dark:border-slate-700 px-6 py-4">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+              <h2
+                id="delete-dialog-title"
+                className="text-lg font-semibold text-slate-900 dark:text-white"
+              >
                 Delete account
               </h2>
 
@@ -642,12 +657,27 @@ export default function Profile() {
 
       {/* dialog for changing password change */}
       {passwordDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="password-dialog-title"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              reset();
+              setChangePasswordError("");
+              setPasswordDialogOpen(false);
+            }
+          }}
+        >
           <div className="w-full max-w-md rounded-xl bg-white dark:bg-slate-800 shadow-xl">
             {/* Header */}
             <div className="border-b border-slate-200 dark:border-slate-700 px-6 py-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                <h2
+                  id="password-dialog-title"
+                  className="text-lg font-semibold text-slate-900 dark:text-white"
+                >
                   Change password
                 </h2>
 

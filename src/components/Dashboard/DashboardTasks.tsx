@@ -565,13 +565,22 @@ export default function Tasks() {
       {exportModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="export-modal-title"
           onClick={() => setExportModalOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setExportModalOpen(false);
+          }}
         >
           <div
             className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-semibold text-slate-900">
+            <h3
+              id="export-modal-title"
+              className="text-lg font-semibold text-slate-900"
+            >
               Export tasks
             </h3>
 

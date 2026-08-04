@@ -67,11 +67,22 @@ export default function TaskDetailsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto bg-slate-900/40 px-4 py-6 sm:py-4">
+    <div
+      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto bg-slate-900/40 px-4 py-6 sm:py-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="task-detail-title"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") handleClose();
+      }}
+    >
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
-          <h2 className="text-lg font-semibold text-slate-900 leading-snug">
+          <h2
+            id="task-detail-title"
+            className="text-lg font-semibold text-slate-900 leading-snug"
+          >
             {task.title}
           </h2>
           <button

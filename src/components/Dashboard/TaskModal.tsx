@@ -131,10 +131,21 @@ export default function TaskModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto bg-slate-900/40 px-4 py-6 sm:py-4">
+    <div
+      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto bg-slate-900/40 px-4 py-6 sm:py-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="task-modal-title"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
+    >
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2
+            id="task-modal-title"
+            className="text-lg font-semibold text-slate-900"
+          >
             {isEditing ? "Edit task" : "New task"}
           </h2>
           <button

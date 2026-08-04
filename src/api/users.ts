@@ -1,12 +1,13 @@
 import { ref, set } from "firebase/database";
 import { db } from "../utils/firebaseConfig";
+import type { UserProfile } from "../types/user";
 
 export async function createUserProfile(
   uid: string,
   name: string,
   email: string,
-): Promise<void> {
-  await set(ref(db, `users/${uid}`), {
+): Promise<UserProfile> {
+  const profile: UserProfile = {
     uid,
     name,
     email,
@@ -15,5 +16,7 @@ export async function createUserProfile(
     bio: "",
     role: "user",
     createdAt: Date.now(),
-  });
+  };
+  await set(ref(db, `users/${uid}`), profile);
+  return profile;
 }

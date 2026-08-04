@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { UserProfile } from "../../types/user";
 import type { ContactMessage } from "../../types/contact";
+import { isUserProfile, isContactMessage } from "../../utils/typeGuards";
 import profilePlaceholder from "../../assets/profilePlaceholder.png";
 
 function formatDate(timestamp: number) {
@@ -47,7 +48,7 @@ export default function DashboardAdmin() {
     try {
       const snapshot = await get(ref(db, "users"));
       const data = snapshot.val() || {};
-      const list: UserProfile[] = Object.values(data);
+      const list: UserProfile[] = Object.values(data).filter(isUserProfile);
       list.sort((a, b) => b.createdAt - a.createdAt);
       setUsers(list);
     } catch (err) {
@@ -63,11 +64,19 @@ export default function DashboardAdmin() {
     try {
       const snapshot = await get(ref(db, "forms"));
       const data = snapshot.val() || {};
-      const list: ContactMessage[] = Object.entries(data).map(
-        ([id, value]) => ({
-          id,
-          ...(value as Omit<ContactMessage, "id">),
-        }),
+      const list: ContactMessage[] = Object.entries(data).flatMap(
+        ([id, value]) => {
+          if (!isContactMessage(value)) return [];
+          const message: ContactMessage = {
+            id,
+            name: value.name,
+            email: value.email,
+            subject: value.subject,
+            message: value.message,
+            createdAt: value.createdAt,
+          };
+          return [message];
+        },
       );
       list.sort((a, b) => b.createdAt - a.createdAt);
       setMessages(list);
@@ -288,29 +297,36 @@ export default function DashboardAdmin() {
                 const isExpanded = expandedMessageId === msg.id;
                 return (
                   <div key={msg.id} className="px-4 py-3">
-                    <button
-                      onClick={() =>
-                        setExpandedMessageId(isExpanded ? null : msg.id)
-                      }
-                      className="w-full flex items-center gap-3 text-left"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-slate-900 truncate">
-                          {msg.subject}
-                        </p>
-                        <p className="text-xs text-slate-400 truncate">
-                          {msg.name} · {msg.email}
-                        </p>
-                      </div>
-                      <span className="shrink-0 text-xs text-slate-400">
-                        {formatDate(msg.createdAt)}
-                      </span>
-                      <Trash2
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() =>
+                          setExpandedMessageId(isExpanded ? null : msg.id)
+                        }
+                        aria-expanded={isExpanded}
+                        aria-label={`${msg.subject} — expand message`}
+                        className="min-w-0 flex-1 flex items-center gap-3 text-left"
+                      >
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-medium text-slate-900 truncate">
+                            {msg.subject}
+                          </span>
+                          <span className="block text-xs text-slate-400 truncate">
+                            {msg.name} · {msg.email}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-xs text-slate-400">
+                          {formatDate(msg.createdAt)}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
                         onClick={(e) => handleDeleteMessage(e, msg.id)}
-                        className="text-red-500 hover:bg-red-100 p-1 cursor-pointer"
-                        size={20}
-                      ></Trash2>
-                    </button>
+                        aria-label={`Delete message from ${msg.name}`}
+                        className="shrink-0 rounded-md p-1.5 text-red-500 hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                     {isExpanded && (
                       <p className="mt-2 text-sm text-slate-600 leading-relaxed">
                         {msg.message}
@@ -326,9 +342,20 @@ export default function DashboardAdmin() {
 
       {/* Promote confirmation */}
       {promotingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="promote-dialog-title"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setPromotingUser(null);
+          }}
+        >
           <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2
+              id="promote-dialog-title"
+              className="text-lg font-semibold text-slate-900"
+            >
               Promote to admin?
             </h2>
             <p className="mt-2 text-sm text-slate-500">
