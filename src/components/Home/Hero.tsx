@@ -1,6 +1,9 @@
 import { motion, type Variants } from "framer-motion";
-import { ArrowRight, CalendarDays, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CalendarDays } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTheme } from "../../context/useTheme";
+import dashboardLight from "../../assets/dashboardLight.png";
+import dashboardDark from "../../assets/dashboardDark.png";
 
 const containerVariants: Variants = {
   hidden: {},
@@ -12,13 +15,9 @@ const itemVariants: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-const demoRows = [
-  { label: "Design onboarding flow", status: "w-2 bg-emerald-500", meta: "Design · 85%" },
-  { label: "Ship billing integration", status: "w-2 bg-indigo-500", meta: "Dev · 60%" },
-  { label: "Prepare Q3 roadmap", status: "w-2 bg-slate-300", meta: "Product · 35%" },
-];
-
 export default function Hero() {
+  const { theme } = useTheme();
+
   return (
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -87,63 +86,18 @@ export default function Hero() {
           </motion.p>
         </motion.div>
 
-        {/* Product mockup */}
+        {/* Product screenshot */}
         <motion.div
           variants={itemVariants}
           className="relative mx-auto mt-16 max-w-4xl"
         >
           <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-900/5 shadow-2xl shadow-slate-900/10 dark:shadow-black/40">
-            <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50/80 px-4 py-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
-              <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
-              <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
-              <div className="ml-3 flex-1 rounded-md bg-white px-3 py-1 text-xs text-slate-400 ring-1 ring-slate-100">
-                taskpulse.app/dashboard
-              </div>
-            </div>
-
-            <div className="p-6 sm:p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-slate-400">Tuesday, Aug 4</p>
-                  <p className="mt-0.5 text-lg font-semibold text-slate-900">
-                    Good morning, Rajesh
-                  </p>
-                </div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-50 text-sm font-semibold text-orange-600">
-                  RP
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-3 gap-4 border-y border-slate-100 py-4">
-                {[
-                  { label: "In progress", value: "12", dot: "bg-orange-500" },
-                  { label: "Due today", value: "4", dot: "bg-indigo-500" },
-                  { label: "Completed", value: "89", dot: "bg-emerald-500" },
-                ].map((stat) => (
-                  <div key={stat.label} className="text-center sm:text-left">
-                    <div className="flex items-center justify-center gap-1.5 sm:justify-start">
-                      <span className={`h-1.5 w-1.5 rounded-full ${stat.dot}`} />
-                      <p className="text-xl font-semibold text-slate-900">{stat.value}</p>
-                    </div>
-                    <p className="mt-0.5 text-xs text-slate-400">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 space-y-3">
-                {demoRows.map((row) => (
-                  <div key={row.label} className="flex items-center gap-3 rounded-lg border border-slate-100 px-4 py-3">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-slate-300" />
-                    <p className="flex-1 truncate text-sm font-medium text-slate-700">{row.label}</p>
-                    <div className="flex items-center gap-2">
-                      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${row.status}`} />
-                      <span className="text-xs text-slate-400">{row.meta}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <img
+              src={theme === "dark" ? dashboardDark : dashboardLight}
+              alt="TaskPulse dashboard"
+              className="block h-auto w-full"
+              loading="lazy"
+            />
           </div>
         </motion.div>
       </div>
