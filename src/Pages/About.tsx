@@ -81,14 +81,14 @@ export default function About() {
           })}
         </script>
       </Helmet>
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">
-        <span className="text-xs font-semibold tracking-wide text-orange-600 uppercase">
+      <section className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-28">
+        <p className="text-sm font-medium uppercase tracking-widest text-orange-600">
           About TaskPulse
-        </span>
-        <h1 className="mt-4 text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight">
+        </p>
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
           We got tired of tools that made work harder to see.
         </h1>
-        <p className="mt-5 text-base text-slate-500 leading-relaxed max-w-xl mx-auto">
+        <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-slate-500">
           TaskPulse started as a smaller, quieter alternative to project
           management tools that had grown too complicated to actually use day to
           day. The goal has stayed the same since: make it obvious what needs
@@ -96,37 +96,44 @@ export default function About() {
         </p>
       </section>
 
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-100">
-        <h2 className="text-2xl font-semibold text-slate-900 tracking-tight text-center">
-          What we care about
-        </h2>
-        <div className="mt-12 grid sm:grid-cols-3 gap-10">
-          {values.map(({ icon: Icon, title, description }) => (
-            <div key={title}>
-              <div className="h-9 w-9 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600">
-                <Icon className="h-4.5 w-4.5" />
+      <section className="border-y border-slate-200 bg-slate-50/60">
+        <div className="mx-auto max-w-5xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+          <div className="text-center">
+            <p className="text-sm font-medium uppercase tracking-widest text-orange-600">
+              Values
+            </p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900">
+              What we care about
+            </h2>
+          </div>
+          <div className="mt-14 grid gap-6 sm:grid-cols-3">
+            {values.map(({ icon: Icon, title, description }) => (
+              <div key={title} className="rounded-2xl border border-slate-200 bg-white p-7">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50 text-orange-600">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-5 text-base font-semibold text-slate-900">
+                  {title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-500">
+                  {description}
+                </p>
               </div>
-              <h3 className="mt-4 text-sm font-semibold text-slate-900">
-                {title}
-              </h3>
-              <p className="mt-2 text-sm text-slate-500 leading-relaxed">
-                {description}
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-100 text-center">
-        <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">
+      <section className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-28">
+        <h2 className="text-3xl font-semibold tracking-tight text-slate-900">
           Want to say hello?
         </h2>
-        <p className="mt-3 text-sm text-slate-500">
+        <p className="mt-4 text-lg text-slate-500">
           We read every message that comes through the contact page.
         </p>
         <Link
           to="/contact"
-          className="mt-6 inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700"
+          className="mt-8 inline-flex items-center rounded-md bg-orange-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-700"
         >
           Get in touch
         </Link>

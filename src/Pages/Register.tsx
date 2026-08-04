@@ -83,7 +83,7 @@ export default function Register() {
   };
 
   return (
-    <main id="main-content" className="min-h-screen bg-white flex flex-col items-center justify-center px-6 font-sans">
+    <main id="main-content" className="bg-white font-sans flex min-h-screen flex-col items-center justify-center px-6">
       <Helmet>
         <title>Create Account | TaskPulse</title>
         <meta
@@ -119,24 +119,27 @@ export default function Register() {
       </Helmet>
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="flex items-center gap-2 mb-10">
-          <div className="h-8 w-8 bg-orange-600 rounded-lg flex items-center justify-center text-white">
+        <div className="mb-10 flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600 text-white">
             <CheckSquare className="h-4 w-4" />
           </div>
-          <span className="text-base font-bold text-slate-900 tracking-tight">
+          <span className="text-base font-bold tracking-tight text-slate-900">
             TaskPulse
           </span>
         </div>
 
-        <h1 className="text-2xl font-semibold text-slate-900">
+        <p className="text-sm font-medium uppercase tracking-widest text-orange-600">
+          Get started
+        </p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
           Create your account
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-2 text-sm text-slate-500">
           Set up your workspace in a few seconds.
         </p>
 
         {error && (
-          <div className="mt-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          <div className="mt-6 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600">
             {error}
           </div>
         )}
@@ -146,14 +149,14 @@ export default function Register() {
           className="mt-8 space-y-5"
         >
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">
               Full name
             </label>
             <input
               type="text"
               {...register("name")}
               placeholder="Rajesh Paudel"
-              className="w-full px-0 py-2 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-orange-600 focus:outline-none"
             />
             {errors.name && (
               <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
@@ -161,14 +164,14 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">
               Email address
             </label>
             <input
               type="email"
               {...register("email")}
               placeholder="you@company.com"
-              className="w-full px-0 py-2 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-orange-600 focus:outline-none"
             />
             {errors.email && (
               <p className="mt-1 text-sm text-red-600">
@@ -178,7 +181,7 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">
               Password
             </label>
             <div className="relative">
@@ -186,7 +189,7 @@ export default function Register() {
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
                 placeholder="••••••••"
-                className="w-full px-0 py-2 pr-8 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-orange-600 focus:outline-none"
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">
@@ -196,8 +199,8 @@ export default function Register() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -211,7 +214,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-2.5 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 mt-2"
+            className="mt-2 w-full rounded-md bg-orange-600 py-3 text-sm font-semibold text-white transition hover:bg-orange-700 disabled:opacity-50"
           >
             {isSubmitting ? "Creating account..." : "Create account"}
           </button>

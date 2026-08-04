@@ -131,26 +131,26 @@ export default function Contact() {
           })}
         </script>
       </Helmet>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 grid lg:grid-cols-2 gap-16">
+      <div className="mx-auto max-w-5xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28 grid lg:grid-cols-2 gap-16">
         <div>
-          <span className="text-xs font-semibold tracking-wide text-orange-600 uppercase">
+          <p className="text-sm font-medium uppercase tracking-widest text-orange-600">
             Get in touch
-          </span>
+          </p>
 
-          <h1 className="mt-4 text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight leading-tight">
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl leading-tight">
             Questions, feedback,
             <br />
             or just say hello.
           </h1>
 
-          <p className="mt-4 text-sm text-slate-500 max-w-sm leading-relaxed">
+          <p className="mt-5 max-w-sm text-lg leading-relaxed text-slate-500">
             Whether something's broken, you need help getting set up, or you
             have an idea for TaskPulse — we read every message.
           </p>
 
           <div className="mt-10 space-y-5">
             <div className="flex items-start gap-3">
-              <Mail className="h-4 w-4 text-orange-600 mt-0.5" />
+              <Mail className="mt-0.5 h-4 w-4 text-orange-600" />
               <div>
                 <p className="text-sm font-medium text-slate-900">Email</p>
                 <p className="text-sm text-slate-500">support@taskpulse.io</p>
@@ -158,7 +158,7 @@ export default function Contact() {
             </div>
 
             <div className="flex items-start gap-3">
-              <Clock className="h-4 w-4 text-orange-600 mt-0.5" />
+              <Clock className="mt-0.5 h-4 w-4 text-orange-600" />
               <div>
                 <p className="text-sm font-medium text-slate-900">
                   Response time
@@ -174,7 +174,7 @@ export default function Contact() {
         <div>
           {isSent ? (
             <div className="flex flex-col items-start gap-3 pt-4">
-              <div className="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-50 text-orange-600">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
 
@@ -200,14 +200,14 @@ export default function Contact() {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {error && (
                 <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600">
                   {error}
                 </div>
               )}
               {/* honeypot field */}
-              <div className="grid sm:grid-cols-2 gap-5">
+              <div className="grid sm:grid-cols-2 gap-6">
                 <div
                   style={{
                     position: "absolute",
@@ -234,7 +234,7 @@ export default function Contact() {
                     type="text"
                     placeholder="Your name"
                     {...register("name")}
-                    className="w-full border-0 border-b border-slate-200 bg-transparent px-0 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-orange-600 focus:outline-none"
                   />
 
                   {errors.name && (
@@ -253,7 +253,7 @@ export default function Contact() {
                     type="email"
                     placeholder="you@company.com"
                     {...register("email")}
-                    className="w-full border-0 border-b border-slate-200 bg-transparent px-0 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-orange-600 focus:outline-none"
                   />
 
                   {errors.email && (
@@ -272,7 +272,7 @@ export default function Contact() {
                   type="text"
                   placeholder="What's this about?"
                   {...register("subject")}
-                  className="w-full border-0 border-b border-slate-200 bg-transparent px-0 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-orange-600 focus:outline-none"
                 />
 
                 {errors.subject && (
@@ -290,7 +290,7 @@ export default function Contact() {
                   rows={5}
                   placeholder="Tell us what's going on"
                   {...register("message")}
-                  className="w-full resize-none border-0 border-b border-slate-200 bg-transparent px-0 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+                  className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-orange-600 focus:outline-none"
                 />
 
                 {errors.message && (
@@ -309,7 +309,7 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={!token || isSubmitting}
-                className="mt-2 w-full rounded-lg bg-orange-600 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
+                className="w-full rounded-md bg-orange-600 py-3 text-sm font-semibold text-white transition hover:bg-orange-700 disabled:opacity-50"
               >
                 {isSubmitting ? "Sending..." : "Send message"}
               </button>

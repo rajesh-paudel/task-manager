@@ -53,7 +53,7 @@ const tiers = [
 
 export default function Pricing() {
   return (
-    <main id="main-content" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <main id="main-content" className="bg-white font-sans">
       <Helmet>
         <title>Pricing | TaskPulse</title>
         <meta
@@ -107,65 +107,70 @@ export default function Pricing() {
           })}
         </script>
       </Helmet>
-      <div className="max-w-lg mx-auto text-center">
-        <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
-          Simple pricing, no surprises
-        </h1>
-        <p className="mt-3 text-sm text-slate-500 leading-relaxed">
-          Start free. Upgrade only when your team actually needs to.
-        </p>
-      </div>
+      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-sm font-medium uppercase tracking-widest text-orange-600">
+            Pricing
+          </p>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+            Simple pricing, no surprises
+          </h1>
+          <p className="mt-4 text-lg text-slate-500">
+            Start free. Upgrade only when your team actually needs to.
+          </p>
+        </div>
 
-      <div className="mt-12 grid sm:grid-cols-3 gap-6">
-        {tiers.map((tier) => (
-          <div
-            key={tier.name}
-            className={`rounded-2xl p-6 flex flex-col ${
-              tier.highlighted
-                ? "border-2 border-orange-600 bg-white"
-                : "border border-slate-200 bg-white"
-            }`}
-          >
-            {tier.highlighted && (
-              <span className="self-start mb-3 text-[11px] font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">
-                Most popular
-              </span>
-            )}
-            <h3 className="text-sm font-semibold text-slate-900">
-              {tier.name}
-            </h3>
-            <div className="mt-2 flex items-baseline gap-1">
-              <span className="text-3xl font-semibold text-slate-900 tracking-tight">
-                {tier.price}
-              </span>
-              <span className="text-xs text-slate-400">{tier.period}</span>
-            </div>
-            <p className="mt-2 text-sm text-slate-500">{tier.description}</p>
-
-            <ul className="mt-6 space-y-2.5 flex-1">
-              {tier.features.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-start gap-2 text-sm text-slate-600"
-                >
-                  <Check className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-
-            <Link
-              to="/register"
-              className={`mt-7 text-center py-2.5 rounded-lg text-sm font-medium ${
+        <div className="mt-16 grid gap-6 sm:grid-cols-3">
+          {tiers.map((tier) => (
+            <div
+              key={tier.name}
+              className={`flex flex-col rounded-2xl border p-8 ${
                 tier.highlighted
-                  ? "text-white bg-orange-600 hover:bg-orange-700"
-                  : "text-slate-900 bg-slate-100 hover:bg-slate-200"
+                  ? "border-2 border-orange-600"
+                  : "border border-slate-200"
               }`}
             >
-              {tier.cta}
-            </Link>
-          </div>
-        ))}
+              {tier.highlighted && (
+                <span className="mb-4 self-start rounded-full bg-orange-600 px-2.5 py-1 text-[11px] font-semibold text-white">
+                  Most popular
+                </span>
+              )}
+              <h3 className="text-sm font-semibold text-slate-900">
+                {tier.name}
+              </h3>
+              <div className="mt-2 flex items-baseline gap-1">
+                <span className="text-4xl font-semibold tracking-tight text-slate-900">
+                  {tier.price}
+                </span>
+                <span className="text-xs text-slate-400">{tier.period}</span>
+              </div>
+              <p className="mt-2 text-sm text-slate-500">{tier.description}</p>
+
+              <ul className="mt-6 flex-1 space-y-2.5">
+                {tier.features.map((feature) => (
+                  <li
+                    key={feature}
+                    className="flex items-start gap-2 text-sm text-slate-600"
+                  >
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-orange-600" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                to="/register"
+                className={`mt-7 rounded-md py-2.5 text-center text-sm font-semibold transition ${
+                  tier.highlighted
+                    ? "bg-orange-600 text-white hover:bg-orange-700"
+                    : "border border-slate-300 text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                {tier.cta}
+              </Link>
+            </div>
+          ))}
+        </div>
       </div>
     </main>
   );
