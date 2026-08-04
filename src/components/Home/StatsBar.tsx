@@ -11,8 +11,8 @@ interface Stat {
 const stats: Stat[] = [
   { value: 2400, suffix: "+", label: "Teams onboarded" },
   { value: 1.8, decimals: 1, suffix: "M", label: "Tasks completed" },
-  { value: 99.9, decimals: 1, suffix: "%", label: "Uptime guaranteed" },
-  { value: 4.8, decimals: 1, suffix: "/5", label: "Average rating" },
+  { value: 99.9, decimals: 1, suffix: "%", label: "Uptime" },
+  { value: 4, suffix: ".8/5", label: "Average rating" },
 ];
 
 function CountUp({ value, decimals = 0, suffix = "" }: Omit<Stat, "label">) {
@@ -24,7 +24,7 @@ function CountUp({ value, decimals = 0, suffix = "" }: Omit<Stat, "label">) {
     if (!inView) return;
     let raf = 0;
     const start = performance.now();
-    const duration = 1500;
+    const duration = 1200;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
       const eased = 1 - Math.pow(1 - t, 3);
@@ -51,18 +51,16 @@ function CountUp({ value, decimals = 0, suffix = "" }: Omit<Stat, "label">) {
 
 export default function StatsBar() {
   return (
-    <section className="border-y border-slate-200 bg-slate-50/80">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-10 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <p className="bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent">
-                <CountUp {...stat} />
-              </p>
-              <p className="mt-2 text-sm font-medium text-slate-500">{stat.label}</p>
-            </div>
-          ))}
-        </div>
+    <section className="border-y border-slate-200 border-t-0 bg-slate-50/60">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-y-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
+        {stats.map((stat) => (
+          <div key={stat.label} className="text-center">
+            <p className="text-3xl font-semibold tracking-tight text-slate-900">
+              <CountUp {...stat} />
+            </p>
+            <p className="mt-2 text-sm text-slate-500">{stat.label}</p>
+          </div>
+        ))}
       </div>
     </section>
   );
