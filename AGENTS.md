@@ -23,6 +23,8 @@ A task management web app built with React + TypeScript. Features Firebase authe
 | `npm run dev` | Start dev server |
 | `npm run build` | Type-check + build |
 | `npm run lint` | Run ESLint |
+| `npm test` | Run tests (watch mode) |
+| `npm run test:coverage` | Run tests with coverage report |
 | `npm run preview` | Preview production build |
 
 ## Project Structure
@@ -38,9 +40,17 @@ src/
 ├── hooks/          # useTasksSync, useEditableField
 ├── Pages/          # Home, Login, Register, Profile, Contact, About, Pricing, NotFound
 ├── store/          # Redux: authSlice, taskSlice, tasksSelectors, store
+├── test/           # Vitest setup (jest-dom matchers)
+├── __tests__/      # Unit tests (Vitest + React Testing Library)
 ├── types/          # task.ts, user.ts
 └── utils/          # firebaseConfig, cloudinary, dateHelpers
 ```
+
+## Testing Conventions
+- Tests live in `src/__tests__/` (Vitest runner, jsdom environment, globals enabled)
+- Pure logic (utils, reducers, selectors) → plain Vitest unit tests; components → React Testing Library (`render`/`screen`/`userEvent`)
+- Tests must never require Firebase credentials — mock `firebase/database` with `vi.mock` when testing api layer functions
+- `npm run build` typechecks test files too (`tsc -b` includes `src/`)
 
 ## Architecture & Conventions
 - Routes are **lazy-loaded** with `React.lazy` + `Suspense`

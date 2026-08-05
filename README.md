@@ -15,6 +15,7 @@ A task management web app built with React 19, TypeScript, and Firebase.
 - **Image Upload:** Cloudinary
 - **Bot Protection:** Cloudflare Turnstile
 - **SEO:** react-helmet-async
+- **Testing:** Vitest + React Testing Library
 
 ## Features
 
@@ -45,7 +46,22 @@ Fill in the required values in `.env` (see `.env.example` for all needed keys).
 | `npm run dev`       | Start dev server            |
 | `npm run build`     | Type-check + build          |
 | `npm run lint`      | Run ESLint                  |
+| `npm test`          | Run tests (watch mode)      |
+| `npm run test:coverage` | Run tests + coverage report |
 | `npm run preview`   | Preview production build    |
+
+## Testing
+
+```bash
+npm test              # watch mode
+npm run test:coverage # run once with coverage report
+```
+
+Tests live in `src/__tests__/`. Pure logic (utils, Redux reducers, selectors) is tested with Vitest; components use React Testing Library. No Firebase credentials are needed — the tested code paths don't touch the real database.
+
+## CI
+
+GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck, tests, and the production build on every push/PR to `main`.
 
 ## Environment Variables
 
