@@ -191,11 +191,6 @@ export default function Register() {
                 placeholder="••••••••"
                 className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-orange-600 focus:outline-none"
               />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.password.message}
-                </p>
-              )}
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
@@ -209,6 +204,11 @@ export default function Register() {
                 )}
               </button>
             </div>
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
           <button
