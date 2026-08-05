@@ -8,7 +8,7 @@ import TaskDetailsModal from "./TaskDetailModal";
 import { createTask, updateTask, deleteTask } from "../../api/tasks";
 import { startOfDay, isOverdue } from "../../utils/dateHelpers";
 import { useAppSelector } from "../../store/store";
-
+import Sidebar from "./DashboardSidebar";
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MAX_CHIPS = 3;
 
