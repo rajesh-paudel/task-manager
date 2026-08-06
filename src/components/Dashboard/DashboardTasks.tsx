@@ -8,6 +8,7 @@ import {
   Loader2,
   Search,
   Download,
+  Upload,
 } from "lucide-react";
 
 import type { NewTask, Task, TaskPriority, TaskStatus } from "../../types/task";
@@ -17,7 +18,8 @@ import {
 } from "../../store/tasksSelectors";
 import TaskModal from "./TaskModal";
 import { useOutletContext } from "react-router-dom";
-import { createTask, updateTask, deleteTask } from "../../api/tasks";
+import { createTask, updateTask, deleteTask, importTasks } from "../../api/tasks";
+import { parseTasksJson } from "../../utils/taskImport";
 import { getDueLabel, isOverdue } from "../../utils/dateHelpers";
 import { useAppSelector } from "../../store/store";
 import { useSearchParams } from "react-router-dom";
@@ -64,6 +66,53 @@ export default function Tasks() {
   const [exportScope, setExportScope] = useState<"all" | "current">("current");
   const [exportFormat, setExportFormat] = useState<"json" | "csv">("json");
 
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importMessage, setImportMessage] = useState<{
+    text: string;
+    isError: boolean;
+  } | null>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
+
+  const openImportModal = () => {
+    setImportFile(null);
+    setImportMessage(null);
+    setImportModalOpen(true);
+  };
+
+  const handleImport = async () => {
+    if (!importFile || !userProfile) return;
+    setImportLoading(true);
+    setImportMessage(null);
+    try {
+      const content = await importFile.text();
+      const { tasks, skipped } = parseTasksJson(content);
+      if (tasks.length === 0) {
+        setImportMessage({
+          text: "No valid tasks found in the file.",
+          isError: true,
+        });
+        return;
+      }
+      await importTasks(userProfile.uid, tasks);
+      setImportMessage({
+        text: `Imported ${tasks.length} task${tasks.length === 1 ? "" : "s"}${
+          skipped > 0 ? `, skipped ${skipped}` : ""
+        }.`,
+        isError: false,
+      });
+    } catch (err: unknown) {
+      setImportMessage({
+        text: getErrorMessage(err, "Couldn't import tasks. Try again."),
+        isError: true,
+      });
+    } finally {
+      setImportLoading(false);
+      if (importFileRef.current) importFileRef.current.value = "";
+    }
+  };
+
   const openCreateModal = useCallback(() => {
     setEditingTask(null);
     setModalOpen(true);
@@ -79,14 +128,18 @@ export default function Tasks() {
         searchRef.current?.focus();
       }
 
-      if (e.key === "n" && !modalOpen && !detailsTask && !exportModalOpen) {
+      if (e.key === "n" &&
+        !modalOpen &&
+        !detailsTask &&
+        !exportModalOpen &&
+        !importModalOpen) {
         e.preventDefault();
         openCreateModal();
       }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [modalOpen, detailsTask, exportModalOpen, openCreateModal]);
+  }, [modalOpen, detailsTask, exportModalOpen, importModalOpen, openCreateModal]);
 
   const openEditModal = (task: Task) => {
     setEditingTask(task);
@@ -362,6 +415,15 @@ export default function Tasks() {
         >
           <Download className="h-4 w-4" />
           Export
+        </button>
+
+        {/* Import */}
+        <button
+          onClick={openImportModal}
+          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50"
+        >
+          <Upload className="h-4 w-4" />
+          Import
         </button>
       </div>
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
@@ -648,6 +710,88 @@ export default function Tasks() {
                 className="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700"
               >
                 Export
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {importModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="import-modal-title"
+          onClick={() => setImportModalOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setImportModalOpen(false);
+          }}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3
+              id="import-modal-title"
+              className="text-lg font-semibold text-slate-900"
+            >
+              Import tasks from JSON
+            </h3>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Choose a JSON file of tasks. New tasks are added to your existing
+              list.
+            </p>
+
+            <input
+              ref={importFileRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={(e) => {
+                setImportMessage(null);
+                setImportFile(e.target.files?.[0] ?? null);
+              }}
+            />
+
+            <button
+              onClick={() => importFileRef.current?.click()}
+              className="mt-4 w-full flex flex-col items-center justify-center gap-2 px-4 py-8 border-2 border-dashed border-slate-200 rounded-lg hover:border-orange-400"
+            >
+              <Upload className="h-6 w-6 text-slate-400" />
+              <span className="text-sm text-slate-600">
+                {importFile ? importFile.name : "Choose a JSON file"}
+              </span>
+            </button>
+
+            {importMessage && (
+              <p
+                className={`mt-4 text-sm ${
+                  importMessage.isError
+                    ? "text-red-600"
+                    : "text-emerald-600"
+                }`}
+              >
+                {importMessage.text}
+              </p>
+            )}
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setImportModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleImport}
+                disabled={!importFile || importLoading}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {importLoading && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                Import
               </button>
             </div>
           </div>

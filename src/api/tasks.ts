@@ -44,6 +44,11 @@ export async function updateTask(
   return update(ref(db, `tasks/${uid}/${task.id}`), updates);
 }
 
+//import multiple tasks at once
+export function importTasks(uid: string, tasks: NewTask[]) {
+  return Promise.all(tasks.map((task) => createTask(uid, task)));
+}
+
 //delete a task
 export function deleteTask(uid: string, taskId: string) {
   return remove(ref(db, `tasks/${uid}/${taskId}`));
