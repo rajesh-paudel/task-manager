@@ -26,7 +26,7 @@ export default function CTABanner() {
             </Link>
             <Link
               to="/pricing"
-              className="inline-flex w-full items-center justify-center rounded-md border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-white sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-md border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-white sm:w-auto dark:hover:text-gray-600"
             >
               Compare plans
             </Link>
