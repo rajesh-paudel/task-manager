@@ -1,5 +1,13 @@
 # Task Manager
 
+## Working Principles
+- **Understand before you act:** read the task and the code it touches, trace the real flow end to end, then write code
+- **Reuse before you build:** check existing helpers, hooks, and patterns in this repo first — never re-write what's already here
+- **Build as little as possible:** no abstractions or boilerplate that weren't asked for; the best code is the code never written
+- **Fix root causes, not symptoms:** if a bug names a symptom, grep every caller and fix the shared function once
+- **Deletion over addition, boring over clever:** smallest diff that works wins
+- **Verify before finishing:** run `npm run build` and `npm test` (or add a small test if you changed non-trivial logic) — never claim a change is done without checking it
+
 ## Description
 A task management web app built with React + TypeScript. Features Firebase authentication, realtime database, role-based dashboards (user/admin), task CRUD, and dark/light theme.
 
