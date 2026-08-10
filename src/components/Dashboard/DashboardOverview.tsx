@@ -31,7 +31,7 @@ export default function Overview() {
     () => getWeeklyCompletionCounts(tasks),
     [tasks],
   );
-
+  const isDark = document.documentElement.classList.contains("dark");
   const statusBreakdown = [
     { name: "Done", value: taskStats.done, color: "#ea580c" },
     { name: "In progress", value: taskStats.inProgress, color: "#fdba74" },
@@ -103,9 +103,9 @@ export default function Overview() {
                   allowDecimals={false}
                 />
                 <Tooltip
-                  cursor={{ fill: "#f8fafc" }}
+                  cursor={{ fill: isDark ? "#1e293b" : "#f8fafc" }}
                   contentStyle={{
-                    border: "1px solid #e2e8f0",
+                    border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
                     borderRadius: 8,
                     fontSize: 12,
                   }}
