@@ -55,8 +55,8 @@ export default function Hero() {
             variants={itemVariants}
             className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-500"
           >
-            Plan, track, and ship your team's work in one focused workspace. Live
-            sync across every screen, without the noise.
+            Plan, track, and ship your team's work in one focused workspace.
+            Live sync across every screen, without the noise.
           </motion.p>
 
           <motion.div
@@ -85,12 +85,8 @@ export default function Hero() {
             Free for teams up to 10 · No credit card required
           </motion.p>
         </motion.div>
-
         {/* Product screenshot */}
-        <motion.div
-          variants={itemVariants}
-          className="relative mx-auto mt-16 max-w-4xl"
-        >
+        <div className="relative mx-auto mt-16 max-w-4xl">
           <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-900/5 shadow-2xl shadow-slate-900/10 dark:shadow-black/40">
             <img
               src={theme === "dark" ? dashboardDark : dashboardLight}
@@ -99,7 +95,7 @@ export default function Hero() {
               loading="lazy"
             />
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
