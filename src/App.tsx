@@ -49,6 +49,9 @@ export default function App() {
   const hideLayout = location.pathname.startsWith("/dashboard");
   const { userProfile, loading } = useAppSelector((state) => state.auth);
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+  useEffect(() => {
     let unsubscribeProfile: (() => void) | undefined;
 
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
