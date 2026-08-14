@@ -71,7 +71,7 @@ export default function TaskModal({
     formState: { errors, isSubmitting },
   } = useForm<TaskForm>({
     resolver: zodResolver(taskSchema),
-    mode: "onTouched",
+
     defaultValues: {
       title: "",
       description: "",
@@ -126,7 +126,9 @@ export default function TaskModal({
       reset();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't save task. Try again.");
+      setError(
+        err instanceof Error ? err.message : "Couldn't save task. Try again.",
+      );
     }
   };
 
