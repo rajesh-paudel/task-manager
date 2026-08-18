@@ -21,6 +21,7 @@ import { useOutletContext } from "react-router-dom";
 import { createTask, updateTask, deleteTask, importTasks } from "../../api/tasks";
 import { parseTasksJson } from "../../utils/taskImport";
 import { getDueLabel, isOverdue } from "../../utils/dateHelpers";
+import { getErrorMessage } from "../../utils/firebaseErrors";
 import { useAppSelector } from "../../store/store";
 import { useSearchParams } from "react-router-dom";
 import PriorityBadge from "../ui/PriorityBadge";
@@ -31,10 +32,6 @@ const columns: { key: TaskStatus; label: string }[] = [
   { key: "in_progress", label: "In progress" },
   { key: "done", label: "Done" },
 ];
-
-function getErrorMessage(err: unknown, fallback: string) {
-  return err instanceof Error ? err.message : fallback;
-}
 
 type SortBy = "newest" | "dueDate";
 interface DashboardContextType {

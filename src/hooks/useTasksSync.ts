@@ -6,8 +6,7 @@ import {
   tasksError,
   tasksReceived,
 } from "../store/taskSlice";
-import { db } from "../utils/firebaseConfig";
-import { onValue, ref } from "firebase/database";
+import { subscribeToTasks } from "../api/tasks";
 
 export const useTasksSync = (uid: string | undefined) => {
   const dispatch = useAppDispatch();
@@ -17,15 +16,10 @@ export const useTasksSync = (uid: string | undefined) => {
       return;
     }
     dispatch(tasksLoading());
-    const taskRef = ref(db, `/tasks/${uid}`);
-    const unsubscribe = onValue(
-      taskRef,
-      (snapshot) => {
-        dispatch(tasksReceived(snapshot.val() || {}));
-      },
-      (err) => {
-        dispatch(tasksError(err.message));
-      },
+    const unsubscribe = subscribeToTasks(
+      uid,
+      (tasks) => dispatch(tasksReceived(tasks)),
+      (message) => dispatch(tasksError(message)),
     );
     return () => unsubscribe();
   }, [uid, dispatch]);

@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
-import { ref, get, remove, update } from "firebase/database";
-import { db } from "../../utils/firebaseConfig";
+import { fetchAllUsers, updateUserRole } from "../../api/users";
+import {
+  deleteContactMessage,
+  fetchContactMessages,
+} from "../../api/forms";
+import { getErrorMessage } from "../../utils/firebaseErrors";
 import { useAppSelector } from "../../store/store";
 import {
   Users,
@@ -13,7 +17,6 @@ import {
 } from "lucide-react";
 import type { UserProfile } from "../../types/user";
 import type { ContactMessage } from "../../types/contact";
-import { isUserProfile, isContactMessage } from "../../utils/typeGuards";
 import profilePlaceholder from "../../assets/profilePlaceholder.png";
 
 function formatDate(timestamp: number) {
@@ -46,15 +49,9 @@ export default function DashboardAdmin() {
 
   const fetchUsers = async () => {
     try {
-      const snapshot = await get(ref(db, "users"));
-      const data = snapshot.val() || {};
-      const list: UserProfile[] = Object.values(data).filter(isUserProfile);
-      list.sort((a, b) => b.createdAt - a.createdAt);
-      setUsers(list);
+      setUsers(await fetchAllUsers());
     } catch (err) {
-      setUsersError(
-        err instanceof Error ? err.message : "Couldn't load users.",
-      );
+      setUsersError(getErrorMessage(err, "Couldn't load users."));
     } finally {
       setUsersLoading(false);
     }
@@ -62,28 +59,9 @@ export default function DashboardAdmin() {
 
   const fetchMessages = async () => {
     try {
-      const snapshot = await get(ref(db, "forms"));
-      const data = snapshot.val() || {};
-      const list: ContactMessage[] = Object.entries(data).flatMap(
-        ([id, value]) => {
-          if (!isContactMessage(value)) return [];
-          const message: ContactMessage = {
-            id,
-            name: value.name,
-            email: value.email,
-            subject: value.subject,
-            message: value.message,
-            createdAt: value.createdAt,
-          };
-          return [message];
-        },
-      );
-      list.sort((a, b) => b.createdAt - a.createdAt);
-      setMessages(list);
+      setMessages(await fetchContactMessages());
     } catch (err) {
-      setMessagesError(
-        err instanceof Error ? err.message : "Couldn't load messages.",
-      );
+      setMessagesError(getErrorMessage(err, "Couldn't load messages."));
     } finally {
       setMessagesLoading(false);
     }
@@ -105,15 +83,13 @@ export default function DashboardAdmin() {
     e.stopPropagation();
 
     try {
-      await remove(ref(db, `forms/${id}`));
+      await deleteContactMessage(id);
 
       setMessages((prev) => {
         return prev.filter((msg) => msg.id !== id);
       });
     } catch (err) {
-      setMessagesError(
-        err instanceof Error ? err.message : "Failed to delete message.",
-      );
+      setMessagesError(getErrorMessage(err, "Failed to delete message."));
     }
   };
 
@@ -122,7 +98,7 @@ export default function DashboardAdmin() {
     setPromoting(true);
     setPromoteError("");
     try {
-      await update(ref(db, `users/${promotingUser.uid}`), { role: "admin" });
+      await updateUserRole(promotingUser.uid, "admin");
       setUsers((prev) =>
         prev.map((u) =>
           u.uid === promotingUser.uid ? { ...u, role: "admin" } : u,
@@ -130,11 +106,7 @@ export default function DashboardAdmin() {
       );
       setPromotingUser(null);
     } catch (err) {
-      setPromoteError(
-        err instanceof Error
-          ? err.message
-          : "Couldn't promote this user. Try again.",
-      );
+      setPromoteError(getErrorMessage(err, "Couldn't promote this user. Try again."));
     } finally {
       setPromoting(false);
     }

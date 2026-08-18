@@ -1,7 +1,32 @@
-import { ref, push, set, update, remove } from "firebase/database";
+import {
+  onValue,
+  ref,
+  push,
+  set,
+  update,
+  remove,
+  type Unsubscribe,
+} from "firebase/database";
 import type { NewTask } from "../types/task";
 import { db } from "../utils/firebaseConfig";
 import type { Task } from "../types/task";
+
+//subscribe to realtime task updates
+export function subscribeToTasks(
+  uid: string,
+  onData: (tasks: Record<string, Task>) => void,
+  onError: (message: string) => void,
+): Unsubscribe {
+  return onValue(
+    ref(db, `/tasks/${uid}`),
+    (snapshot) => {
+      onData(snapshot.val() || {});
+    },
+    (err) => {
+      onError(err.message);
+    },
+  );
+}
 
 //create a task
 export const createTask = (uid: string, task: NewTask) => {

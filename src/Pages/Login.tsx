@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { auth } from "../utils/firebaseConfig";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { login } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import { CheckSquare, Eye, EyeOff } from "lucide-react";
 import { Helmet } from "react-helmet-async";
@@ -33,7 +32,7 @@ export default function Login() {
   const handleLogin = async (data: LoginForm) => {
     setError("");
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      await login(data.email, data.password);
       reset();
       navigate("/dashboard");
     } catch {

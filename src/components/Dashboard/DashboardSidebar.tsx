@@ -11,9 +11,8 @@ import {
 } from "lucide-react";
 import { RiAdminFill } from "react-icons/ri";
 import { useAppDispatch, useAppSelector } from "../../store/store";
-import { signOut } from "firebase/auth";
+import { logout } from "../../api/auth";
 import profilePlaceholder from "../../assets/profilePlaceholder.png";
-import { auth } from "../../utils/firebaseConfig";
 import { clearProfile } from "../../store/authSlice";
 
 export default function Sidebar() {
@@ -43,7 +42,7 @@ export default function Sidebar() {
   const closeMobile = () => setMobileOpen(false);
 
   const handleSignOut = () => {
-    signOut(auth).then(() => {
+    logout().then(() => {
       dispatch(clearProfile());
       navigate("/login");
     });

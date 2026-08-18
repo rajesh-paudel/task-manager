@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
-import { auth, db } from "./utils/firebaseConfig";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { ref, onValue } from "firebase/database";
+import { subscribeToAuthState, logout } from "./api/auth";
+import { subscribeToUserProfile } from "./api/users";
 import {
   Routes,
   Route,
@@ -12,7 +11,6 @@ import {
 import { useAppDispatch } from "./store/store";
 import { useAppSelector } from "./store/store";
 import { setProfile, clearProfile } from "./store/authSlice";
-import { isUserProfile } from "./utils/typeGuards";
 
 import { ThemeProvider } from "./context/ThemeContext";
 import Navbar from "./components/layout/Navbar";
@@ -54,18 +52,12 @@ export default function App() {
   useEffect(() => {
     let unsubscribeProfile: (() => void) | undefined;
 
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = subscribeToAuthState((user) => {
       if (unsubscribeProfile) unsubscribeProfile();
 
       if (user) {
-        const userRef = ref(db, `users/${user.uid}`);
-        unsubscribeProfile = onValue(userRef, (snapshot) => {
-          const profileData = snapshot.val();
-          if (isUserProfile(profileData)) {
-            dispatch(setProfile(profileData));
-          } else {
-            dispatch(clearProfile());
-          }
+        unsubscribeProfile = subscribeToUserProfile(user.uid, (profile) => {
+          dispatch(profile ? setProfile(profile) : clearProfile());
         });
       } else {
         dispatch(clearProfile());
@@ -79,7 +71,7 @@ export default function App() {
   }, [dispatch]);
 
   const handleLogout = () => {
-    signOut(auth).then(() => {
+    logout().then(() => {
       dispatch(clearProfile());
       navigate("/login");
     });

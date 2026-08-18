@@ -1,15 +1,10 @@
 import React, { useRef, useState } from "react";
-import { ref, update, remove } from "firebase/database";
-import {
-  deleteUser,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-  updatePassword,
-} from "firebase/auth";
-import { FirebaseError } from "firebase/app";
 import { z } from "zod";
-import { auth, db } from "../utils/firebaseConfig";
 import { uploadImageToCloudinary } from "../utils/cloudinary";
+import { changePassword, deleteAccount, reauthenticate } from "../api/auth";
+import { deleteUserData, updateUserProfile } from "../api/users";
+import { getAuthErrorMessage } from "../utils/firebaseErrors";
+import { useEditableField } from "../hooks/useEditableField";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { setProfile } from "../store/authSlice";
 import {
@@ -65,48 +60,6 @@ const deleteAccountSchema = z.object({
 });
 
 type DeleteAccountForm = z.infer<typeof deleteAccountSchema>;
-
-function useEditableField(
-  initialValue: string,
-  onSave: (value: string) => Promise<void>,
-) {
-  const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(initialValue);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [prevInitial, setPrevInitial] = useState(initialValue);
-
-  if (!editing && prevInitial !== initialValue) {
-    setPrevInitial(initialValue);
-    setValue(initialValue);
-  }
-
-  const start = () => {
-    setValue(initialValue);
-    setError("");
-    setEditing(true);
-  };
-
-  const cancel = () => {
-    setEditing(false);
-    setError("");
-  };
-
-  const commit = async () => {
-    setSaving(true);
-    setError("");
-    try {
-      await onSave(value.trim());
-      setEditing(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't save. Try again.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return { editing, value, setValue, saving, error, start, cancel, commit };
-}
 
 interface EditableFieldProps {
   label: string;
@@ -274,35 +227,27 @@ export default function Profile() {
     setDeleteError("");
 
     try {
-      const user = auth.currentUser;
-
-      if (!user?.email) {
+      if (!userProfile) {
         throw new Error("User is not signed in.");
       }
 
       // Reauthenticate
-      const credential = EmailAuthProvider.credential(
-        user.email,
-        data.password,
-      );
-
-      await reauthenticateWithCredential(user, credential);
+      await reauthenticate(data.password);
 
       // Delete user's data
-      await remove(ref(db, `tasks/${user.uid}`));
-      await remove(ref(db, `users/${user.uid}`));
+      await deleteUserData(userProfile.uid);
       // Delete Firebase Auth account
-      await deleteUser(user);
+      await deleteAccount();
       resetDelete();
       navigate("/login");
     } catch (err) {
-      setDeleteError(getErrorMessage(err));
+      setDeleteError(getAuthErrorMessage(err));
     }
   };
 
   //handling profile field update
   const saveField = async (field: "name" | "title" | "bio", value: string) => {
-    await update(ref(db, `users/${userProfile.uid}`), { [field]: value });
+    await updateUserProfile(userProfile.uid, { [field]: value });
     dispatch(setProfile({ ...userProfile, [field]: value }));
   };
 
@@ -324,7 +269,7 @@ export default function Profile() {
     setPhotoError("");
     try {
       const url = await uploadImageToCloudinary(file);
-      await update(ref(db, `users/${userProfile.uid}`), { profileUrl: url });
+      await updateUserProfile(userProfile.uid, { profileUrl: url });
       dispatch(setProfile({ ...userProfile, profileUrl: url }));
     } catch (err) {
       setPhotoError(
@@ -336,62 +281,18 @@ export default function Profile() {
     }
   };
 
-  //handle firebase errros and translate to user friendly messages
-  function getErrorMessage(err: unknown): string {
-    if (!(err instanceof FirebaseError)) {
-      return "Something went wrong. Please try again.";
-    }
-
-    switch (err.code) {
-      case "auth/invalid-credential":
-        return "Current password is incorrect.";
-
-      case "auth/wrong-password":
-        return "Current password is incorrect.";
-
-      case "auth/weak-password":
-        return "Your new password is too weak.";
-
-      case "auth/requires-recent-login":
-        return "Please sign in again and try changing your password.";
-
-      case "auth/too-many-requests":
-        return "Too many attempts. Please try again later.";
-
-      case "auth/network-request-failed":
-        return "Network error. Check your internet connection.";
-
-      default:
-        return err.message || "Something went wrong.";
-    }
-  }
-
   //handling password change
   const handleNewPassword = async (data: ChangePasswordForm) => {
     setChangePasswordError("");
 
     try {
-      const user = auth.currentUser;
-
-      if (!user?.email) {
-        throw new Error("User is not signed in.");
-      }
-      const credential = EmailAuthProvider.credential(
-        user.email,
-        data.currentPassword,
-      );
-
-      // Verify current password
-      await reauthenticateWithCredential(user, credential);
-
-      // Update password
-      await updatePassword(user, data.newPassword);
+      await changePassword(data.currentPassword, data.newPassword);
 
       reset();
       setChangePasswordError("");
       setPasswordDialogOpen(false);
     } catch (err) {
-      setChangePasswordError(getErrorMessage(err));
+      setChangePasswordError(getAuthErrorMessage(err));
     }
   };
 

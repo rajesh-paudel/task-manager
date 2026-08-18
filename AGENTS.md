@@ -38,7 +38,7 @@ A task management web app built with React + TypeScript. Features Firebase authe
 ## Project Structure
 ```
 src/
-├── api/            # Firebase interaction layer (CRUD functions)
+├── api/            # Firebase interaction layer (auth.ts, users.ts, tasks.ts, forms.ts)
 ├── assets/         # Static assets
 ├── components/     # Reusable components
 │   ├── layout/     # Navbar, Footer
@@ -69,7 +69,8 @@ src/
 - Theme toggling via `ThemeContext` with Tailwind dark mode classes
 - Components are **default-exported** function components, PascalCase filenames
 - Utilities/hooks use **named exports**, camelCase filenames
-- Never call Firebase (`onValue`, `ref`, `push`, etc.) directly in components — use `api/tasks.ts` functions and `useTasksSync` hook
+- Never call Firebase (`onValue`, `ref`, `push`, etc.) directly in components — all Firebase imports stay inside `src/api/` (auth.ts, users.ts, tasks.ts, forms.ts); use `useTasksSync` for task sync and `subscribeToUserProfile`/`subscribeToAuthState` for auth/profile listeners
+- Auth error messages come from `utils/firebaseErrors.ts` (`getAuthErrorMessage`, `getRegisterErrorMessage`, `getErrorMessage`)
 - Never use `@/` path aliases — relative imports only (e.g. `../types/user`)
 
 ## Component Location Rules

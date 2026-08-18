@@ -1,15 +1,14 @@
 import { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { FirebaseError } from "firebase/app";
 import { Eye, EyeOff, CheckSquare } from "lucide-react";
-import { auth } from "../utils/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SITE_URL } from "../utils/constants";
+import { register as registerUser } from "../api/auth";
 import { createUserProfile } from "../api/users";
+import { getRegisterErrorMessage } from "../utils/firebaseErrors";
 import { useAppDispatch } from "../store/store";
 import { setProfile } from "../store/authSlice";
 
@@ -50,11 +49,7 @@ export default function Register() {
   const handleRegister = async (data: RegisterForm) => {
     setError("");
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        data.email,
-        data.password,
-      );
+      const userCredential = await registerUser(data.email, data.password);
       const user = userCredential.user;
 
       const profile = await createUserProfile(user.uid, data.name, data.email);
@@ -62,23 +57,7 @@ export default function Register() {
       reset();
       navigate("/dashboard");
     } catch (err) {
-      const code = err instanceof FirebaseError ? err.code : "";
-      switch (code) {
-        case "auth/email-already-in-use":
-          setError("An account with this email already exists.");
-          break;
-
-        case "auth/invalid-email":
-          setError("Invalid email address.");
-          break;
-
-        case "auth/weak-password":
-          setError("Password is too weak.");
-          break;
-
-        default:
-          setError("Registration failed.");
-      }
+      setError(getRegisterErrorMessage(err));
     }
   };
 
