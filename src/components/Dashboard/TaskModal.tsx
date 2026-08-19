@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
 
 import type { NewTask, Task, TaskPriority, TaskStatus } from "../../types/task";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
+import Modal from "../ui/Modal";
+import Input from "../ui/Input";
+import Textarea from "../ui/Textarea";
+import Button from "../ui/Button";
 interface TaskModalProps {
   open: boolean;
   onClose: () => void;
@@ -133,167 +136,142 @@ export default function TaskModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto bg-slate-900/40 px-4 py-6 sm:py-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="task-modal-title"
-      onKeyDown={(e) => {
-        if (e.key === "Escape") onClose();
-      }}
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={isEditing ? "Edit task" : "New task"}
+      titleId="task-modal-title"
     >
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between">
-          <h2
-            id="task-modal-title"
-            className="text-lg font-semibold text-slate-900"
-          >
-            {isEditing ? "Edit task" : "New task"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
+      {error && (
+        <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit(handleSave)} className="space-y-5">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            Title
+          </label>
+          <Input
+            autoFocus
+            invalid={!!errors.title}
+            {...register("title")}
+            placeholder="Task title"
+          />
+          {errors.title && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.title.message}
+            </p>
+          )}
         </div>
 
-        {error && (
-          <div className="mt-4 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-            {error}
-          </div>
-        )}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            Description
+          </label>
+          <Textarea
+            rows={3}
+            invalid={!!errors.description}
+            {...register("description")}
+            placeholder="Optional details"
+          />
+          {errors.description && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.description.message}
+            </p>
+          )}
+        </div>
 
-        <form onSubmit={handleSubmit(handleSave)} className="mt-5 space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Title
-            </label>
-            <input
-              autoFocus
-              {...register("title")}
-              placeholder="Task title"
-              className="w-full px-0 py-2 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent"
-            />
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.title.message}
-              </p>
-            )}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Status
+          </label>
+          <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg p-1">
+            {statusOptions.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setValue("status", opt.value)}
+                className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
+                  status === opt.value
+                    ? "bg-white text-orange-600 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
+          {errors.status && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.status.message}
+            </p>
+          )}
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Description
-            </label>
-            <textarea
-              rows={3}
-              {...register("description")}
-              placeholder="Optional details"
-              className="w-full px-0 py-2 border-0 border-b border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-900 bg-transparent resize-none"
-            />
-            {errors.description && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.description.message}
-              </p>
-            )}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Priority
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {priorityOptions.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setValue("priority", opt.value)}
+                className={`flex items-center justify-center gap-1.5 text-xs font-medium py-1.5 rounded-lg border transition-colors ${
+                  priority === opt.value
+                    ? "border-orange-600 text-orange-600 bg-orange-50"
+                    : "border-slate-200 text-slate-500 hover:border-slate-300"
+                }`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${opt.dot}`} />
+                {opt.label}
+              </button>
+            ))}
           </div>
+          {errors.priority && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.priority.message}
+            </p>
+          )}
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Status
-            </label>
-            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg p-1">
-              {statusOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setValue("status", opt.value)}
-                  className={`flex-1 text-xs font-medium py-1.5 rounded-md ${
-                    status === opt.value
-                      ? "bg-white text-orange-600 shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-            {errors.status && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.status.message}
-              </p>
-            )}
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            Due date
+          </label>
+          <Input
+            type="date"
+            invalid={!!errors.dueDate}
+            {...register("dueDate")}
+          />
+          {errors.dueDate && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.dueDate.message}
+            </p>
+          )}
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Priority
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {priorityOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setValue("priority", opt.value)}
-                  className={`flex items-center justify-center gap-1.5 text-xs font-medium py-1.5 rounded-lg border ${
-                    priority === opt.value
-                      ? "border-orange-600 text-orange-600 bg-orange-50"
-                      : "border-slate-200 text-slate-500 hover:border-slate-300"
-                  }`}
-                >
-                  <span className={`h-1.5 w-1.5 rounded-full ${opt.dot}`} />
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-            {errors.priority && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.priority.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Due date
-            </label>
-            <input
-              type="date"
-              {...register("dueDate")}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-orange-500"
-            />
-            {errors.dueDate && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.dueDate.message}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50"
-            >
-              {isSubmitting
-                ? "Saving..."
-                : isEditing
-                  ? "Save changes"
-                  : "Create task"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="flex items-center justify-end gap-3 pt-2">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" loading={isSubmitting}>
+            {isSubmitting
+              ? "Saving..."
+              : isEditing
+                ? "Save changes"
+                : "Create task"}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }

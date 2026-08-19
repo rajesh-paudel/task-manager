@@ -58,7 +58,7 @@ export default function Features() {
       <div className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-3">
         {features.map(({ icon: Icon, title, description }, i) => (
           <Reveal key={title} delay={i * 0.05} className="h-full">
-            <div className="group h-full bg-white p-7 transition-colors hover:bg-slate-50">
+            <div className="group h-full bg-white p-7 transition-all duration-300 hover:bg-slate-50 hover:-translate-y-0.5 hover:shadow-lift">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50 text-orange-600">
                 <Icon className="h-5 w-5" />
               </div>

@@ -13,12 +13,12 @@ import {
 import { useAppSelector } from "../../store/store";
 import { selectAllTasks, selectTaskStats } from "../../store/tasksSelectors";
 import { getWeeklyCompletionCounts } from "../../utils/dateHelpers";
+import { useTheme } from "../../context/useTheme";
 import {
   CheckCircle2,
   Clock,
   AlertCircle,
   ListTodo,
-  Loader2,
 } from "lucide-react";
 
 export default function Overview() {
@@ -26,12 +26,13 @@ export default function Overview() {
   const tasksStatus = useAppSelector((state) => state.tasks.status);
   const tasks = useAppSelector(selectAllTasks);
   const taskStats = useAppSelector(selectTaskStats);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const weeklyCompletion = useMemo(
     () => getWeeklyCompletionCounts(tasks),
     [tasks],
   );
-  const isDark = document.documentElement.classList.contains("dark");
   const statusBreakdown = [
     { name: "Done", value: taskStats.done, color: "#ea580c" },
     { name: "In progress", value: taskStats.inProgress, color: "#fdba74" },
@@ -47,8 +48,21 @@ export default function Overview() {
 
   if (tasksStatus === "loading" || tasksStatus === "idle") {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="h-5 w-5 text-orange-600 animate-spin" />
+      <div className="min-h-screen max-w-5xl mx-auto px-6 sm:px-8 py-10">
+        <div className="h-7 w-56 bg-slate-200 animate-pulse rounded-md" />
+        <div className="mt-2 h-4 w-72 bg-slate-200 animate-pulse rounded-md" />
+        <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-24 bg-white border border-slate-200 rounded-xl animate-pulse"
+            />
+          ))}
+        </div>
+        <div className="mt-6 grid sm:grid-cols-3 gap-4">
+          <div className="sm:col-span-2 h-72 bg-white border border-slate-200 rounded-xl animate-pulse" />
+          <div className="h-72 bg-white border border-slate-200 rounded-xl animate-pulse" />
+        </div>
       </div>
     );
   }
@@ -69,7 +83,7 @@ export default function Overview() {
         {stats.map(({ label, value, icon: Icon }) => (
           <div
             key={label}
-            className="bg-white border border-slate-200 rounded-xl p-4"
+            className="bg-white border border-slate-200 rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift"
           >
             <Icon className="h-4 w-4 text-orange-600" />
             <p className="mt-3 text-2xl font-semibold text-slate-900">

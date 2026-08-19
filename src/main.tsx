@@ -6,12 +6,15 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store/store.ts";
 import { HelmetProvider } from "react-helmet-async";
+import { ToastProvider } from "./components/ui/Toast.tsx";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <HelmetProvider>
       <Provider store={store}>
         <BrowserRouter>
-          <App />
+          <ToastProvider>
+            <App />
+          </ToastProvider>
         </BrowserRouter>
       </Provider>
     </HelmetProvider>

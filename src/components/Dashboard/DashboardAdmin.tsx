@@ -18,6 +18,9 @@ import {
 import type { UserProfile } from "../../types/user";
 import type { ContactMessage } from "../../types/contact";
 import profilePlaceholder from "../../assets/profilePlaceholder.png";
+import Modal from "../ui/Modal";
+import Button from "../ui/Button";
+import { useToast } from "../../context/useToast";
 
 function formatDate(timestamp: number) {
   return new Date(timestamp).toLocaleDateString(undefined, {
@@ -29,6 +32,7 @@ function formatDate(timestamp: number) {
 
 export default function DashboardAdmin() {
   const currentUserId = useAppSelector((state) => state.auth.userProfile?.uid);
+  const { showToast } = useToast();
 
   const [activeTab, setActiveTab] = useState<"users" | "messages">("users");
 
@@ -88,6 +92,7 @@ export default function DashboardAdmin() {
       setMessages((prev) => {
         return prev.filter((msg) => msg.id !== id);
       });
+      showToast("Message deleted");
     } catch (err) {
       setMessagesError(getErrorMessage(err, "Failed to delete message."));
     }
@@ -105,6 +110,7 @@ export default function DashboardAdmin() {
         ),
       );
       setPromotingUser(null);
+      showToast(`${promotingUser.name} is now an admin`);
     } catch (err) {
       setPromoteError(getErrorMessage(err, "Couldn't promote this user. Try again."));
     } finally {
@@ -313,53 +319,36 @@ export default function DashboardAdmin() {
       )}
 
       {/* Promote confirmation */}
-      {promotingUser && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="promote-dialog-title"
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setPromotingUser(null);
-          }}
-        >
-          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
-            <h2
-              id="promote-dialog-title"
-              className="text-lg font-semibold text-slate-900"
-            >
-              Promote to admin?
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">
-              <span className="font-medium text-slate-700">
-                {promotingUser.name}
-              </span>{" "}
-              will gain full admin access, including viewing all users and
-              contact messages, and promoting others.
-            </p>
-            {promoteError && (
-              <p className="mt-3 text-sm text-red-600">{promoteError}</p>
-            )}
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setPromotingUser(null)}
-                disabled={promoting}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmPromote}
-                disabled={promoting}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg disabled:opacity-50"
-              >
-                {promoting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                {promoting ? "Promoting..." : "Promote to admin"}
-              </button>
-            </div>
-          </div>
+      <Modal
+        open={promotingUser !== null}
+        onClose={() => setPromotingUser(null)}
+        title="Promote to admin?"
+        titleId="promote-dialog-title"
+        description={
+          promotingUser
+            ? `${promotingUser.name} will gain full admin access, including viewing all users and contact messages, and promoting others.`
+            : undefined
+        }
+      >
+        {promoteError && (
+          <p className="text-sm text-red-600">{promoteError}</p>
+        )}
+        <div className="mt-4 flex justify-end gap-3">
+          <Button
+            variant="secondary"
+            onClick={() => setPromotingUser(null)}
+            disabled={promoting}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmPromote}
+            loading={promoting}
+          >
+            {promoting ? "Promoting..." : "Promote to admin"}
+          </Button>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

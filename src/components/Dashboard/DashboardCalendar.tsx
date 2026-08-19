@@ -8,6 +8,7 @@ import TaskDetailsModal from "./TaskDetailModal";
 import { createTask, updateTask, deleteTask } from "../../api/tasks";
 import { startOfDay, isOverdue } from "../../utils/dateHelpers";
 import { useAppSelector } from "../../store/store";
+import { useToast } from "../../context/useToast";
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MAX_CHIPS = 3;
 
@@ -22,6 +23,7 @@ export default function DashboardCalendar() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
   const tasksStatus = useAppSelector((state) => state.tasks.status);
   const tasks = useAppSelector(selectAllTasks);
+  const { showToast } = useToast();
 
   const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();
@@ -106,8 +108,10 @@ export default function DashboardCalendar() {
     if (!userProfile) return;
     if (editingTask) {
       await updateTask(userProfile.uid, editingTask, data);
+      showToast("Task updated");
     } else {
       await createTask(userProfile.uid, data);
+      showToast("Task created");
     }
   };
 
@@ -121,6 +125,7 @@ export default function DashboardCalendar() {
   const handleDeleteFromDetails = async () => {
     if (!detailsTask || !userProfile) return;
     await deleteTask(userProfile.uid, detailsTask.id);
+    showToast("Task deleted");
   };
 
   const monthLabel = viewMonth.toLocaleDateString(undefined, {

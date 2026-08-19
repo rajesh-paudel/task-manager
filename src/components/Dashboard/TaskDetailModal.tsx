@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { X, Pencil, Trash2, Calendar, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Calendar } from "lucide-react";
 import type { Task, TaskStatus } from "../../types/task";
 import PriorityBadge from "../ui/PriorityBadge";
+import Modal from "../ui/Modal";
+import Button from "../ui/Button";
 import { getDueLabel, isOverdue } from "../../utils/dateHelpers";
 interface TaskDetailsModalProps {
   open: boolean;
@@ -67,123 +69,97 @@ export default function TaskDetailsModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto bg-slate-900/40 px-4 py-6 sm:py-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="task-detail-title"
-      onKeyDown={(e) => {
-        if (e.key === "Escape") handleClose();
-      }}
+    <Modal
+      open={open && !!task}
+      onClose={handleClose}
+      title={task.title}
+      titleId="task-detail-title"
     >
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <h2
-            id="task-detail-title"
-            className="text-lg font-semibold text-slate-900 leading-snug"
-          >
-            {task.title}
-          </h2>
-          <button
-            onClick={handleClose}
-            className="shrink-0 text-slate-400 hover:text-slate-600"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+      {/* Status / priority / due date */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${statusStyles[task.status]}`}
+        >
+          {statusLabels[task.status]}
+        </span>
+        <PriorityBadge priority={task.priority} />
+        <span
+          className={`inline-flex items-center gap-1 text-xs ${
+            overdue ? "text-red-500 font-medium" : "text-slate-400"
+          }`}
+        >
+          <Calendar className="h-3.5 w-3.5" />
+          {dueLabel ?? "No due date"}
+        </span>
+      </div>
 
-        {/* Status / priority / due date */}
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span
-            className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${statusStyles[task.status]}`}
-          >
-            {statusLabels[task.status]}
-          </span>
-          <PriorityBadge priority={task.priority} />
-          <span
-            className={`inline-flex items-center gap-1 text-xs ${
-              overdue ? "text-red-500 font-medium" : "text-slate-400"
-            }`}
-          >
-            <Calendar className="h-3.5 w-3.5" />
-            {dueLabel ?? "No due date"}
-          </span>
-        </div>
-
-        {/* Description */}
-        <div className="mt-5">
-          <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">
-            Description
-          </p>
-          {task.description?.trim() ? (
-            <p className="mt-1.5 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-              {task.description}
-            </p>
-          ) : (
-            <p className="mt-1.5 text-sm text-slate-400 italic">
-              No description
-            </p>
-          )}
-        </div>
-
-        {/* Meta */}
-        <p className="mt-5 text-xs text-slate-400">
-          Created {formatDate(task.createdAt)}
-          {task.updatedAt !== task.createdAt &&
-            ` · Updated ${formatDate(task.updatedAt)}`}
+      {/* Description */}
+      <div className="mt-5">
+        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+          Description
         </p>
-
-        {error && (
-          <div className="mt-4 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-            {error}
-          </div>
-        )}
-
-        {/* Footer */}
-        {confirmingDelete ? (
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <p className="text-sm text-slate-600">
-              Delete this task? This can't be undone.
-            </p>
-            <div className="mt-4 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setConfirmingDelete(false)}
-                disabled={deleting}
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                disabled={deleting}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
-              >
-                {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                {deleting ? "Deleting..." : "Delete task"}
-              </button>
-            </div>
-          </div>
+        {task.description?.trim() ? (
+          <p className="mt-1.5 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+            {task.description}
+          </p>
         ) : (
-          <div className="mt-6 pt-5 border-t border-slate-100 flex items-center gap-3">
-            <button
-              onClick={() => setConfirmingDelete(true)}
-              className="mr-auto h-9 w-9 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50"
-              aria-label="Delete task"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-            <button
-              onClick={onEdit}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              Edit
-            </button>
-          </div>
+          <p className="mt-1.5 text-sm text-slate-400 italic">
+            No description
+          </p>
         )}
       </div>
-    </div>
+
+      {/* Meta */}
+      <p className="mt-5 text-xs text-slate-400">
+        Created {formatDate(task.createdAt)}
+        {task.updatedAt !== task.createdAt &&
+          ` · Updated ${formatDate(task.updatedAt)}`}
+      </p>
+
+      {error && (
+        <div className="mt-4 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          {error}
+        </div>
+      )}
+
+      {/* Footer */}
+      {confirmingDelete ? (
+        <div className="mt-6 pt-5 border-t border-slate-100">
+          <p className="text-sm text-slate-600">
+            Delete this task? This can't be undone.
+          </p>
+          <div className="mt-4 flex items-center justify-end gap-3">
+            <Button
+              variant="ghost"
+              onClick={() => setConfirmingDelete(false)}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+              loading={deleting}
+            >
+              {deleting ? "Deleting..." : "Delete task"}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-6 pt-5 border-t border-slate-100 flex items-center gap-3">
+          <button
+            onClick={() => setConfirmingDelete(true)}
+            className="mr-auto h-9 w-9 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+            aria-label="Delete task"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+          <Button onClick={onEdit}>
+            <Pencil className="h-3.5 w-3.5" />
+            Edit
+          </Button>
+        </div>
+      )}
+    </Modal>
   );
 }

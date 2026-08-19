@@ -5,7 +5,6 @@ import {
   KanbanSquare,
   Circle,
   CheckCircle2,
-  Loader2,
   Search,
   Download,
   Upload,
@@ -26,6 +25,9 @@ import { useAppSelector } from "../../store/store";
 import { useSearchParams } from "react-router-dom";
 import PriorityBadge from "../ui/PriorityBadge";
 import TaskDetailsModal from "./TaskDetailModal";
+import Modal from "../ui/Modal";
+import Button from "../ui/Button";
+import { useToast } from "../../context/useToast";
 
 const columns: { key: TaskStatus; label: string }[] = [
   { key: "todo", label: "To do" },
@@ -58,6 +60,7 @@ export default function Tasks() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [detailsTask, setDetailsTask] = useState<Task | null>(null);
   const [error, setError] = useState("");
+  const { showToast } = useToast();
 
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportScope, setExportScope] = useState<"all" | "current">("current");
@@ -93,12 +96,11 @@ export default function Tasks() {
         return;
       }
       await importTasks(userProfile.uid, tasks);
-      setImportMessage({
-        text: `Imported ${tasks.length} task${tasks.length === 1 ? "" : "s"}${
-          skipped > 0 ? `, skipped ${skipped}` : ""
-        }.`,
-        isError: false,
-      });
+      const message = `Imported ${tasks.length} task${tasks.length === 1 ? "" : "s"}${
+        skipped > 0 ? `, skipped ${skipped}` : ""
+      }.`;
+      setImportMessage({ text: message, isError: false });
+      showToast(message);
     } catch (err: unknown) {
       setImportMessage({
         text: getErrorMessage(err, "Couldn't import tasks. Try again."),
@@ -149,8 +151,10 @@ export default function Tasks() {
     if (!userProfile) return;
     if (editingTask) {
       await updateTask(userProfile.uid, editingTask, data);
+      showToast("Task updated");
     } else {
       await createTask(userProfile.uid, data);
+      showToast("Task created");
     }
   };
 
@@ -164,6 +168,7 @@ export default function Tasks() {
   const handleDeleteFromDetails = async () => {
     if (!detailsTask || !userProfile) return;
     await deleteTask(userProfile.uid, detailsTask.id);
+    showToast("Task deleted");
   };
 
   const toggleDone = async (
@@ -178,6 +183,11 @@ export default function Tasks() {
         ...task,
         status: currentStatus === "done" ? "todo" : "done",
       });
+      showToast(
+        currentStatus === "done"
+          ? "Task moved back to to do"
+          : "Task completed",
+      );
     } catch (err: unknown) {
       setError(getErrorMessage(err, "Couldn't update task. Try again."));
     }
@@ -209,6 +219,8 @@ export default function Tasks() {
 
       downloadFile(csv, "tasks.csv", "text/csv;charset=utf-8");
     }
+
+    showToast(`Exported ${data.length} task${data.length === 1 ? "" : "s"}`);
   };
 
   const buildCsv = (tasks: Task[]) => {
@@ -282,6 +294,7 @@ export default function Tasks() {
 
     try {
       await updateTask(userProfile.uid, task, { ...task, status: newStatus });
+      showToast(`Moved to ${columns.find((c) => c.key === newStatus)?.label}`);
     } catch (err: unknown) {
       setError(getErrorMessage(err, "Couldn't move task. Try again."));
     }
@@ -324,13 +337,10 @@ export default function Tasks() {
             </button>
           </div>
 
-          <button
-            onClick={openCreateModal}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-white bg-orange-600 hover:bg-orange-700"
-          >
+          <Button onClick={openCreateModal}>
             <Plus className="h-4 w-4" />
             New task
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -406,28 +416,28 @@ export default function Tasks() {
         </select>
 
         {/* Export */}
-        <button
-          onClick={() => setExportModalOpen(true)}
-          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50"
-        >
+        <Button variant="outline" onClick={() => setExportModalOpen(true)}>
           <Download className="h-4 w-4" />
           Export
-        </button>
+        </Button>
 
         {/* Import */}
-        <button
-          onClick={openImportModal}
-          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50"
-        >
+        <Button variant="outline" onClick={openImportModal}>
           <Upload className="h-4 w-4" />
           Import
-        </button>
+        </Button>
       </div>
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
       {tasksStatus === "loading" || tasksStatus === "idle" ? (
-        <div className="mt-10 flex justify-center">
-          <Loader2 className="h-5 w-5 text-orange-600 animate-spin" />
+        <div className="mt-6 bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex items-center gap-3 px-4 py-3.5">
+              <div className="h-4 w-4 rounded-full bg-slate-200 animate-pulse" />
+              <div className="h-4 flex-1 rounded bg-slate-200 animate-pulse" />
+              <div className="h-4 w-20 rounded-full bg-slate-200 animate-pulse" />
+            </div>
+          ))}
         </div>
       ) : (
         <div className="min-h-screen">
@@ -444,7 +454,7 @@ export default function Tasks() {
                   <div
                     key={task.id}
                     onClick={() => setDetailsTask(task)}
-                    className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50"
+                    className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors"
                   >
                     <button
                       onClick={(e) => toggleDone(e, task, task.status)}
@@ -581,7 +591,7 @@ export default function Tasks() {
                               setDragOverColumn(null);
                             }}
                             onClick={() => setDetailsTask(task)}
-                            className={`bg-white border border-slate-200 rounded-lg px-3 py-2.5 cursor-grab active:cursor-grabbing hover:border-slate-300 shadow-sm transition-all ${
+                            className={`bg-white border border-slate-200 rounded-lg px-3 py-2.5 cursor-grab active:cursor-grabbing hover:border-slate-300 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift ${
                               draggingId === task.id
                                 ? "opacity-20 scale-95"
                                 : ""
@@ -621,179 +631,133 @@ export default function Tasks() {
         </div>
       )}
 
-      {exportModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="export-modal-title"
-          onClick={() => setExportModalOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setExportModalOpen(false);
-          }}
-        >
-          <div
-            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3
-              id="export-modal-title"
-              className="text-lg font-semibold text-slate-900"
-            >
-              Export tasks
-            </h3>
-
-            <div className="mt-4">
-              <p className="text-sm font-medium text-slate-700 mb-2">Scope</p>
-              <label className="flex items-center gap-2 mb-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="scope"
-                  value="current"
-                  checked={exportScope === "current"}
-                  onChange={() => setExportScope("current")}
-                  className="text-orange-600"
-                />
-                <span className="text-sm text-slate-700">Current view</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="scope"
-                  value="all"
-                  checked={exportScope === "all"}
-                  onChange={() => setExportScope("all")}
-                  className="text-orange-600"
-                />
-                <span className="text-sm text-slate-700">All tasks</span>
-              </label>
-            </div>
-
-            <div className="mt-4">
-              <p className="text-sm font-medium text-slate-700 mb-2">Format</p>
-              <label className="flex items-center gap-2 mb-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="format"
-                  value="json"
-                  checked={exportFormat === "json"}
-                  onChange={() => setExportFormat("json")}
-                  className="text-orange-600"
-                />
-                <span className="text-sm text-slate-700">JSON</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="format"
-                  value="csv"
-                  checked={exportFormat === "csv"}
-                  onChange={() => setExportFormat("csv")}
-                  className="text-orange-600"
-                />
-                <span className="text-sm text-slate-700">CSV</span>
-              </label>
-            </div>
-
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setExportModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleExportData}
-                className="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700"
-              >
-                Export
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {importModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="import-modal-title"
-          onClick={() => setImportModalOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setImportModalOpen(false);
-          }}
-        >
-          <div
-            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3
-              id="import-modal-title"
-              className="text-lg font-semibold text-slate-900"
-            >
-              Import tasks from JSON
-            </h3>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Choose a JSON file of tasks. New tasks are added to your existing
-              list.
-            </p>
-
+      <Modal
+        open={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        title="Export tasks"
+        titleId="export-modal-title"
+        maxWidth="max-w-sm"
+        closeOnBackdrop
+      >
+        <div>
+          <p className="text-sm font-medium text-slate-700 mb-2">Scope</p>
+          <label className="flex items-center gap-2 mb-2 cursor-pointer">
             <input
-              ref={importFileRef}
-              type="file"
-              accept=".json,application/json"
-              className="hidden"
-              onChange={(e) => {
-                setImportMessage(null);
-                setImportFile(e.target.files?.[0] ?? null);
-              }}
+              type="radio"
+              name="scope"
+              value="current"
+              checked={exportScope === "current"}
+              onChange={() => setExportScope("current")}
+              className="text-orange-600"
             />
-
-            <button
-              onClick={() => importFileRef.current?.click()}
-              className="mt-4 w-full flex flex-col items-center justify-center gap-2 px-4 py-8 border-2 border-dashed border-slate-200 rounded-lg hover:border-orange-400"
-            >
-              <Upload className="h-6 w-6 text-slate-400" />
-              <span className="text-sm text-slate-600">
-                {importFile ? importFile.name : "Choose a JSON file"}
-              </span>
-            </button>
-
-            {importMessage && (
-              <p
-                className={`mt-4 text-sm ${
-                  importMessage.isError
-                    ? "text-red-600"
-                    : "text-emerald-600"
-                }`}
-              >
-                {importMessage.text}
-              </p>
-            )}
-
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setImportModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50"
-              >
-                Close
-              </button>
-              <button
-                onClick={handleImport}
-                disabled={!importFile || importLoading}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {importLoading && (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                )}
-                Import
-              </button>
-            </div>
-          </div>
+            <span className="text-sm text-slate-700">Current view</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="scope"
+              value="all"
+              checked={exportScope === "all"}
+              onChange={() => setExportScope("all")}
+              className="text-orange-600"
+            />
+            <span className="text-sm text-slate-700">All tasks</span>
+          </label>
         </div>
-      )}
+
+        <div className="mt-4">
+          <p className="text-sm font-medium text-slate-700 mb-2">Format</p>
+          <label className="flex items-center gap-2 mb-2 cursor-pointer">
+            <input
+              type="radio"
+              name="format"
+              value="json"
+              checked={exportFormat === "json"}
+              onChange={() => setExportFormat("json")}
+              className="text-orange-600"
+            />
+            <span className="text-sm text-slate-700">JSON</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="format"
+              value="csv"
+              checked={exportFormat === "csv"}
+              onChange={() => setExportFormat("csv")}
+              className="text-orange-600"
+            />
+            <span className="text-sm text-slate-700">CSV</span>
+          </label>
+        </div>
+
+        <div className="mt-6 flex items-center justify-end gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setExportModalOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleExportData}>Export</Button>
+        </div>
+      </Modal>
+
+      <Modal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        title="Import tasks from JSON"
+        titleId="import-modal-title"
+        maxWidth="max-w-sm"
+        description="Choose a JSON file of tasks. New tasks are added to your existing list."
+        closeOnBackdrop
+      >
+        <input
+          ref={importFileRef}
+          type="file"
+          accept=".json,application/json"
+          className="hidden"
+          onChange={(e) => {
+            setImportMessage(null);
+            setImportFile(e.target.files?.[0] ?? null);
+          }}
+        />
+
+        <button
+          onClick={() => importFileRef.current?.click()}
+          className="mt-1 w-full flex flex-col items-center justify-center gap-2 px-4 py-8 border-2 border-dashed border-slate-200 rounded-lg hover:border-orange-400 transition-colors"
+        >
+          <Upload className="h-6 w-6 text-slate-400" />
+          <span className="text-sm text-slate-600">
+            {importFile ? importFile.name : "Choose a JSON file"}
+          </span>
+        </button>
+
+        {importMessage && (
+          <p
+            className={`mt-4 text-sm ${
+              importMessage.isError ? "text-red-600" : "text-emerald-600"
+            }`}
+          >
+            {importMessage.text}
+          </p>
+        )}
+
+        <div className="mt-6 flex items-center justify-end gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setImportModalOpen(false)}
+          >
+            Close
+          </Button>
+          <Button
+            onClick={handleImport}
+            loading={importLoading}
+            disabled={!importFile}
+          >
+            Import
+          </Button>
+        </div>
+      </Modal>
 
       <TaskModal
         open={modalOpen}

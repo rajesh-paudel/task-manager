@@ -6,6 +6,7 @@ import { useState, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import ErrorBoundary from "../ui/ErrorBoundary";
 import { SITE_URL } from "../../utils/constants";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function DashboardLayout() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
@@ -29,15 +30,25 @@ export default function DashboardLayout() {
       <Sidebar />
       <main className="flex-1 bg-slate-50 overflow-y-auto">
         <ErrorBoundary key={location.pathname}>
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center h-full min-h-[calc(100vh-4rem)]">
-                <div className="h-8 w-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            }
-          >
-            <Outlet context={{ view, setView }} />
-          </Suspense>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center h-full min-h-[calc(100vh-4rem)]">
+                    <div className="h-8 w-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                }
+              >
+                <Outlet context={{ view, setView }} />
+              </Suspense>
+            </motion.div>
+          </AnimatePresence>
         </ErrorBoundary>
       </main>
     </div>

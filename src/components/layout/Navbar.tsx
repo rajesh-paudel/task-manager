@@ -4,6 +4,8 @@ import { CheckSquare, LayoutDashboard, User, LogOut, X } from "lucide-react";
 import type { UserProfile } from "../../types/user";
 import profilePlaceholder from "../../assets/profilePlaceholder.png";
 import ThemeToggle from "../ui/ThemeToggle";
+import Modal from "../ui/Modal";
+import Button from "../ui/Button";
 
 interface NavbarProps {
   userProfile: UserProfile | null;
@@ -318,33 +320,31 @@ const Navbar = ({ userProfile, onLogout }: NavbarProps) => {
       </div>
 
       {/* Sign out confirmation dialog */}
-      {confirmOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 px-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
-            <h2 className="text-lg font-semibold text-slate-900">Log out?</h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Are you sure you want to log out of your account?
-            </p>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setConfirmOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setConfirmOpen(false);
-                  onLogout();
-                }}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg"
-              >
-                Log out
-              </button>
-            </div>
-          </div>
+      <Modal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title="Log out?"
+        titleId="logout-dialog-title"
+        description="Are you sure you want to log out of your account?"
+      >
+        <div className="flex justify-end gap-3">
+          <Button
+            variant="secondary"
+            onClick={() => setConfirmOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              setConfirmOpen(false);
+              onLogout();
+            }}
+          >
+            Log out
+          </Button>
         </div>
-      )}
+      </Modal>
     </>
   );
 };
