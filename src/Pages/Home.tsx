@@ -7,6 +7,7 @@ import Comparison from "../components/Home/Comparision";
 import Integrations from "../components/Home/Integrations";
 import HowItWorks from "../components/Home/HowItWorks";
 import Features from "../components/Home/Features";
+import ProductTour from "../components/Home/ProductTour";
 import Testimonial from "../components/Home/Testimonial";
 import FAQ from "../components/Home/Faq";
 import { faqs } from "../utils/faqs";
@@ -112,6 +113,7 @@ export default function Home() {
 
       <Comparison />
       <Features />
+      <ProductTour />
       <Integrations />
       <HowItWorks />
 
