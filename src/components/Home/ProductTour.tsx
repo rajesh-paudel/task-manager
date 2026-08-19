@@ -96,11 +96,10 @@ export default function ProductTour() {
               aria-selected={i === activeIndex}
               aria-controls={`tour-panel-${view.id}`}
               onClick={() => setActiveIndex(i)}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-                i === activeIndex
+              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${i === activeIndex
                   ? "border-orange-600 bg-orange-600 text-white shadow-sm"
                   : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
-              }`}
+                }`}
             >
               {view.label}
             </button>
@@ -124,7 +123,7 @@ export default function ProductTour() {
                 src={activeSrc}
                 alt={`${active.title} screenshot`}
                 className="block h-auto w-full"
-                loading="lazy"
+
               />
             </div>
             <div className="mt-6 text-center">
