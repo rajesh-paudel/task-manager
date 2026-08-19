@@ -12,7 +12,8 @@ import {
 } from "recharts";
 import { useAppSelector } from "../../store/store";
 import { selectAllTasks, selectTaskStats } from "../../store/tasksSelectors";
-import { getWeeklyCompletionCounts } from "../../utils/dateHelpers";
+import { getWeeklyCompletionCounts, startOfDay } from "../../utils/dateHelpers";
+import type { TaskPriority } from "../../types/task";
 import { useTheme } from "../../context/useTheme";
 import {
   CheckCircle2,
@@ -20,6 +21,20 @@ import {
   AlertCircle,
   ListTodo,
 } from "lucide-react";
+
+const priorityColors: Record<TaskPriority, string> = {
+  low: "#94a3b8",
+  medium: "#3b82f6",
+  high: "#8b5cf6",
+  urgent: "#ef4444",
+};
+
+const priorityLabels: Record<TaskPriority, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  urgent: "Urgent",
+};
 
 export default function Overview() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
@@ -33,6 +48,51 @@ export default function Overview() {
     () => getWeeklyCompletionCounts(tasks),
     [tasks],
   );
+
+  const priorityCounts = useMemo(() => {
+    const counts: Record<TaskPriority, number> = {
+      low: 0,
+      medium: 0,
+      high: 0,
+      urgent: 0,
+    };
+    for (const task of tasks) counts[task.priority] += 1;
+    return counts;
+  }, [tasks]);
+
+  const priorityData = (
+    Object.keys(priorityCounts) as TaskPriority[]
+  ).map((priority) => ({
+    priority: priorityLabels[priority],
+    count: priorityCounts[priority],
+    color: priorityColors[priority],
+  }));
+  const maxPriorityCount = Math.max(...Object.values(priorityCounts), 1);
+
+  const completedThisWeek = useMemo(
+    () => weeklyCompletion.reduce((sum, d) => sum + d.completed, 0),
+    [weeklyCompletion],
+  );
+
+  const daysActive = useMemo(
+    () => weeklyCompletion.filter((d) => d.completed > 0).length,
+    [weeklyCompletion],
+  );
+
+  const dueThisWeek = useMemo(() => {
+    const today = startOfDay(new Date());
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - 6);
+    const end = today.getTime() + 86400000 - 1;
+    return tasks.filter(
+      (t) =>
+        t.status !== "done" &&
+        t.dueDate != null &&
+        t.dueDate >= weekStart.getTime() &&
+        t.dueDate <= end,
+    ).length;
+  }, [tasks]);
+
   const statusBreakdown = [
     { name: "Done", value: taskStats.done, color: "#ea580c" },
     { name: "In progress", value: taskStats.inProgress, color: "#fdba74" },
@@ -59,9 +119,12 @@ export default function Overview() {
             />
           ))}
         </div>
-        <div className="mt-6 grid sm:grid-cols-3 gap-4">
-          <div className="sm:col-span-2 h-72 bg-white border border-slate-200 rounded-xl animate-pulse" />
-          <div className="h-72 bg-white border border-slate-200 rounded-xl animate-pulse" />
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="sm:col-span-2 h-80 bg-white border border-slate-200 rounded-xl animate-pulse" />
+          <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
+            <div className="h-52 bg-white border border-slate-200 rounded-xl animate-pulse" />
+            <div className="h-44 bg-white border border-slate-200 rounded-xl animate-pulse" />
+          </div>
         </div>
       </div>
     );
@@ -95,12 +158,12 @@ export default function Overview() {
       </div>
 
       {/* Charts */}
-      <div className="mt-6 grid sm:grid-cols-3 gap-4">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="sm:col-span-2 bg-white border border-slate-200 rounded-xl p-5">
           <h2 className="text-sm font-semibold text-slate-900">
             Tasks completed this week
           </h2>
-          <div className="mt-4 h-56">
+          <div className="mt-4 h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weeklyCompletion}>
                 <XAxis
@@ -128,53 +191,125 @@ export default function Overview() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+
+          {/* Weekly summary */}
+          <div className="mt-8 pt-6 border-t border-slate-100">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+              Weekly summary
+            </p>
+            <div className="mt-4 grid grid-cols-3 divide-x divide-slate-100">
+              {[
+                {
+                  label: "Completed",
+                  value: completedThisWeek,
+                  dot: "bg-orange-500",
+                },
+                { label: "Due", value: dueThisWeek, dot: "bg-slate-400" },
+                {
+                  label: "Days active",
+                  value: `${daysActive}/7`,
+                  dot: "bg-blue-500",
+                },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="px-4 first:pl-0 last:pr-0 text-center"
+                >
+                  <p className="text-xl font-semibold text-slate-900 leading-tight">
+                    {stat.value}
+                  </p>
+                  <p className="mt-1 flex items-center justify-center gap-1.5 text-xs text-slate-500">
+                    <span className={`h-1.5 w-1.5 rounded-full ${stat.dot}`} />
+                    {stat.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Status breakdown
-          </h2>
-          {taskStats.total === 0 ? (
-            <p className="mt-8 text-sm text-slate-400 text-center">
-              No tasks yet.
-            </p>
-          ) : (
-            <>
-              <div className="mt-2 h-40">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={statusBreakdown}
-                      dataKey="value"
-                      innerRadius={40}
-                      outerRadius={60}
-                      paddingAngle={2}
+        <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
+          <div className="bg-white border border-slate-200 rounded-xl p-5">
+            <h2 className="text-sm font-semibold text-slate-900">
+              Status breakdown
+            </h2>
+            {taskStats.total === 0 ? (
+              <p className="mt-8 text-sm text-slate-400 text-center">
+                No tasks yet.
+              </p>
+            ) : (
+              <>
+                <div className="mt-2 h-36">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={statusBreakdown}
+                        dataKey="value"
+                        innerRadius={40}
+                        outerRadius={58}
+                        paddingAngle={2}
+                      >
+                        {statusBreakdown.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-2 space-y-1.5">
+                  {statusBreakdown.map((s) => (
+                    <div
+                      key={s.name}
+                      className="flex items-center gap-2 text-xs text-slate-500"
                     >
-                      {statusBreakdown.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-2 space-y-1.5">
-                {statusBreakdown.map((s) => (
-                  <div
-                    key={s.name}
-                    className="flex items-center gap-2 text-xs text-slate-500"
-                  >
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{ background: s.color }}
-                    />
-                    {s.name}
-                    <span className="ml-auto text-slate-900 font-medium">
-                      {s.value}
-                    </span>
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ background: s.color }}
+                      />
+                      {s.name}
+                      <span className="ml-auto text-slate-900 font-medium">
+                        {s.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {taskStats.total > 0 && (
+            <div className="bg-white border border-slate-200 rounded-xl p-5">
+              <h2 className="text-sm font-semibold text-slate-900">
+                Tasks by priority
+              </h2>
+              <div className="mt-4 space-y-3.5">
+                {priorityData.map((entry) => (
+                  <div key={entry.priority}>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5 text-slate-500">
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ background: entry.color }}
+                        />
+                        {entry.priority}
+                      </span>
+                      <span className="font-medium text-slate-900">
+                        {entry.count}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{
+                          width: `${(entry.count / maxPriorityCount) * 100}%`,
+                          background: entry.color,
+                        }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
