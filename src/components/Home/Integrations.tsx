@@ -1,20 +1,20 @@
 import {
-  CalendarDays,
-  Paperclip,
-  MessageSquare,
-  Clock,
-  Mail,
-  Webhook,
+  Download,
+  Keyboard,
+  Moon,
+  RefreshCw,
+  Search,
+  ShieldCheck,
 } from "lucide-react";
 import Reveal from "../ui/Reveal";
 
 const integrations = [
-  { icon: CalendarDays, label: "Calendar sync" },
-  { icon: Paperclip, label: "File attachments" },
-  { icon: MessageSquare, label: "Chat alerts" },
-  { icon: Clock, label: "Time tracking" },
-  { icon: Mail, label: "Email digests" },
-  { icon: Webhook, label: "API & webhooks" },
+  { icon: RefreshCw, label: "Real-time sync" },
+  { icon: Search, label: "Search & filters" },
+  { icon: Moon, label: "Dark mode" },
+  { icon: Download, label: "Export & import" },
+  { icon: ShieldCheck, label: "Secure sign-in" },
+  { icon: Keyboard, label: "Keyboard shortcuts" },
 ];
 
 export default function Integrations() {
@@ -22,14 +22,14 @@ export default function Integrations() {
     <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
       <Reveal className="mx-auto max-w-2xl text-center">
         <p className="text-sm font-medium uppercase tracking-widest text-orange-600">
-          Integrations
+          Everything included
         </p>
         <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-          Fits into how you already work
+          No add-ons, no setup
         </h2>
         <p className="mt-4 text-lg text-slate-500">
-          Connects to the tools your team already uses, so nothing has to move
-          to a new home.
+          Everything works out of the box — no third-party apps or accounts to
+          configure.
         </p>
       </Reveal>
 

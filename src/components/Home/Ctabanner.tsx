@@ -11,10 +11,10 @@ export default function CTABanner() {
             Get started
           </p>
           <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-            Your team's next sprint starts here.
+            Your next sprint starts here.
           </h2>
           <p className="mt-4 text-lg text-slate-500">
-            Free for teams up to 10. No credit card required.
+            Free to start. No credit card required.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link

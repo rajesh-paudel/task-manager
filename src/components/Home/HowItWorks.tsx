@@ -3,19 +3,21 @@ import Reveal from "../ui/Reveal";
 const steps = [
   {
     number: "01",
-    title: "Create a board",
+    title: "Create your account",
     description:
-      "Set up a space for your project in seconds. No templates to fight with first.",
+      "Sign up in seconds and start adding tasks right away — no setup or templates to fight with.",
   },
   {
     number: "02",
-    title: "Add the work",
-    description: "Break it into tasks, assign owners, and set dates as you go.",
+    title: "Organize your work",
+    description:
+      "Use list, kanban, or calendar views, set priorities and due dates, and filter to what matters.",
   },
   {
     number: "03",
-    title: "Track the pulse",
-    description: "Watch progress update live as your team checks things off.",
+    title: "Track your pulse",
+    description:
+      "Watch your overview chart completion, status, and priorities update in real time.",
   },
 ];
 

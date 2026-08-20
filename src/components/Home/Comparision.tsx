@@ -3,16 +3,16 @@ import Reveal from "../ui/Reveal";
 
 const oldWay = [
   "Tasks scattered across sticky notes, chats, and email",
-  "No one's sure who owns what until standup",
-  "Deadlines live in someone's head, not the tool",
-  "Status updates mean writing a summary by hand",
+  "Deadlines live in your head, not in one tool",
+  "No way to see what's overdue at a glance",
+  "Progress is a guessing game until you dig it out",
 ];
 
 const taskPulseWay = [
-  "One board holds every task, in one place",
-  "Every task has a clear owner from the start",
-  "Due dates are visible on the task, not guessed at",
-  "Progress is visible without asking anyone",
+  "Every task in one place — list, kanban, or calendar",
+  "Due dates visible on each task, with overdue flagged",
+  "Priorities so you always know what to do next",
+  "Progress visible on your overview without asking anyone",
 ];
 
 export default function Comparison() {
@@ -26,8 +26,8 @@ export default function Comparison() {
             The old way vs. TaskPulse
           </h2>
           <p className="mt-4 text-lg text-slate-500">
-            Stop herding work through chat threads. See what the whole team is
-            doing, at a glance.
+            Stop juggling notes, chats, and spreadsheets. See everything in one
+            place, at a glance.
           </p>
         </Reveal>
 

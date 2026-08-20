@@ -8,12 +8,13 @@ const tiers = [
     name: "Free",
     price: "$0",
     period: "forever",
-    description: "For getting a small project organized.",
+    description: "For getting your personal task list organized.",
     features: [
-      "Up to 3 boards",
       "Unlimited tasks",
       "List & kanban views",
-      "Basic reminders",
+      "Calendar view",
+      "Priorities & due dates",
+      "Export (JSON & CSV)",
     ],
     cta: "Get started free",
     highlighted: false,
@@ -24,10 +25,10 @@ const tiers = [
     period: "per user / month",
     description: "For individuals who live in their task list.",
     features: [
-      "Unlimited boards",
-      "Priority & due date views",
-      "Calendar sync",
-      "Email digests",
+      "Everything in Free",
+      "Overview analytics",
+      "Search & filters",
+      "Dark mode",
       "Priority support",
     ],
     cta: "Start free trial",
@@ -37,15 +38,15 @@ const tiers = [
     name: "Team",
     price: "$14",
     period: "per user / month",
-    description: "For teams that need shared visibility.",
+    description: "For growing workspaces that need oversight.",
     features: [
       "Everything in Pro",
-      "Shared team boards",
-      "Role-based permissions",
-      "Activity history",
-      "Admin controls",
+      "Role-based access",
+      "Admin panel",
+      "Contact inbox",
+      "Dedicated support",
     ],
-    cta: "Talk to sales",
+    cta: "Get started",
     highlighted: false,
   },
 ];
@@ -58,7 +59,7 @@ export default function Pricing() {
         <title>Pricing | TaskPulse</title>
         <meta
           name="description"
-          content="Simple, transparent pricing for TaskPulse. Start free, upgrade when your team needs it. Plans from $0 to $14 per user per month."
+          content="Simple, transparent pricing for TaskPulse. Start free. Plans from $0 to $14 per user per month."
         />
         <meta
           property="og:title"
@@ -66,7 +67,7 @@ export default function Pricing() {
         />
         <meta
           property="og:description"
-          content="Simple, transparent pricing for TaskPulse. Start free, upgrade when your team needs it."
+          content="Simple, transparent pricing for TaskPulse. Start free. Plans from $0 to $14 per user per month."
         />
         <meta
           property="og:image"
@@ -116,7 +117,7 @@ export default function Pricing() {
             Simple pricing, no surprises
           </h1>
           <p className="mt-4 text-lg text-slate-500">
-            Start free. Upgrade only when your team actually needs to.
+            Start free. Upgrade only when you actually need to.
           </p>
         </div>
 

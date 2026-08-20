@@ -1,42 +1,42 @@
-import { BarChart3, BellRing, CalendarDays, Layers, Users, Zap } from "lucide-react";
+import { BarChart3, Download, Flag, Layers, RefreshCw, Zap } from "lucide-react";
 import Reveal from "../ui/Reveal";
 
 const features = [
   {
     icon: Layers,
-    title: "Boards that adapt",
+    title: "Views that adapt",
     description:
-      "Switch between list, board, and calendar views for the same project — no re-entering data.",
+      "Switch between list, kanban, and calendar for the same tasks — no re-entering data.",
   },
   {
     icon: Zap,
     title: "Quick to capture",
     description:
-      "Add a task in one line and refine it later. Nothing waits on a form to get written down.",
+      "Add a task with a title, priority, and due date in seconds. Refine the details later.",
   },
   {
-    icon: Users,
-    title: "Clear ownership",
+    icon: Flag,
+    title: "Priorities & due dates",
     description:
-      "Every task has one owner and a due date, so status updates stop needing a meeting.",
+      "Every task carries a priority from Low to Urgent, and overdue work is flagged automatically.",
   },
   {
-    icon: BellRing,
-    title: "Updates that find you",
+    icon: RefreshCw,
+    title: "Real-time sync",
     description:
-      "Get notified when your work changes, and nothing else. No noisy, all-team channels.",
-  },
-  {
-    icon: CalendarDays,
-    title: "Calendar you can plan on",
-    description:
-      "See every deadline in a month view and drag work into shape in seconds.",
+      "Your tasks update live, so the same list is always current across your devices.",
   },
   {
     icon: BarChart3,
     title: "Progress you can measure",
     description:
-      "Completion rates, velocity, and workload — charted on your overview.",
+      "Weekly completion, status, and priority charts on your overview — no spreadsheets.",
+  },
+  {
+    icon: Download,
+    title: "Export & import",
+    description:
+      "Take your data anywhere — export tasks as JSON or CSV and import them back anytime.",
   },
 ];
 

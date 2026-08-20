@@ -4,23 +4,23 @@ import Reveal from "../ui/Reveal";
 const testimonials = [
   {
     quote:
-      "We stopped losing track of who owned what. That alone paid for itself in the first week.",
+      "I stopped losing tasks across notes and chats. That alone paid for itself in the first week.",
     name: "Mandeep Chaudhary",
-    role: "Ops Lead, Loop Studio",
+    role: "Ops consultant",
     initials: "MC",
   },
   {
     quote:
-      "The realtime sync means my team and I are always looking at the same board. We run our entire sprint off it now.",
+      "The realtime sync means my list is always up to date, whether I'm on my laptop or phone. I run my whole week off it now.",
     name: "Sarita Rai",
-    role: "Engineering Manager, Northwind",
+    role: "Product designer",
     initials: "SR",
   },
   {
     quote:
       "I tried three other tools and always ended up back in a spreadsheet. TaskPulse was the first one that stuck.",
     name: "Bibek Shrestha",
-    role: "Founder, Craftly",
+    role: "Freelance developer",
     initials: "BS",
   },
 ];

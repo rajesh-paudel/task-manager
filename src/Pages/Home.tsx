@@ -17,19 +17,19 @@ export default function Home() {
   return (
     <main id="main-content" className="bg-white font-sans">
       <Helmet>
-        <title>TaskPulse | Organize Tasks, Projects & Team Work</title>
+        <title>TaskPulse | Organize Tasks in List, Kanban & Calendar</title>
         <meta
           name="description"
-          content="TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity."
+          content="TaskPulse is a task management app for organizing your to-dos in list, kanban, and calendar views — with priorities, due dates, and real-time sync."
         />
         <meta
           property="og:title"
-          content="TaskPulse | Organize Tasks, Projects & Team Work"
+          content="TaskPulse | Organize Tasks in List, Kanban & Calendar"
         />
 
         <meta
           property="og:description"
-          content="TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity."
+          content="TaskPulse is a task management app for organizing your to-dos in list, kanban, and calendar views — with priorities, due dates, and real-time sync."
         />
 
         <meta
@@ -63,7 +63,7 @@ export default function Home() {
             url: `${SITE_URL}/`,
             logo: `${SITE_URL}/og-image.png`,
             description:
-              "TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity.",
+              "TaskPulse is a task management app for organizing to-dos in list, kanban, and calendar views with priorities, due dates, and real-time sync.",
           })}
         </script>
         <script type="application/ld+json">
@@ -97,7 +97,7 @@ export default function Home() {
             applicationCategory: "ProjectManagement",
             operatingSystem: "Web",
             description:
-              "TaskPulse is a modern task management platform to organize projects, track progress, and boost productivity.",
+              "TaskPulse is a task management app for organizing to-dos in list, kanban, and calendar views with priorities, due dates, and real-time sync.",
             offers: {
               "@type": "Offer",
               price: "0",

@@ -55,8 +55,8 @@ export default function Hero() {
             variants={itemVariants}
             className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-500"
           >
-            Plan, track, and ship your team's work in one focused workspace.
-            Live sync across every screen, without the noise.
+            Plan, track, and ship your work in one focused workspace. Your tasks
+            stay in sync across every screen, without the noise.
           </motion.p>
 
           <motion.div
@@ -82,7 +82,7 @@ export default function Hero() {
             variants={itemVariants}
             className="mt-8 text-sm text-slate-400"
           >
-            Free for teams up to 10 · No credit card required
+            Free to start · No credit card required
           </motion.p>
         </motion.div>
         {/* Product screenshot */}

@@ -9,10 +9,10 @@ interface Stat {
 }
 
 const stats: Stat[] = [
-  { value: 2400, suffix: "+", label: "Teams onboarded" },
-  { value: 1.8, decimals: 1, suffix: "M", label: "Tasks completed" },
-  { value: 99.9, decimals: 1, suffix: "%", label: "Uptime" },
-  { value: 4, suffix: ".8/5", label: "Average rating" },
+  { value: 3, label: "Task views" },
+  { value: 4, label: "Priority levels" },
+  { value: 2, label: "Export formats" },
+  { value: 100, suffix: "%", label: "Real-time sync" },
 ];
 
 function CountUp({ value, decimals = 0, suffix = "" }: Omit<Stat, "label">) {

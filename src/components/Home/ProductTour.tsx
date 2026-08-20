@@ -39,7 +39,7 @@ const views = [
     dark: taskKanbanDark,
     title: "Kanban — move work forward",
     description:
-      "Drag tasks across To do, In progress, and Done with realtime sync for the whole team.",
+      "Drag tasks across To do, In progress, and Done with realtime sync across your devices.",
   },
   {
     id: "calendar",
