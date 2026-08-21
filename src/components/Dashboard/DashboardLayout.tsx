@@ -16,7 +16,7 @@ export default function DashboardLayout() {
   );
   useWorkspacesSync(userProfile?.uid);
   useTasksSync(userProfile?.uid, activeWorkspaceId);
-  const [view, setView] = useState<"list" | "kanban">("list");
+  const [view, setView] = useState<"list" | "kanban">("kanban");
   const location = useLocation();
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white font-sans">
