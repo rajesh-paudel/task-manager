@@ -5,16 +5,14 @@ export default function NotFound() {
   return (
     <main
       id="main-content"
-      className="bg-white font-sans flex min-h-screen flex-col items-center justify-center px-6 text-center"
+      className="bg-white font-sans min-h-screen flex flex-col items-center justify-center px-6 text-center"
     >
       <Helmet>
         <title>404 | TaskPulse</title>
         <meta name="description" content="Page not found." />
         <meta name="robots" content="noindex" />
       </Helmet>
-      <p className="text-sm font-medium uppercase tracking-widest text-orange-600">
-        404
-      </p>
+      <div className="text-8xl font-bold text-orange-600 mb-4">404</div>
       <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
         This page doesn't exist.
       </h1>
