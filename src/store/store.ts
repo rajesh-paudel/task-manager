@@ -3,10 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import type { TypedUseSelectorHook } from "react-redux";
 import authReducer from "./authSlice";
 import taskReducer from "./taskSlice";
+import workspaceReducer from "./workspaceSlice";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     tasks: taskReducer,
+    workspaces: workspaceReducer,
   },
 });
 

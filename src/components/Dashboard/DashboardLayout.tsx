@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./DashboardSidebar";
 import { useAppSelector } from "../../store/store";
 import { useTasksSync } from "../../hooks/useTasksSync";
+import { useWorkspacesSync } from "../../hooks/useWorkspacesSync";
 import { useState, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import ErrorBoundary from "../ui/ErrorBoundary";
@@ -10,7 +11,11 @@ import { AnimatePresence, motion } from "framer-motion";
 
 export default function DashboardLayout() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
-  useTasksSync(userProfile?.uid);
+  const activeWorkspaceId = useAppSelector(
+    (state) => state.workspaces.activeWorkspaceId,
+  );
+  useWorkspacesSync(userProfile?.uid);
+  useTasksSync(userProfile?.uid, activeWorkspaceId);
   const [view, setView] = useState<"list" | "kanban">("list");
   const location = useLocation();
   return (

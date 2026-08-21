@@ -5,10 +5,20 @@ import type { NewTask, Task, TaskPriority } from "../../types/task";
 import { selectAllTasks } from "../../store/tasksSelectors";
 import TaskModal from "./TaskModal";
 import TaskDetailsModal from "./TaskDetailModal";
-import { createTask, updateTask, deleteTask } from "../../api/tasks";
+import {
+  createTask,
+  deleteTask,
+  personalTaskScope,
+  updateTask,
+  workspaceTaskScope,
+} from "../../api/tasks";
 import { startOfDay, isOverdue } from "../../utils/dateHelpers";
 import { useAppSelector } from "../../store/store";
 import { useToast } from "../../context/useToast";
+import {
+  selectActiveWorkspace,
+  selectActiveWorkspaceMembers,
+} from "../../store/workspaceSelectors";
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MAX_CHIPS = 3;
 
@@ -21,9 +31,16 @@ const priorityDot: Record<TaskPriority, string> = {
 
 export default function DashboardCalendar() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
+  const activeWorkspace = useAppSelector(selectActiveWorkspace);
+  const activeWorkspaceMembers = useAppSelector(selectActiveWorkspaceMembers);
   const tasksStatus = useAppSelector((state) => state.tasks.status);
   const tasks = useAppSelector(selectAllTasks);
   const { showToast } = useToast();
+  const taskScope = useMemo(() => {
+    if (activeWorkspace) return workspaceTaskScope(activeWorkspace.id);
+    if (userProfile) return personalTaskScope(userProfile.uid);
+    return null;
+  }, [activeWorkspace, userProfile]);
 
   const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();
@@ -105,12 +122,12 @@ export default function DashboardCalendar() {
   const closeModal = () => setModalOpen(false);
 
   const handleSaveTask = async (data: NewTask) => {
-    if (!userProfile) return;
+    if (!userProfile || !taskScope) return;
     if (editingTask) {
-      await updateTask(userProfile.uid, editingTask, data);
+      await updateTask(taskScope, editingTask, data);
       showToast("Task updated");
     } else {
-      await createTask(userProfile.uid, data);
+      await createTask(taskScope, data, userProfile.uid);
       showToast("Task created");
     }
   };
@@ -123,8 +140,8 @@ export default function DashboardCalendar() {
   };
 
   const handleDeleteFromDetails = async () => {
-    if (!detailsTask || !userProfile) return;
-    await deleteTask(userProfile.uid, detailsTask.id);
+    if (!detailsTask || !taskScope) return;
+    await deleteTask(taskScope, detailsTask.id);
     showToast("Task deleted");
   };
 
@@ -143,7 +160,9 @@ export default function DashboardCalendar() {
             Calendar
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Tasks organized by their due date — spot your deadlines at a glance.
+            Tasks in{" "}
+            {activeWorkspace ? activeWorkspace.name : "your personal board"},
+            organized by due date.
           </p>
         </div>
 
@@ -255,6 +274,11 @@ export default function DashboardCalendar() {
                             className={`h-1.5 w-1.5 rounded-full shrink-0 ${priorityDot[task.priority]}`}
                           />
                           <span className="truncate">{task.title}</span>
+                          {task.assigneeName && (
+                            <span className="shrink-0 text-slate-400">
+                              {task.assigneeName.slice(0, 1).toUpperCase()}
+                            </span>
+                          )}
                         </button>
                       );
                     })}
@@ -277,6 +301,7 @@ export default function DashboardCalendar() {
         onSave={handleSaveTask}
         initialTask={editingTask}
         defaultDueDate={defaultDueDate}
+        assigneeOptions={activeWorkspace ? activeWorkspaceMembers : []}
       />
       <TaskDetailsModal
         open={detailsTask !== null}
@@ -284,6 +309,7 @@ export default function DashboardCalendar() {
         onClose={() => setDetailsTask(null)}
         onEdit={handleEditFromDetails}
         onDelete={handleDeleteFromDetails}
+        assigneeName={detailsTask?.assigneeName ?? null}
       />
     </div>
   );

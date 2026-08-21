@@ -7,18 +7,41 @@ import {
   remove,
   type Unsubscribe,
 } from "firebase/database";
-import type { NewTask } from "../types/task";
+import type { NewTask, TaskScope } from "../types/task";
 import { db } from "../utils/firebaseConfig";
 import type { Task } from "../types/task";
 
+type TaskScopeInput = string | TaskScope;
+
+export const personalTaskScope = (uid: string): TaskScope => ({
+  type: "personal",
+  id: uid,
+});
+
+export const workspaceTaskScope = (workspaceId: string): TaskScope => ({
+  type: "workspace",
+  id: workspaceId,
+});
+
+export function getTaskScopeKey(scope: TaskScope): string {
+  return `${scope.type}:${scope.id}`;
+}
+
+function resolveTaskPath(scope: TaskScopeInput): string {
+  if (typeof scope === "string") return `tasks/${scope}`;
+  return scope.type === "workspace"
+    ? `workspaceTasks/${scope.id}`
+    : `tasks/${scope.id}`;
+}
+
 //subscribe to realtime task updates
 export function subscribeToTasks(
-  uid: string,
+  scope: TaskScopeInput,
   onData: (tasks: Record<string, Task>) => void,
   onError: (message: string) => void,
 ): Unsubscribe {
   return onValue(
-    ref(db, `/tasks/${uid}`),
+    ref(db, resolveTaskPath(scope)),
     (snapshot) => {
       onData(snapshot.val() || {});
     },
@@ -29,8 +52,12 @@ export function subscribeToTasks(
 }
 
 //create a task
-export const createTask = (uid: string, task: NewTask) => {
-  const newTaskRef = push(ref(db, `tasks/${uid}`));
+export const createTask = (
+  scope: TaskScopeInput,
+  task: NewTask,
+  createdBy?: string,
+) => {
+  const newTaskRef = push(ref(db, resolveTaskPath(scope)));
   const now = Date.now();
   const fullTask: Task = {
     id: newTaskRef.key as string,
@@ -42,13 +69,19 @@ export const createTask = (uid: string, task: NewTask) => {
     createdAt: now,
     updatedAt: now,
     completedAt: task.status == "done" ? Date.now() : null,
+    assigneeId: task.assigneeId ?? null,
+    assigneeName: task.assigneeName ?? null,
+    ...(createdBy ? { createdBy } : {}),
+    ...(typeof scope !== "string" && scope.type === "workspace"
+      ? { workspaceId: scope.id }
+      : {}),
   };
   return set(newTaskRef, fullTask);
 };
 
 //update a task  and look for status change to register completion date
 export async function updateTask(
-  uid: string,
+  scope: TaskScopeInput,
   task: Task,
   changes: Partial<Task>,
 ) {
@@ -66,15 +99,19 @@ export async function updateTask(
     }
   }
 
-  return update(ref(db, `tasks/${uid}/${task.id}`), updates);
+  return update(ref(db, `${resolveTaskPath(scope)}/${task.id}`), updates);
 }
 
 //import multiple tasks at once
-export function importTasks(uid: string, tasks: NewTask[]) {
-  return Promise.all(tasks.map((task) => createTask(uid, task)));
+export function importTasks(
+  scope: TaskScopeInput,
+  tasks: NewTask[],
+  createdBy?: string,
+) {
+  return Promise.all(tasks.map((task) => createTask(scope, task, createdBy)));
 }
 
 //delete a task
-export function deleteTask(uid: string, taskId: string) {
-  return remove(ref(db, `tasks/${uid}/${taskId}`));
+export function deleteTask(scope: TaskScopeInput, taskId: string) {
+  return remove(ref(db, `${resolveTaskPath(scope)}/${taskId}`));
 }

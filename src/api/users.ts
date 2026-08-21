@@ -55,6 +55,16 @@ export async function fetchAllUsers(): Promise<UserProfile[]> {
   return list;
 }
 
+export async function findUserByEmail(
+  email: string,
+): Promise<UserProfile | null> {
+  const normalizedEmail = email.trim().toLowerCase();
+  const users = await fetchAllUsers();
+  return (
+    users.find((user) => user.email.toLowerCase() === normalizedEmail) ?? null
+  );
+}
+
 export async function updateUserRole(
   uid: string,
   role: "admin" | "user",

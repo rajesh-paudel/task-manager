@@ -6,21 +6,34 @@ import {
   tasksError,
   tasksReceived,
 } from "../store/taskSlice";
-import { subscribeToTasks } from "../api/tasks";
+import {
+  getTaskScopeKey,
+  personalTaskScope,
+  subscribeToTasks,
+  workspaceTaskScope,
+} from "../api/tasks";
 
-export const useTasksSync = (uid: string | undefined) => {
+export const useTasksSync = (
+  uid: string | undefined,
+  workspaceId: string | null,
+) => {
   const dispatch = useAppDispatch();
   useEffect(() => {
     if (!uid) {
       dispatch(tasksCleared());
       return;
     }
-    dispatch(tasksLoading());
+    const taskScope = workspaceId
+      ? workspaceTaskScope(workspaceId)
+      : personalTaskScope(uid);
+    const sourceKey = getTaskScopeKey(taskScope);
+
+    dispatch(tasksLoading(sourceKey));
     const unsubscribe = subscribeToTasks(
-      uid,
-      (tasks) => dispatch(tasksReceived(tasks)),
+      taskScope,
+      (tasks) => dispatch(tasksReceived({ items: tasks, sourceKey })),
       (message) => dispatch(tasksError(message)),
     );
     return () => unsubscribe();
-  }, [uid, dispatch]);
+  }, [uid, workspaceId, dispatch]);
 };

@@ -25,7 +25,15 @@ const makeTask = (overrides: Partial<Task> = {}): Task => ({
 
 const makeState = (items: Record<string, Task>): RootState => ({
   auth: { userProfile: null, loading: false },
-  tasks: { items, status: "synced", error: null },
+  tasks: { items, sourceKey: "personal:u1", status: "synced", error: null },
+  workspaces: {
+    userWorkspaces: {},
+    workspaces: {},
+    members: {},
+    activeWorkspaceId: null,
+    status: "idle",
+    error: null,
+  },
 });
 
 describe("selectAllTasks", () => {

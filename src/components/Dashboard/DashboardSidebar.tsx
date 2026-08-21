@@ -8,6 +8,7 @@ import {
   Menu,
   X,
   Calendar,
+  Building2,
 } from "lucide-react";
 import { RiAdminFill } from "react-icons/ri";
 import { useAppDispatch, useAppSelector } from "../../store/store";
@@ -26,6 +27,7 @@ export default function Sidebar() {
     { label: "Overview", path: "/dashboard/overview", icon: BarChart3 },
     { label: "Tasks", path: "/dashboard/tasks", icon: ListChecks },
     { label: "Calendar", path: "/dashboard/calendar", icon: Calendar },
+    { label: "Workspaces", path: "/dashboard/workspaces", icon: Building2 },
   ];
 
   const adminNavItem = {

@@ -32,6 +32,9 @@ const Tasks = lazy(() => import("./components/Dashboard/DashboardTasks"));
 const Calendar = lazy(
   () => import("./components/Dashboard/DashboardCalendar"),
 );
+const Workspaces = lazy(
+  () => import("./components/Dashboard/DashboardWorkspaces"),
+);
 const DashboardAdmin = lazy(
   () => import("./components/Dashboard/DashboardAdmin"),
 );
@@ -115,6 +118,7 @@ export default function App() {
                   <Route path="overview" element={<Overview />} />
                   <Route path="tasks" element={<Tasks />} />
                   <Route path="calendar" element={<Calendar />} />
+                  <Route path="workspaces" element={<Workspaces />} />
                   <Route
                     path="admin"
                     element={

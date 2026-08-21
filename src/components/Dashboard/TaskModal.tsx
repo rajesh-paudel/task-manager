@@ -8,12 +8,14 @@ import Modal from "../ui/Modal";
 import Input from "../ui/Input";
 import Textarea from "../ui/Textarea";
 import Button from "../ui/Button";
+import type { WorkspaceMember } from "../../types/workspace";
 interface TaskModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (data: NewTask) => Promise<void>;
   initialTask?: Task | null;
   defaultDueDate?: number | null;
+  assigneeOptions?: WorkspaceMember[];
 }
 
 const statusOptions: { value: TaskStatus; label: string }[] = [
@@ -52,6 +54,7 @@ const taskSchema = z.object({
   status: z.enum(["todo", "in_progress", "done"]),
   priority: z.enum(["low", "medium", "high", "urgent"]),
   dueDate: z.string(),
+  assigneeId: z.string(),
 });
 
 type TaskForm = z.infer<typeof taskSchema>;
@@ -62,8 +65,10 @@ export default function TaskModal({
   onSave,
   initialTask,
   defaultDueDate,
+  assigneeOptions = [],
 }: TaskModalProps) {
   const isEditing = !!initialTask;
+  const canAssign = assigneeOptions.length > 0;
 
   const {
     register,
@@ -81,6 +86,7 @@ export default function TaskModal({
       status: "todo",
       priority: "low",
       dueDate: "",
+      assigneeId: "",
     },
   });
   const status = useWatch({ control, name: "status" });
@@ -97,6 +103,7 @@ export default function TaskModal({
         status: initialTask.status,
         priority: initialTask.priority,
         dueDate: toDateInputValue(initialTask?.dueDate ?? null),
+        assigneeId: initialTask.assigneeId ?? "",
       });
     } else {
       reset({
@@ -105,6 +112,7 @@ export default function TaskModal({
         status: "todo",
         priority: "medium",
         dueDate: toDateInputValue(defaultDueDate ?? null),
+        assigneeId: "",
       });
     }
 
@@ -123,6 +131,10 @@ export default function TaskModal({
         status: data.status,
         priority: data.priority,
         dueDate: fromDateInputValue(data.dueDate),
+        assigneeId: data.assigneeId || null,
+        assigneeName:
+          assigneeOptions.find((member) => member.uid === data.assigneeId)
+            ?.name ?? null,
       };
 
       await onSave(newTask);
@@ -253,6 +265,25 @@ export default function TaskModal({
             </p>
           )}
         </div>
+
+        {canAssign && (
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              Assignee
+            </label>
+            <select
+              {...register("assigneeId")}
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-primary-500"
+            >
+              <option value="">Unassigned</option>
+              {assigneeOptions.map((member) => (
+                <option key={member.uid} value={member.uid}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="flex items-center justify-end gap-3 pt-2">
           <Button

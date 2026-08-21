@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Trash2, Calendar } from "lucide-react";
+import { Pencil, Trash2, Calendar, UserRound } from "lucide-react";
 import type { Task, TaskStatus } from "../../types/task";
 import PriorityBadge from "../ui/PriorityBadge";
 import Modal from "../ui/Modal";
@@ -11,6 +11,7 @@ interface TaskDetailsModalProps {
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => Promise<void>;
+  assigneeName?: string | null;
 }
 
 const statusStyles: Record<TaskStatus, string> = {
@@ -39,6 +40,7 @@ export default function TaskDetailsModal({
   onClose,
   onEdit,
   onDelete,
+  assigneeName,
 }: TaskDetailsModalProps) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -91,6 +93,12 @@ export default function TaskDetailsModal({
           <Calendar className="h-3.5 w-3.5" />
           {dueLabel ?? "No due date"}
         </span>
+        {assigneeName && (
+          <span className="inline-flex items-center gap-1 text-xs text-slate-400">
+            <UserRound className="h-3.5 w-3.5" />
+            {assigneeName}
+          </span>
+        )}
       </div>
 
       {/* Description */}

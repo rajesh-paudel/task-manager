@@ -17,7 +17,14 @@ import {
 } from "../../store/tasksSelectors";
 import TaskModal from "./TaskModal";
 import { useOutletContext } from "react-router-dom";
-import { createTask, updateTask, deleteTask, importTasks } from "../../api/tasks";
+import {
+  createTask,
+  updateTask,
+  deleteTask,
+  importTasks,
+  personalTaskScope,
+  workspaceTaskScope,
+} from "../../api/tasks";
 import { parseTasksJson } from "../../utils/taskImport";
 import { getDueLabel, isOverdue } from "../../utils/dateHelpers";
 import { getErrorMessage } from "../../utils/firebaseErrors";
@@ -28,6 +35,10 @@ import TaskDetailsModal from "./TaskDetailModal";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import { useToast } from "../../context/useToast";
+import {
+  selectActiveWorkspace,
+  selectActiveWorkspaceMembers,
+} from "../../store/workspaceSelectors";
 
 const columns: { key: TaskStatus; label: string }[] = [
   { key: "todo", label: "To do" },
@@ -45,9 +56,16 @@ export default function Tasks() {
   const searchRef = useRef<HTMLInputElement>(null);
   const { view, setView } = useOutletContext<DashboardContextType>();
   const userProfile = useAppSelector((state) => state.auth.userProfile);
+  const activeWorkspace = useAppSelector(selectActiveWorkspace);
+  const activeWorkspaceMembers = useAppSelector(selectActiveWorkspaceMembers);
   const tasksStatus = useAppSelector((state) => state.tasks.status);
   const tasks = useAppSelector(selectAllTasks);
   const tasksByDue = useAppSelector(selectTasksByDueDate);
+  const taskScope = useMemo(() => {
+    if (activeWorkspace) return workspaceTaskScope(activeWorkspace.id);
+    if (userProfile) return personalTaskScope(userProfile.uid);
+    return null;
+  }, [activeWorkspace, userProfile]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const priority =
@@ -82,7 +100,7 @@ export default function Tasks() {
   };
 
   const handleImport = async () => {
-    if (!importFile || !userProfile) return;
+    if (!importFile || !userProfile || !taskScope) return;
     setImportLoading(true);
     setImportMessage(null);
     try {
@@ -95,7 +113,7 @@ export default function Tasks() {
         });
         return;
       }
-      await importTasks(userProfile.uid, tasks);
+      await importTasks(taskScope, tasks, userProfile.uid);
       const message = `Imported ${tasks.length} task${tasks.length === 1 ? "" : "s"}${
         skipped > 0 ? `, skipped ${skipped}` : ""
       }.`;
@@ -148,12 +166,12 @@ export default function Tasks() {
   const closeModal = () => setModalOpen(false);
 
   const handleSaveTask = async (data: NewTask) => {
-    if (!userProfile) return;
+    if (!userProfile || !taskScope) return;
     if (editingTask) {
-      await updateTask(userProfile.uid, editingTask, data);
+      await updateTask(taskScope, editingTask, data);
       showToast("Task updated");
     } else {
-      await createTask(userProfile.uid, data);
+      await createTask(taskScope, data, userProfile.uid);
       showToast("Task created");
     }
   };
@@ -166,8 +184,8 @@ export default function Tasks() {
   };
 
   const handleDeleteFromDetails = async () => {
-    if (!detailsTask || !userProfile) return;
-    await deleteTask(userProfile.uid, detailsTask.id);
+    if (!detailsTask || !taskScope) return;
+    await deleteTask(taskScope, detailsTask.id);
     showToast("Task deleted");
   };
 
@@ -177,9 +195,9 @@ export default function Tasks() {
     currentStatus: TaskStatus,
   ) => {
     e.stopPropagation();
-    if (!userProfile) return;
+    if (!taskScope) return;
     try {
-      await updateTask(userProfile.uid, task, {
+      await updateTask(taskScope, task, {
         ...task,
         status: currentStatus === "done" ? "todo" : "done",
       });
@@ -229,6 +247,7 @@ export default function Tasks() {
       "Description",
       "Status",
       "Priority",
+      "Assignee",
       "Due Date",
       "Created At",
       "Updated At",
@@ -240,6 +259,7 @@ export default function Tasks() {
       task.description,
       task.status,
       task.priority,
+      task.assigneeName ?? "",
       task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "",
       new Date(task.createdAt).toLocaleString(),
       new Date(task.updatedAt).toLocaleString(),
@@ -290,10 +310,10 @@ export default function Tasks() {
     setDragOverColumn(null);
     const taskId = e.dataTransfer.getData("text/plain");
     const task = tasks.find((t) => t.id === taskId);
-    if (!task || !userProfile || task.status === newStatus) return;
+    if (!task || !taskScope || task.status === newStatus) return;
 
     try {
-      await updateTask(userProfile.uid, task, { ...task, status: newStatus });
+      await updateTask(taskScope, task, { ...task, status: newStatus });
       showToast(`Moved to ${columns.find((c) => c.key === newStatus)?.label}`);
     } catch (err: unknown) {
       setError(getErrorMessage(err, "Couldn't move task. Try again."));
@@ -307,7 +327,8 @@ export default function Tasks() {
             Tasks
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            {tasks.length} tasks across your workspace.
+            {tasks.length} tasks in{" "}
+            {activeWorkspace ? activeWorkspace.name : "your personal board"}.
           </p>
         </div>
 
@@ -476,6 +497,11 @@ export default function Tasks() {
                       {task.title}
                     </span>
                     <PriorityBadge priority={task.priority} />
+                    {task.assigneeName && (
+                      <span className="hidden sm:inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                        {task.assigneeName}
+                      </span>
+                    )}
                     {dueLabel && (
                       <span
                         className={`text-xs shrink-0 ${
@@ -602,6 +628,11 @@ export default function Tasks() {
                             </p>
                             <div className="mt-2 flex items-center justify-between gap-2">
                               <PriorityBadge priority={task.priority} />
+                              {task.assigneeName && (
+                                <span className="truncate text-xs text-slate-400">
+                                  {task.assigneeName}
+                                </span>
+                              )}
                               {dueLabel && (
                                 <span
                                   className={`text-xs shrink-0 ${
@@ -764,10 +795,12 @@ export default function Tasks() {
         onClose={closeModal}
         onSave={handleSaveTask}
         initialTask={editingTask}
+        assigneeOptions={activeWorkspace ? activeWorkspaceMembers : []}
       />
       <TaskDetailsModal
         open={detailsTask !== null}
         task={detailsTask}
+        assigneeName={detailsTask?.assigneeName ?? null}
         onClose={() => setDetailsTask(null)}
         onEdit={handleEditFromDetails}
         onDelete={handleDeleteFromDetails}

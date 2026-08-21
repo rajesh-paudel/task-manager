@@ -11,8 +11,22 @@ export interface Task {
   createdAt: number;
   updatedAt: number;
   completedAt: number | null;
+  createdBy?: string;
+  workspaceId?: string;
+  assigneeId?: string | null;
+  assigneeName?: string | null;
 }
 export type NewTask = Pick<
   Task,
-  "title" | "description" | "status" | "priority" | "dueDate"
+  | "title"
+  | "description"
+  | "status"
+  | "priority"
+  | "dueDate"
+  | "assigneeId"
+  | "assigneeName"
 >;
+
+export type TaskScope =
+  | { type: "personal"; id: string }
+  | { type: "workspace"; id: string };
