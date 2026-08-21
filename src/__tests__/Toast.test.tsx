@@ -11,6 +11,15 @@ function ToastTrigger() {
   );
 }
 
+function ErrorToastTrigger() {
+  const { showToast } = useToast();
+  return (
+    <button onClick={() => showToast("Task failed", "error")}>
+      Trigger error
+    </button>
+  );
+}
+
 describe("ToastProvider", () => {
   it("renders a toast when showToast is called", async () => {
     const user = userEvent.setup();
@@ -21,6 +30,22 @@ describe("ToastProvider", () => {
     );
     await user.click(screen.getByRole("button", { name: "Trigger toast" }));
     expect(await screen.findByText("Task saved")).toBeInTheDocument();
+  });
+
+  it("uses theme-aware toast surface classes", async () => {
+    const user = userEvent.setup();
+    render(
+      <ToastProvider>
+        <ErrorToastTrigger />
+      </ToastProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Trigger error" }));
+    expect(await screen.findByRole("status")).toHaveClass(
+      "bg-white",
+      "dark:bg-[#0f172a]",
+      "dark:text-white",
+    );
   });
 
   it("throws when useToast is used outside the provider", () => {

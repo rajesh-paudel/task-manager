@@ -20,15 +20,24 @@ const icons: Record<ToastType, typeof CheckCircle2> = {
 };
 
 const iconColors: Record<ToastType, string> = {
-  success: "text-orange-400",
-  error: "text-white",
-  info: "text-orange-300",
+  success: "text-orange-600 dark:text-orange-300",
+  error: "text-red-600 dark:text-red-300",
+  info: "text-blue-600 dark:text-blue-300",
 };
 
-const bgColors: Record<ToastType, string> = {
-  success: "bg-slate-900",
-  error: "bg-red-600",
-  info: "bg-slate-700",
+const toastStyles: Record<ToastType, string> = {
+  success:
+    "border-orange-200 bg-white text-slate-900 dark:border-orange-500/30 dark:bg-[#0f172a] dark:text-white",
+  error:
+    "border-red-200 bg-white text-slate-900 dark:border-red-500/30 dark:bg-[#0f172a] dark:text-white",
+  info:
+    "border-blue-200 bg-white text-slate-900 dark:border-blue-500/30 dark:bg-[#0f172a] dark:text-white",
+};
+
+const accentStyles: Record<ToastType, string> = {
+  success: "bg-orange-500",
+  error: "bg-red-500",
+  info: "bg-blue-500",
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -64,13 +73,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.98 }}
                   transition={{ duration: 0.18, ease: "easeOut" }}
-                  className={`pointer-events-auto flex items-start gap-2.5 rounded-lg px-4 py-3 text-sm text-white shadow-lift ${bgColors[t.type]}`}
+                  className={`pointer-events-auto relative flex items-start gap-2.5 overflow-hidden rounded-lg border px-4 py-3 text-sm shadow-lift ${toastStyles[t.type]}`}
                 >
+                  <span
+                    className={`absolute inset-y-0 left-0 w-1 ${accentStyles[t.type]}`}
+                    aria-hidden="true"
+                  />
                   <Icon className={`h-4.5 w-4.5 mt-0.5 shrink-0 ${iconColors[t.type]}`} />
                   <p className="flex-1 leading-snug">{t.message}</p>
                   <button
                     onClick={() => dismiss(t.id)}
-                    className="shrink-0 opacity-70 hover:opacity-100 transition-opacity"
+                    className="shrink-0 text-slate-400 hover:text-slate-700 dark:text-slate-300 dark:hover:text-white transition-colors"
                     aria-label="Dismiss notification"
                   >
                     <X className="h-4 w-4" />
