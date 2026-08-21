@@ -10,11 +10,7 @@
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "preview": "vite preview",
-    "prepare": "husky",
-    "commit": "git commit",
-    "commit:no-verify": "git commit --no-verify",
-    "push": "git push",
-    "push:no-verify": "git push --no-verify"
+    "prepare": "husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
