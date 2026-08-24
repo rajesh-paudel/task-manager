@@ -348,6 +348,17 @@ export default function DashboardWorkspaces() {
                   >
                     <Icon className="h-4 w-4" />
                     {label}
+                    {id === "members" && (
+                      <span
+                        className={`rounded-md px-1.5 py-0.5 text-xs ${
+                          activeTab === id
+                            ? "bg-orange-50 text-orange-600"
+                            : "bg-slate-100 text-slate-500"
+                        }`}
+                      >
+                        {memberCount}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -359,9 +370,14 @@ export default function DashboardWorkspaces() {
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     {[
                       {
-                        label: "Total tasks",
-                        value: taskStats.total,
+                        label: "To do",
+                        value: taskStats.todo,
                         icon: ClipboardList,
+                      },
+                      {
+                        label: "In progress",
+                        value: taskStats.inProgress,
+                        icon: CalendarClock,
                       },
                       {
                         label: "Completed",
@@ -373,7 +389,6 @@ export default function DashboardWorkspaces() {
                         value: taskStats.overdue,
                         icon: CalendarClock,
                       },
-                      { label: "Members", value: memberCount, icon: Users },
                     ].map(({ label, value, icon: Icon }) => (
                       <div
                         key={label}
