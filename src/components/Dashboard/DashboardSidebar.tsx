@@ -9,17 +9,28 @@ import {
   X,
   Calendar,
   Building2,
+  ChevronDown,
+  Users,
 } from "lucide-react";
 import { RiAdminFill } from "react-icons/ri";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { logout } from "../../api/auth";
 import profilePlaceholder from "../../assets/profilePlaceholder.png";
 import { clearProfile } from "../../store/authSlice";
+import { activeWorkspaceChanged } from "../../store/workspaceSlice";
+import {
+  selectActiveWorkspace,
+  selectActiveWorkspaceId,
+  selectAllWorkspaces,
+} from "../../store/workspaceSelectors";
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const userProfile = useAppSelector((state) => state.auth.userProfile);
+  const activeWorkspaceId = useAppSelector(selectActiveWorkspaceId);
+  const activeWorkspace = useAppSelector(selectActiveWorkspace);
+  const workspaces = useAppSelector(selectAllWorkspaces);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -48,6 +59,12 @@ export default function Sidebar() {
       dispatch(clearProfile());
       navigate("/login");
     });
+  };
+
+  const handleWorkspaceChange = (workspaceId: string) => {
+    dispatch(
+      activeWorkspaceChanged(workspaceId === "personal" ? null : workspaceId),
+    );
   };
 
   return (
@@ -100,6 +117,41 @@ export default function Sidebar() {
             >
               <X className="h-4 w-4" />
             </button>
+          </div>
+
+          <div className="px-3 py-4 border-b border-slate-100">
+            <label
+              htmlFor="workspace-switcher"
+              className="text-xs font-medium uppercase tracking-wide text-slate-400"
+            >
+              Workspace
+            </label>
+            <div className="relative mt-2">
+              <select
+                id="workspace-switcher"
+                value={activeWorkspaceId ?? "personal"}
+                onChange={(e) => handleWorkspaceChange(e.target.value)}
+                className="w-full appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-9 text-sm font-medium text-slate-800 outline-none transition-colors hover:border-slate-300 focus:border-orange-500"
+              >
+                <option value="personal">Personal board</option>
+                {workspaces.map((workspace) => (
+                  <option key={workspace.id} value={workspace.id}>
+                    {workspace.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                {activeWorkspace ? (
+                  <Building2 className="h-4 w-4" />
+                ) : (
+                  <Users className="h-4 w-4" />
+                )}
+              </div>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+            <p className="mt-2 truncate text-xs text-slate-400">
+              Viewing {activeWorkspace?.name ?? "Personal board"}
+            </p>
           </div>
 
           <nav className="px-3 py-4 space-y-1">

@@ -21,6 +21,7 @@ import {
   AlertCircle,
   ListTodo,
 } from "lucide-react";
+import { selectActiveWorkspace } from "../../store/workspaceSelectors";
 
 const priorityColors: Record<TaskPriority, string> = {
   low: "#94a3b8",
@@ -38,6 +39,7 @@ const priorityLabels: Record<TaskPriority, string> = {
 
 export default function Overview() {
   const userProfile = useAppSelector((state) => state.auth.userProfile);
+  const activeWorkspace = useAppSelector(selectActiveWorkspace);
   const tasksStatus = useAppSelector((state) => state.tasks.status);
   const tasks = useAppSelector(selectAllTasks);
   const taskStats = useAppSelector(selectTaskStats);
@@ -138,7 +140,9 @@ export default function Overview() {
           : "Overview"}
       </h1>
       <p className="mt-1 text-sm text-slate-500">
-        Here's how work is moving this week.
+        Here's how{" "}
+        {activeWorkspace ? activeWorkspace.name : "your personal board"} is
+        moving this week.
       </p>
 
       {/* Stat cards */}
