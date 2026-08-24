@@ -6,7 +6,6 @@ import {
   CalendarClock,
   CheckCircle2,
   ClipboardList,
-  MailPlus,
   Plus,
   Settings,
   ShieldCheck,
@@ -435,7 +434,7 @@ export default function DashboardWorkspaces() {
 
               {activeTab === "members" && (
                 <div>
-                  <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="mb-4">
                     <div>
                       <h3 className="text-sm font-semibold text-slate-900">
                         Members
@@ -446,16 +445,6 @@ export default function DashboardWorkspaces() {
                           : "Personal tasks are visible only to you."}
                       </p>
                     </div>
-                    {canInvite && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setInviteModalOpen(true)}
-                      >
-                        <MailPlus className="h-4 w-4" />
-                        Add member
-                      </Button>
-                    )}
                   </div>
 
                   {activeWorkspace ? (
