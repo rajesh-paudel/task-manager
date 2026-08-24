@@ -4,6 +4,7 @@ import reducer, {
   workspaceDetailsReceived,
   workspaceCreated,
   workspaceMembersReceived,
+  workspaceUpdated,
   workspacesCleared,
   workspacesError,
   workspacesLoading,
@@ -125,6 +126,28 @@ describe("workspaceSlice", () => {
     expect(state.userWorkspaces.w1).toEqual(userWorkspace);
     expect(state.activeWorkspaceId).toBe("w1");
     expect(state.status).toBe("synced");
+  });
+
+  it("updates a workspace detail record", () => {
+    const current = reducer(
+      undefined,
+      workspaceDetailsReceived({ w1: makeWorkspace() }),
+    );
+
+    const state = reducer(
+      current,
+      workspaceUpdated(
+        makeWorkspace({
+          name: "Growth Team",
+          description: "Campaign planning",
+          updatedAt: 2000,
+        }),
+      ),
+    );
+
+    expect(state.workspaces.w1?.name).toBe("Growth Team");
+    expect(state.workspaces.w1?.description).toBe("Campaign planning");
+    expect(state.workspaces.w1?.updatedAt).toBe(2000);
   });
 
   it("records errors and clears state on logout", () => {

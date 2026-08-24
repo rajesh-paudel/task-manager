@@ -71,6 +71,10 @@ const workspaceSlice = createSlice({
       state.status = "synced";
       state.error = null;
     },
+    workspaceUpdated(state, action: PayloadAction<Workspace>) {
+      state.workspaces[action.payload.id] = action.payload;
+      state.error = null;
+    },
     workspaceMembersReceived(
       state,
       action: PayloadAction<{
@@ -101,6 +105,7 @@ const workspaceSlice = createSlice({
 export const {
   activeWorkspaceChanged,
   workspaceCreated,
+  workspaceUpdated,
   workspaceDetailsReceived,
   workspaceMembersReceived,
   workspacesCleared,

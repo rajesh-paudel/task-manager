@@ -5,15 +5,23 @@ import {
   AlertCircle,
   Building2,
   CheckCircle2,
+  Check,
   Clock,
   ClipboardList,
+  Loader2,
+  Pencil,
   Plus,
   Settings,
   ShieldCheck,
   UserPlus,
   Users,
+  X,
 } from "lucide-react";
-import { addWorkspaceMember, createWorkspace } from "../../api/workspaces";
+import {
+  addWorkspaceMember,
+  createWorkspace,
+  updateWorkspaceDetails,
+} from "../../api/workspaces";
 import { findUserByEmail } from "../../api/users";
 import { useToast } from "../../context/useToast";
 import { getErrorMessage } from "../../utils/firebaseErrors";
@@ -28,12 +36,14 @@ import { selectTaskStats } from "../../store/tasksSelectors";
 import {
   activeWorkspaceChanged,
   workspaceCreated,
+  workspaceUpdated,
 } from "../../store/workspaceSlice";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Modal from "../ui/Modal";
 import Textarea from "../ui/Textarea";
 import type { Workspace, WorkspaceRole } from "../../types/workspace";
+import { useEditableField } from "../../hooks/useEditableField";
 
 type WorkspaceTab = "overview" | "members" | "settings";
 
@@ -56,6 +66,114 @@ function RoleBadge({ role }: { role: WorkspaceRole | "private" }) {
     <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium capitalize text-slate-600">
       {role}
     </span>
+  );
+}
+
+interface WorkspaceEditableFieldProps {
+  label: string;
+  value: string;
+  onSave: (value: string) => Promise<void>;
+  placeholder?: string;
+  multiline?: boolean;
+  required?: boolean;
+  editable: boolean;
+}
+
+function WorkspaceEditableField({
+  label,
+  value,
+  onSave,
+  placeholder,
+  multiline,
+  required,
+  editable,
+}: WorkspaceEditableFieldProps) {
+  const field = useEditableField(value, async (nextValue) => {
+    if (required && !nextValue) {
+      throw new Error(`${label} can't be empty.`);
+    }
+    await onSave(nextValue);
+  });
+
+  return (
+    <div className="flex items-start justify-between gap-4 py-5">
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          {label}
+        </p>
+
+        {field.editing ? (
+          multiline ? (
+            <textarea
+              autoFocus
+              rows={3}
+              value={field.value}
+              onChange={(e) => field.setValue(e.target.value)}
+              placeholder={placeholder}
+              onKeyDown={(e) => e.key === "Escape" && field.cancel()}
+              className="mt-1.5 w-full resize-none border-0 border-b border-slate-900 bg-transparent px-0 py-1 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            />
+          ) : (
+            <input
+              autoFocus
+              value={field.value}
+              onChange={(e) => field.setValue(e.target.value)}
+              placeholder={placeholder}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") field.commit();
+                if (e.key === "Escape") field.cancel();
+              }}
+              className="mt-1.5 w-full border-0 border-b border-slate-900 bg-transparent px-0 py-1 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            />
+          )
+        ) : (
+          <p className="mt-1 text-sm leading-relaxed text-slate-900">
+            {value || <span className="text-slate-400">Not set</span>}
+          </p>
+        )}
+
+        {field.error && (
+          <p className="mt-1.5 text-xs text-red-600">{field.error}</p>
+        )}
+      </div>
+
+      {editable && (
+        <div className="mt-5 flex shrink-0 items-center gap-1">
+          {field.editing ? (
+            <>
+              <button
+                onClick={field.commit}
+                disabled={field.saving}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-orange-600 hover:bg-orange-50 disabled:opacity-50"
+                aria-label={`Save ${label}`}
+              >
+                {field.saving ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Check className="h-3.5 w-3.5" />
+                )}
+              </button>
+              <button
+                onClick={field.cancel}
+                disabled={field.saving}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 disabled:opacity-50"
+                aria-label={`Cancel editing ${label}`}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={field.start}
+              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-orange-50 hover:text-orange-600"
+              aria-label={`Edit ${label}`}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -97,9 +215,17 @@ export default function DashboardWorkspaces() {
     activeWorkspaceId === null
       ? "private"
       : userWorkspaces[activeWorkspaceId]?.role;
+  const hasManagerRole = activeRole === "owner" || activeRole === "admin";
   const canInvite =
     Boolean(activeWorkspace) &&
     (activeWorkspace?.ownerId === userProfile?.uid ||
+      hasManagerRole ||
+      currentMember?.role === "admin" ||
+      currentMember?.role === "owner");
+  const canManageWorkspace =
+    Boolean(activeWorkspace) &&
+    (activeWorkspace?.ownerId === userProfile?.uid ||
+      hasManagerRole ||
       currentMember?.role === "admin" ||
       currentMember?.role === "owner");
 
@@ -201,6 +327,21 @@ export default function DashboardWorkspaces() {
   const selectWorkspace = (workspaceId: string | null) => {
     dispatch(activeWorkspaceChanged(workspaceId));
     setActiveTab("overview");
+  };
+
+  const saveWorkspaceField = async (
+    field: "name" | "description",
+    value: string,
+  ) => {
+    if (!activeWorkspace || !canManageWorkspace) return;
+
+    const updatedWorkspace = await updateWorkspaceDetails(activeWorkspace, {
+      name: field === "name" ? value : activeWorkspace.name,
+      description:
+        field === "description" ? value : activeWorkspace.description,
+    });
+    dispatch(workspaceUpdated(updatedWorkspace));
+    showToast("Workspace updated");
   };
 
   return (
@@ -496,39 +637,71 @@ export default function DashboardWorkspaces() {
               )}
 
               {activeTab === "settings" && (
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-4">
                   <div className="rounded-lg border border-slate-200 p-4">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                      Name
-                    </p>
-                    <p className="mt-2 text-sm font-medium text-slate-900">
-                      {activeName}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-slate-200 p-4">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                      Type
-                    </p>
-                    <p className="mt-2 text-sm font-medium text-slate-900">
-                      {activeWorkspace ? "Shared workspace" : "Personal board"}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-slate-200 p-4 md:col-span-2">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                      Description
-                    </p>
-                    <p className="mt-2 text-sm text-slate-600">
-                      {activeDescription}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-dashed border-slate-200 p-4 md:col-span-2">
-                    <p className="text-sm font-semibold text-slate-900">
-                      More controls can live here next
-                    </p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      Rename, archive, transfer ownership, and member
-                      permission changes fit naturally in this settings tab.
-                    </p>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-slate-900">
+                          Workspace details
+                        </h3>
+                        <p className="mt-1 text-sm text-slate-500">
+                          Owners and admins can edit each workspace field.
+                        </p>
+                      </div>
+                      <RoleBadge role={activeRole ?? "member"} />
+                    </div>
+
+                    {!activeWorkspace ? (
+                      <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                        <p className="text-sm font-medium text-slate-900">
+                          Personal board settings are fixed
+                        </p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          Select a shared workspace to edit its name and
+                          description.
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="mt-3 divide-y divide-slate-100">
+                          <WorkspaceEditableField
+                            label="Name"
+                            value={activeWorkspace.name}
+                            required
+                            editable={canManageWorkspace}
+                            onSave={(value) => saveWorkspaceField("name", value)}
+                          />
+                          <WorkspaceEditableField
+                            label="Description"
+                            value={activeWorkspace.description}
+                            placeholder="Describe this workspace"
+                            multiline
+                            editable={canManageWorkspace}
+                            onSave={(value) =>
+                              saveWorkspaceField("description", value)
+                            }
+                          />
+                          <div className="flex items-start justify-between gap-4 py-5">
+                            <div>
+                              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                                Type
+                              </p>
+                              <p className="mt-1 text-sm text-slate-900">
+                                Shared workspace
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        {!canManageWorkspace && (
+                          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <p className="text-sm text-slate-500">
+                              Ask a workspace owner or admin to change these
+                              details.
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               )}

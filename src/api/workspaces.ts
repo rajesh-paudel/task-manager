@@ -164,3 +164,21 @@ export async function addWorkspaceMember(
     [`workspaces/${workspace.id}/updatedAt`]: now,
   });
 }
+
+export async function updateWorkspaceDetails(
+  workspace: Workspace,
+  changes: NewWorkspace,
+): Promise<Workspace> {
+  const updatedWorkspace: Workspace = {
+    ...workspace,
+    name: changes.name.trim(),
+    description: changes.description.trim(),
+    updatedAt: Date.now(),
+  };
+
+  await update(ref(db), {
+    [`workspaces/${workspace.id}`]: updatedWorkspace,
+  });
+
+  return updatedWorkspace;
+}
