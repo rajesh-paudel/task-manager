@@ -1,5 +1,18 @@
 import { useMemo, useState, type FormEvent } from "react";
-import { Building2, MailPlus, Plus, ShieldCheck, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowRight,
+  Building2,
+  CalendarClock,
+  CheckCircle2,
+  ClipboardList,
+  MailPlus,
+  Plus,
+  Settings,
+  ShieldCheck,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { addWorkspaceMember, createWorkspace } from "../../api/workspaces";
 import { findUserByEmail } from "../../api/users";
 import { useToast } from "../../context/useToast";
@@ -11,6 +24,7 @@ import {
   selectAllWorkspaces,
   selectWorkspaceStatus,
 } from "../../store/workspaceSelectors";
+import { selectTaskStats } from "../../store/tasksSelectors";
 import {
   activeWorkspaceChanged,
   workspaceCreated,
@@ -19,9 +33,34 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Modal from "../ui/Modal";
 import Textarea from "../ui/Textarea";
-import type { WorkspaceRole } from "../../types/workspace";
+import type { Workspace, WorkspaceRole } from "../../types/workspace";
+
+type WorkspaceTab = "overview" | "members" | "settings";
+
+const tabs: { id: WorkspaceTab; label: string; icon: typeof ClipboardList }[] = [
+  { id: "overview", label: "Overview", icon: ClipboardList },
+  { id: "members", label: "Members", icon: Users },
+  { id: "settings", label: "Settings", icon: Settings },
+];
+
+function formatDate(timestamp: number) {
+  return new Date(timestamp).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function RoleBadge({ role }: { role: WorkspaceRole | "private" }) {
+  return (
+    <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium capitalize text-slate-600">
+      {role}
+    </span>
+  );
+}
 
 export default function DashboardWorkspaces() {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const userProfile = useAppSelector((state) => state.auth.userProfile);
   const workspaceStatus = useAppSelector(selectWorkspaceStatus);
@@ -31,8 +70,10 @@ export default function DashboardWorkspaces() {
   );
   const workspaces = useAppSelector(selectAllWorkspaces);
   const activeMembers = useAppSelector(selectActiveWorkspaceMembers);
+  const taskStats = useAppSelector(selectTaskStats);
   const { showToast } = useToast();
 
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>("overview");
   const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -52,11 +93,23 @@ export default function DashboardWorkspaces() {
   const currentMember = activeMembers.find(
     (member) => member.uid === userProfile?.uid,
   );
+  const activeRole =
+    activeWorkspaceId === null
+      ? "private"
+      : userWorkspaces[activeWorkspaceId]?.role;
   const canInvite =
     Boolean(activeWorkspace) &&
     (activeWorkspace?.ownerId === userProfile?.uid ||
       currentMember?.role === "admin" ||
       currentMember?.role === "owner");
+
+  const activeName = activeWorkspace?.name ?? "Personal board";
+  const activeDescription =
+    activeWorkspace?.description ||
+    "Your private task board, calendar, and productivity history.";
+  const activeUpdatedAt = activeWorkspace?.updatedAt;
+  const memberCount = activeWorkspace ? activeMembers.length : 1;
+  const workspaceRows: Array<Workspace | null> = [null, ...workspaces];
 
   const resetForm = () => {
     setName("");
@@ -97,6 +150,7 @@ export default function DashboardWorkspaces() {
       });
       dispatch(workspaceCreated(createdWorkspace));
       showToast("Workspace created");
+      setActiveTab("overview");
       setModalOpen(false);
       resetForm();
     } catch (err: unknown) {
@@ -144,15 +198,20 @@ export default function DashboardWorkspaces() {
     }
   };
 
+  const selectWorkspace = (workspaceId: string | null) => {
+    dispatch(activeWorkspaceChanged(workspaceId));
+    setActiveTab("overview");
+  };
+
   return (
-    <div className="min-h-screen max-w-5xl mx-auto px-6 sm:px-8 py-10">
+    <div className="min-h-screen max-w-6xl mx-auto px-6 sm:px-8 py-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
             Workspaces
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Organize shared projects, members, and team task boards.
+            Manage spaces, members, and the task scope used across Dashboard.
           </p>
         </div>
         <Button onClick={() => setModalOpen(true)}>
@@ -162,194 +221,304 @@ export default function DashboardWorkspaces() {
       </div>
 
       {workspaceStatus === "loading" || workspaceStatus === "idle" ? (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {[0, 1, 2, 3].map((item) => (
-            <div
-              key={item}
-              className="h-36 bg-white border border-slate-200 rounded-xl animate-pulse"
-            />
-          ))}
-        </div>
-      ) : workspaces.length === 0 ? (
-        <div className="mt-8 bg-white border border-slate-200 rounded-xl px-6 py-14 text-center">
-          <div className="mx-auto h-12 w-12 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
-            <Building2 className="h-6 w-6" />
-          </div>
-          <h2 className="mt-5 text-lg font-semibold text-slate-900">
-            Create your first team workspace
-          </h2>
-          <p className="mt-2 max-w-md mx-auto text-sm text-slate-500">
-            Workspaces let you separate client projects, product teams, or
-            internship demos with their own members and shared task boards.
-          </p>
-          <Button className="mt-6" onClick={() => setModalOpen(true)}>
-            <Plus className="h-4 w-4" />
-            Create workspace
-          </Button>
+        <div className="mt-8 grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
+          <div className="h-96 rounded-lg border border-slate-200 bg-white animate-pulse" />
+          <div className="h-96 rounded-lg border border-slate-200 bg-white animate-pulse" />
         </div>
       ) : (
-        <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
-          <section className="space-y-3">
-            <button
-              onClick={() => dispatch(activeWorkspaceChanged(null))}
-              className={`w-full text-left bg-white border rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift ${
-                activeWorkspaceId === null
-                  ? "border-orange-300 ring-2 ring-orange-100"
-                  : "border-slate-200 hover:border-slate-300"
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                <div
-                  className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${
-                    activeWorkspaceId === null
-                      ? "bg-orange-50 text-orange-600"
-                      : "bg-slate-100 text-slate-500"
-                  }`}
-                >
-                  <Users className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base font-semibold text-slate-900 truncate">
-                      Personal board
-                    </h2>
-                    {activeWorkspaceId === null && (
-                      <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-600">
-                        Active
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Your private task list, calendar, and productivity stats.
-                  </p>
-                </div>
-              </div>
-            </button>
+        <div className="mt-8 grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
+          <aside className="h-fit rounded-lg border border-slate-200 bg-white">
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                Your spaces
+              </p>
+              <span className="text-xs text-slate-400">
+                {workspaces.length + 1}
+              </span>
+            </div>
+            <div className="p-2">
+              {workspaceRows.map((workspace) => {
+                const isPersonal = workspace === null;
+                const workspaceId = workspace?.id ?? null;
+                const isActive = workspaceId === activeWorkspaceId;
+                const role = isPersonal
+                  ? "private"
+                  : userWorkspaces[workspace.id]?.role;
 
-            {workspaces.map((workspace) => {
-              const isActive = workspace.id === activeWorkspaceId;
-              const membership = userWorkspaces[workspace.id];
-              return (
-                <button
-                  key={workspace.id}
-                  onClick={() => dispatch(activeWorkspaceChanged(workspace.id))}
-                  className={`w-full text-left bg-white border rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift ${
-                    isActive
-                      ? "border-orange-300 ring-2 ring-orange-100"
-                      : "border-slate-200 hover:border-slate-300"
-                  }`}
-                >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${
-                        isActive
-                          ? "bg-orange-50 text-orange-600"
-                          : "bg-slate-100 text-slate-500"
-                      }`}
-                    >
-                      <Building2 className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-base font-semibold text-slate-900 truncate">
-                          {workspace.name}
-                        </h2>
-                        {isActive && (
-                          <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-600">
-                            Active
-                          </span>
+                return (
+                  <button
+                    key={workspace?.id ?? "personal"}
+                    onClick={() => selectWorkspace(workspaceId)}
+                    className={`w-full rounded-lg px-3 py-3 text-left transition-colors ${
+                      isActive
+                        ? "bg-orange-50 text-orange-700"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                          isActive
+                            ? "bg-white text-orange-600"
+                            : "bg-slate-100 text-slate-500"
+                        }`}
+                      >
+                        {isPersonal ? (
+                          <Users className="h-4 w-4" />
+                        ) : (
+                          <Building2 className="h-4 w-4" />
                         )}
                       </div>
-                      <p className="mt-1 text-sm text-slate-500 line-clamp-2">
-                        {workspace.description || "No description yet."}
-                      </p>
-                      <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-400">
-                        <span className="inline-flex items-center gap-1.5">
-                          <ShieldCheck className="h-3.5 w-3.5" />
-                          {workspace.ownerId === userProfile?.uid
-                            ? "Owner workspace"
-                            : `${membership?.role ?? "Member"} workspace`}
-                        </span>
-                        <span>
-                          Updated{" "}
-                          {new Date(workspace.updatedAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </section>
-
-          <aside className="bg-white border border-slate-200 rounded-xl p-5 h-fit">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                  Active workspace
-                </p>
-                <h2 className="mt-1 text-base font-semibold text-slate-900">
-                  {activeWorkspace?.name ?? "Personal board"}
-                </h2>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
-                <Users className="h-5 w-5" />
-              </div>
-            </div>
-
-            <div className="mt-5 border-t border-slate-100 pt-5">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-slate-900">
-                  Members
-                </h3>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400">
-                    {activeMembers.length}
-                  </span>
-                  {canInvite && (
-                    <button
-                      onClick={() => setInviteModalOpen(true)}
-                      className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-orange-50 hover:text-orange-600"
-                      aria-label="Invite member"
-                    >
-                      <MailPlus className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-              <div className="mt-3 space-y-2">
-                {activeMembers.length === 0 ? (
-                  <p className="text-sm text-slate-400">
-                    {activeWorkspace
-                      ? "Member details will appear here after sync."
-                      : "Personal tasks are visible only to you."}
-                  </p>
-                ) : (
-                  activeMembers.map((member) => (
-                    <div
-                      key={member.uid}
-                      className="flex items-center gap-3 rounded-lg border border-slate-100 px-3 py-2"
-                    >
-                      <div className="h-8 w-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-xs font-semibold">
-                        {member.name.slice(0, 1).toUpperCase()}
-                      </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-slate-900">
-                          {member.name}
-                        </p>
-                        <p className="truncate text-xs text-slate-400">
-                          {member.email}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-semibold">
+                            {workspace?.name ?? "Personal board"}
+                          </p>
+                          {isActive && (
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-600" />
+                          )}
+                        </div>
+                        <div className="mt-1 flex items-center gap-2">
+                          <RoleBadge role={role ?? "member"} />
+                          {!isPersonal && (
+                            <span className="truncate text-xs text-slate-400">
+                              {formatDate(workspace.updatedAt)}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium capitalize text-slate-600">
-                        {member.role}
-                      </span>
                     </div>
-                  ))
-                )}
-              </div>
+                  </button>
+                );
+              })}
             </div>
           </aside>
+
+          <section className="rounded-lg border border-slate-200 bg-white">
+            <div className="border-b border-slate-100 p-5">
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div className="flex min-w-0 items-start gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-600">
+                    {activeWorkspace ? (
+                      <Building2 className="h-5 w-5" />
+                    ) : (
+                      <Users className="h-5 w-5" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="truncate text-xl font-semibold text-slate-900">
+                        {activeName}
+                      </h2>
+                      <RoleBadge role={activeRole ?? "member"} />
+                    </div>
+                    <p className="mt-1 max-w-2xl text-sm text-slate-500">
+                      {activeDescription}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {canInvite && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setInviteModalOpen(true)}
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Invite
+                    </Button>
+                  )}
+                  <Button onClick={() => navigate("/dashboard/tasks")}>
+                    Tasks
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                {tabs.map(({ id, label, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTab(id)}
+                    className={`inline-flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
+                      activeTab === id
+                        ? "border-orange-600 text-orange-600"
+                        : "border-transparent text-slate-500 hover:text-slate-900"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-5">
+              {activeTab === "overview" && (
+                <div className="space-y-5">
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    {[
+                      {
+                        label: "Total tasks",
+                        value: taskStats.total,
+                        icon: ClipboardList,
+                      },
+                      {
+                        label: "Completed",
+                        value: taskStats.done,
+                        icon: CheckCircle2,
+                      },
+                      {
+                        label: "Overdue",
+                        value: taskStats.overdue,
+                        icon: CalendarClock,
+                      },
+                      { label: "Members", value: memberCount, icon: Users },
+                    ].map(({ label, value, icon: Icon }) => (
+                      <div
+                        key={label}
+                        className="rounded-lg border border-slate-200 p-4"
+                      >
+                        <Icon className="h-4 w-4 text-orange-600" />
+                        <p className="mt-3 text-2xl font-semibold text-slate-900">
+                          {value}
+                        </p>
+                        <p className="text-xs text-slate-500">{label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 p-4">
+                    <h3 className="text-sm font-semibold text-slate-900">
+                      Workspace summary
+                    </h3>
+                    <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
+                      <div>
+                        <dt className="text-slate-400">Scope</dt>
+                        <dd className="mt-1 font-medium text-slate-900">
+                          {activeWorkspace ? "Shared workspace" : "Private"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-slate-400">Your access</dt>
+                        <dd className="mt-1 font-medium capitalize text-slate-900">
+                          {activeRole ?? "member"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-slate-400">Last updated</dt>
+                        <dd className="mt-1 font-medium text-slate-900">
+                          {activeUpdatedAt
+                            ? formatDate(activeUpdatedAt)
+                            : "Today"}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "members" && (
+                <div>
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-900">
+                        Members
+                      </h3>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {activeWorkspace
+                          ? `${activeMembers.length} people have access to this workspace.`
+                          : "Personal tasks are visible only to you."}
+                      </p>
+                    </div>
+                    {canInvite && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setInviteModalOpen(true)}
+                      >
+                        <MailPlus className="h-4 w-4" />
+                        Add member
+                      </Button>
+                    )}
+                  </div>
+
+                  {activeWorkspace ? (
+                    <div className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+                      {activeMembers.map((member) => (
+                        <div
+                          key={member.uid}
+                          className="flex items-center gap-3 px-4 py-3"
+                        >
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-50 text-sm font-semibold text-orange-600">
+                            {member.name.slice(0, 1).toUpperCase()}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-slate-900">
+                              {member.name}
+                            </p>
+                            <p className="truncate text-xs text-slate-400">
+                              {member.email}
+                            </p>
+                          </div>
+                          <RoleBadge role={member.role} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-slate-200 p-6 text-center">
+                      <ShieldCheck className="mx-auto h-6 w-6 text-orange-600" />
+                      <p className="mt-3 text-sm font-medium text-slate-900">
+                        Private by default
+                      </p>
+                      <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">
+                        Create or select a shared workspace when you need task
+                        assignment and member collaboration.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "settings" && (
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-lg border border-slate-200 p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                      Name
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-slate-900">
+                      {activeName}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                      Type
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-slate-900">
+                      {activeWorkspace ? "Shared workspace" : "Personal board"}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 p-4 md:col-span-2">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                      Description
+                    </p>
+                    <p className="mt-2 text-sm text-slate-600">
+                      {activeDescription}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-dashed border-slate-200 p-4 md:col-span-2">
+                    <p className="text-sm font-semibold text-slate-900">
+                      More controls can live here next
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Rename, archive, transfer ownership, and member
+                      permission changes fit naturally in this settings tab.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
         </div>
       )}
 
