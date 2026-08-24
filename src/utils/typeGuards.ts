@@ -61,6 +61,7 @@ export function isWorkspaceMember(value: unknown): value is WorkspaceMember {
     isNonEmptyString(v.uid) &&
     isNonEmptyString(v.name) &&
     isNonEmptyString(v.email) &&
+    (typeof v.profileUrl === "undefined" || typeof v.profileUrl === "string") &&
     isWorkspaceRole(v.role) &&
     typeof v.joinedAt === "number"
   );

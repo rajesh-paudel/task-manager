@@ -44,6 +44,7 @@ import Modal from "../ui/Modal";
 import Textarea from "../ui/Textarea";
 import type { Workspace, WorkspaceRole } from "../../types/workspace";
 import { useEditableField } from "../../hooks/useEditableField";
+import profilePlaceholder from "../../assets/profilePlaceholder.png";
 
 type WorkspaceTab = "overview" | "members" | "settings";
 
@@ -390,19 +391,17 @@ export default function DashboardWorkspaces() {
                   <button
                     key={workspace?.id ?? "personal"}
                     onClick={() => selectWorkspace(workspaceId)}
-                    className={`w-full rounded-lg px-3 py-3 text-left transition-colors ${
-                      isActive
-                        ? "bg-orange-50 text-orange-700"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                    }`}
+                    className={`w-full rounded-lg px-3 py-3 text-left transition-colors ${isActive
+                      ? "bg-orange-50 text-orange-700"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      }`}
                   >
                     <div className="flex items-start gap-3">
                       <div
-                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                          isActive
-                            ? "bg-white text-orange-600"
-                            : "bg-slate-100 text-slate-500"
-                        }`}
+                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${isActive
+                          ? "bg-white text-orange-600"
+                          : "bg-slate-100 text-slate-500"
+                          }`}
                       >
                         {isPersonal ? (
                           <Users className="h-4 w-4" />
@@ -481,21 +480,19 @@ export default function DashboardWorkspaces() {
                   <button
                     key={id}
                     onClick={() => setActiveTab(id)}
-                    className={`inline-flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
-                      activeTab === id
-                        ? "border-orange-600 text-orange-600"
-                        : "border-transparent text-slate-500 hover:text-slate-900"
-                    }`}
+                    className={`inline-flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors ${activeTab === id
+                      ? "border-orange-600 text-orange-600"
+                      : "border-transparent text-slate-500 hover:text-slate-900"
+                      }`}
                   >
                     <Icon className="h-4 w-4" />
                     {label}
                     {id === "members" && (
                       <span
-                        className={`rounded-md px-1.5 py-0.5 text-xs ${
-                          activeTab === id
-                            ? "bg-orange-50 text-orange-600"
-                            : "bg-slate-100 text-slate-500"
-                        }`}
+                        className={`rounded-md px-1.5 py-0.5 text-xs ${activeTab === id
+                          ? "bg-orange-50 text-orange-600"
+                          : "bg-slate-100 text-slate-500"
+                          }`}
                       >
                         {memberCount}
                       </span>
@@ -606,12 +603,18 @@ export default function DashboardWorkspaces() {
                           key={member.uid}
                           className="flex items-center gap-3 px-4 py-3"
                         >
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-50 text-sm font-semibold text-orange-600">
-                            {member.name.slice(0, 1).toUpperCase()}
-                          </div>
+                          <img
+                            src={member.profileUrl || profilePlaceholder}
+                            alt={member.name}
+                            onError={(event) => {
+                              event.currentTarget.src = profilePlaceholder;
+                            }}
+                            className="h-9 w-9 shrink-0 rounded-full object-cover"
+                          />
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-medium text-slate-900">
                               {member.name}
+                              {member.uid === userProfile?.uid && " (you)"}
                             </p>
                             <p className="truncate text-xs text-slate-400">
                               {member.email}

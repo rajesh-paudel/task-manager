@@ -13,6 +13,7 @@ export interface WorkspaceMember {
   uid: string;
   name: string;
   email: string;
+  profileUrl?: string;
   role: WorkspaceRole;
   joinedAt: number;
 }

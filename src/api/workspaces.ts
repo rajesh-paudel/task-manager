@@ -16,6 +16,7 @@ import type {
 } from "../types/workspace";
 import { db } from "../utils/firebaseConfig";
 import {
+  isUserProfile,
   isUserWorkspace,
   isWorkspace,
   isWorkspaceMember,
@@ -51,7 +52,7 @@ export function subscribeToWorkspaceMembers(
 ): Unsubscribe {
   return onValue(
     ref(db, `workspaceMembers/${workspaceId}`),
-    (snapshot) => {
+    async (snapshot) => {
       const data = snapshot.val() || {};
       const members = Object.entries(data).reduce<
         Record<string, WorkspaceMember>
@@ -61,7 +62,26 @@ export function subscribeToWorkspaceMembers(
         }
         return acc;
       }, {});
-      onData(members);
+      const enrichedMembers = await Promise.all(
+        Object.entries(members).map(async ([uid, member]) => {
+          try {
+            const profileSnapshot = await get(ref(db, `users/${uid}`));
+            const profile = profileSnapshot.val();
+            return [
+              uid,
+              {
+                ...member,
+                profileUrl: isUserProfile(profile)
+                  ? profile.profileUrl
+                  : member.profileUrl,
+              },
+            ] as const;
+          } catch {
+            return [uid, member] as const;
+          }
+        }),
+      );
+      onData(Object.fromEntries(enrichedMembers));
     },
     (err) => onError(err.message),
   );
@@ -121,6 +141,7 @@ export async function createWorkspace(
     uid: owner.uid,
     name: owner.name,
     email: owner.email,
+    profileUrl: owner.profileUrl,
     role: "owner",
     joinedAt: now,
   };
@@ -149,6 +170,7 @@ export async function addWorkspaceMember(
     uid: user.uid,
     name: user.name,
     email: user.email,
+    profileUrl: user.profileUrl,
     role,
     joinedAt: now,
   };
