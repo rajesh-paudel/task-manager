@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from "react";
 import { subscribeToAuthState, logout } from "./api/auth";
-import { subscribeToUserProfile } from "./api/users";
+import { subscribeToUserProfile, syncPublicUserProfile } from "./api/users";
+import { syncWorkspaceMemberProfile } from "./api/workspaces";
 import {
   Routes,
   Route,
@@ -61,6 +62,10 @@ export default function App() {
       if (user) {
         unsubscribeProfile = subscribeToUserProfile(user.uid, (profile) => {
           dispatch(profile ? setProfile(profile) : clearProfile());
+          if (profile) {
+            syncPublicUserProfile(profile).catch(() => undefined);
+            syncWorkspaceMemberProfile(profile).catch(() => undefined);
+          }
         });
       } else {
         dispatch(clearProfile());

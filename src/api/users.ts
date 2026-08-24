@@ -3,13 +3,13 @@ import {
   onValue,
   ref,
   remove,
-  set,
   update,
   type Unsubscribe,
 } from "firebase/database";
 import { db } from "../utils/firebaseConfig";
 import { isUserProfile } from "../utils/typeGuards";
 import type { UserProfile } from "../types/user";
+import { syncWorkspaceMemberProfile } from "./workspaces";
 
 export async function createUserProfile(
   uid: string,
@@ -26,7 +26,14 @@ export async function createUserProfile(
     role: "user",
     createdAt: Date.now(),
   };
-  await set(ref(db, `users/${uid}`), profile);
+  await update(ref(db), {
+    [`users/${uid}`]: profile,
+    [`publicProfiles/${uid}`]: {
+      uid,
+      name,
+      profileUrl: "",
+    },
+  });
   return profile;
 }
 
@@ -40,11 +47,38 @@ export function subscribeToUserProfile(
   });
 }
 
+export async function syncPublicUserProfile(
+  profile: UserProfile,
+): Promise<void> {
+  await update(ref(db), {
+    [`publicProfiles/${profile.uid}`]: {
+      uid: profile.uid,
+      name: profile.name,
+      profileUrl: profile.profileUrl,
+    },
+  });
+}
+
 export async function updateUserProfile(
   uid: string,
   changes: Partial<UserProfile>,
 ): Promise<void> {
-  await update(ref(db, `users/${uid}`), changes);
+  const profileSnapshot = await get(ref(db, `users/${uid}`));
+  const profile = profileSnapshot.val();
+  if (!isUserProfile(profile)) {
+    throw new Error("Unable to update profile. Please try again.");
+  }
+  const updatedProfile = { ...profile, ...changes };
+
+  await update(ref(db), {
+    [`users/${uid}`]: changes,
+    [`publicProfiles/${uid}`]: {
+      uid,
+      name: updatedProfile.name,
+      profileUrl: updatedProfile.profileUrl,
+    },
+  });
+  await syncWorkspaceMemberProfile(updatedProfile);
 }
 
 export async function fetchAllUsers(): Promise<UserProfile[]> {

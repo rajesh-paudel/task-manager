@@ -16,7 +16,7 @@ import type {
 } from "../types/workspace";
 import { db } from "../utils/firebaseConfig";
 import {
-  isUserProfile,
+  isPublicUserProfile,
   isUserWorkspace,
   isWorkspace,
   isWorkspaceMember,
@@ -45,6 +45,28 @@ export function subscribeToUserWorkspaces(
   );
 }
 
+export async function syncWorkspaceMemberProfile(
+  profile: UserProfile,
+): Promise<void> {
+  const snapshot = await get(ref(db, `userWorkspaces/${profile.uid}`));
+  const memberships = snapshot.val() || {};
+  const updates: Record<string, string> = {};
+
+  Object.entries(memberships).forEach(([workspaceId, value]) => {
+    if (!isUserWorkspace(value)) return;
+    updates[`workspaceMembers/${workspaceId}/${profile.uid}/name`] =
+      profile.name;
+    updates[`workspaceMembers/${workspaceId}/${profile.uid}/email`] =
+      profile.email;
+    updates[`workspaceMembers/${workspaceId}/${profile.uid}/profileUrl`] =
+      profile.profileUrl;
+  });
+
+  if (Object.keys(updates).length > 0) {
+    await update(ref(db), updates);
+  }
+}
+
 export function subscribeToWorkspaceMembers(
   workspaceId: string,
   onData: (members: Record<string, WorkspaceMember>) => void,
@@ -65,13 +87,13 @@ export function subscribeToWorkspaceMembers(
       const enrichedMembers = await Promise.all(
         Object.entries(members).map(async ([uid, member]) => {
           try {
-            const profileSnapshot = await get(ref(db, `users/${uid}`));
+            const profileSnapshot = await get(ref(db, `publicProfiles/${uid}`));
             const profile = profileSnapshot.val();
             return [
               uid,
               {
                 ...member,
-                profileUrl: isUserProfile(profile)
+                profileUrl: isPublicUserProfile(profile)
                   ? profile.profileUrl
                   : member.profileUrl,
               },

@@ -10,6 +10,7 @@
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "preview": "vite preview",
+    "firebase:deploy": "npx firebase-tools deploy --only database",
     "prepare": "husky"
   },
   "dependencies": {

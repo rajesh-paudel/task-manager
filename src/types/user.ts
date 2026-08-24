@@ -8,3 +8,9 @@ export interface UserProfile {
   role: "admin" | "user";
   createdAt: number;
 }
+
+export interface PublicUserProfile {
+  uid: string;
+  name: string;
+  profileUrl: string;
+}

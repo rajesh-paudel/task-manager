@@ -39,16 +39,29 @@ npm run dev
 
 Fill in the required values in `.env` (see `.env.example` for all needed keys).
 
+## Firebase Database Rules
+
+Database rules are stored in `database.rules.json` and deployed with the Firebase CLI:
+
+```bash
+npx firebase-tools login
+npx firebase-tools use --add
+npm run firebase:deploy
+```
+
+Choose the Firebase project that matches `VITE_FIREBASE_PROJECT_ID` when prompted. The deployment script publishes only the Realtime Database rules.
+
 ## Commands
 
-| Command             | Description                 |
-| ------------------- | --------------------------- |
-| `npm run dev`       | Start dev server            |
-| `npm run build`     | Type-check + build          |
-| `npm run lint`      | Run ESLint                  |
-| `npm test`          | Run tests (watch mode)      |
-| `npm run test:coverage` | Run tests + coverage report |
-| `npm run preview`   | Preview production build    |
+| Command                   | Description                    |
+| ------------------------- | ------------------------------ |
+| `npm run dev`             | Start dev server               |
+| `npm run build`           | Type-check + build             |
+| `npm run lint`            | Run ESLint                     |
+| `npm test`                | Run tests (watch mode)         |
+| `npm run test:coverage`   | Run tests + coverage report    |
+| `npm run preview`         | Preview production build       |
+| `npm run firebase:deploy` | Deploy Realtime Database rules |
 
 ## Testing
 

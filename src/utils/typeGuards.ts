@@ -1,4 +1,4 @@
-import type { UserProfile } from "../types/user";
+import type { PublicUserProfile, UserProfile } from "../types/user";
 import type { ContactMessage } from "../types/contact";
 import type {
   UserWorkspace,
@@ -22,6 +22,18 @@ export function isUserProfile(value: unknown): value is UserProfile {
     typeof v.bio === "string" &&
     (v.role === "admin" || v.role === "user") &&
     typeof v.createdAt === "number"
+  );
+}
+
+export function isPublicUserProfile(
+  value: unknown,
+): value is PublicUserProfile {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    isNonEmptyString(v.uid) &&
+    isNonEmptyString(v.name) &&
+    typeof v.profileUrl === "string"
   );
 }
 
