@@ -2,9 +2,10 @@ import { useMemo, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
+  AlertCircle,
   Building2,
-  CalendarClock,
   CheckCircle2,
+  Clock,
   ClipboardList,
   Plus,
   Settings,
@@ -366,34 +367,44 @@ export default function DashboardWorkspaces() {
             <div className="p-5">
               {activeTab === "overview" && (
                 <div className="space-y-5">
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                     {[
+                      {
+                        label: "Total tasks",
+                        value: taskStats.total,
+                        icon: ClipboardList,
+                        tone: "text-slate-500",
+                      },
                       {
                         label: "To do",
                         value: taskStats.todo,
                         icon: ClipboardList,
+                        tone: "text-slate-500",
                       },
                       {
                         label: "In progress",
                         value: taskStats.inProgress,
-                        icon: CalendarClock,
+                        icon: Clock,
+                        tone: "text-blue-600",
                       },
                       {
                         label: "Completed",
                         value: taskStats.done,
                         icon: CheckCircle2,
+                        tone: "text-emerald-600",
                       },
                       {
                         label: "Overdue",
                         value: taskStats.overdue,
-                        icon: CalendarClock,
+                        icon: AlertCircle,
+                        tone: "text-red-600",
                       },
-                    ].map(({ label, value, icon: Icon }) => (
+                    ].map(({ label, value, icon: Icon, tone }) => (
                       <div
                         key={label}
                         className="rounded-lg border border-slate-200 p-4"
                       >
-                        <Icon className="h-4 w-4 text-orange-600" />
+                        <Icon className={`h-4 w-4 ${tone}`} />
                         <p className="mt-3 text-2xl font-semibold text-slate-900">
                           {value}
                         </p>
