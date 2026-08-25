@@ -113,19 +113,76 @@ export default function Overview() {
       <div className="min-h-screen max-w-5xl mx-auto px-6 sm:px-8 py-10">
         <div className="h-7 w-56 bg-slate-200 animate-pulse rounded-md" />
         <div className="mt-2 h-4 w-72 bg-slate-200 animate-pulse rounded-md" />
+
         <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-24 bg-white border border-slate-200 rounded-xl animate-pulse"
-            />
+              className="bg-white border border-slate-200 rounded-xl p-4"
+            >
+              <div className="h-4 w-4 bg-slate-200 animate-pulse rounded" />
+              <div className="mt-3 h-7 w-10 bg-slate-200 animate-pulse rounded-md" />
+              <div className="mt-1.5 h-3 w-16 bg-slate-200 animate-pulse rounded-md" />
+            </div>
           ))}
         </div>
+
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="sm:col-span-2 h-80 bg-white border border-slate-200 rounded-xl animate-pulse" />
+          <div className="sm:col-span-2 bg-white border border-slate-200 rounded-xl p-5">
+            <div className="h-4 w-44 bg-slate-200 animate-pulse rounded-md" />
+            <div className="mt-4 h-72 rounded-lg border border-slate-100 bg-slate-50 animate-pulse" />
+            <div className="mt-8 pt-6 border-t border-slate-100">
+              <div className="h-3 w-24 bg-slate-200 animate-pulse rounded-md" />
+              <div className="mt-4 grid grid-cols-3 divide-x divide-slate-100">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col items-center gap-2 px-4 first:pl-0 last:pr-0"
+                  >
+                    <div className="h-5 w-10 bg-slate-200 animate-pulse rounded-md" />
+                    <div className="h-3 w-14 bg-slate-200 animate-pulse rounded-md" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
-            <div className="h-52 bg-white border border-slate-200 rounded-xl animate-pulse" />
-            <div className="h-44 bg-white border border-slate-200 rounded-xl animate-pulse" />
+            <div className="bg-white border border-slate-200 rounded-xl p-5 flex-1 flex flex-col">
+              <div className="h-4 w-32 bg-slate-200 animate-pulse rounded-md" />
+              <div className="mt-2 flex-1 min-h-36 flex items-center justify-center">
+                <div className="h-28 w-28 rounded-full border-[14px] border-slate-200 animate-pulse" />
+              </div>
+              <div className="mt-2 space-y-1.5">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-slate-200 animate-pulse" />
+                    <div className="h-3 w-16 bg-slate-200 animate-pulse rounded-md" />
+                    <div className="ml-auto h-3 w-6 bg-slate-200 animate-pulse rounded-md" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-5">
+              <div className="h-4 w-28 bg-slate-200 animate-pulse rounded-md" />
+              <div className="mt-4 space-y-3.5">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i}>
+                    <div className="flex items-center justify-between">
+                      <div className="h-3 w-12 bg-slate-200 animate-pulse rounded-md" />
+                      <div className="h-3 w-5 bg-slate-200 animate-pulse rounded-md" />
+                    </div>
+                    <div className="mt-1.5 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-slate-200 animate-pulse"
+                        style={{ width: `${90 - i * 20}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
