@@ -151,7 +151,7 @@ export default function Overview() {
             <div className="bg-white border border-slate-200 rounded-xl p-5 flex-1 flex flex-col">
               <div className="h-4 w-32 bg-slate-200 animate-pulse rounded-md" />
               <div className="mt-2 flex-1 min-h-36 flex items-center justify-center">
-                <div className="h-28 w-28 rounded-full border-[14px] border-slate-200 animate-pulse" />
+                <div className="h-28 w-28 rounded-full border-14 border-slate-200 animate-pulse" />
               </div>
               <div className="mt-2 space-y-1.5">
                 {[0, 1, 2].map((i) => (
