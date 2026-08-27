@@ -4,7 +4,6 @@ A task management web app built with React 19, TypeScript, and Firebase.
 
 ## Tech Stack
 
-
 - **Framework:** React 19 + TypeScript + Vite 8
 - **Backend:** Firebase Auth + Realtime Database
 - **State:** Redux Toolkit
